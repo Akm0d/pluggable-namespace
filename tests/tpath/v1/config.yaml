@@ -1,0 +1,8 @@
+config:
+  v1:
+    load:
+      default: True
+      help: Load the module
+
+dyne:
+  v1: ["v1"]
