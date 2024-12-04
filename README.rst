@@ -1,28 +1,17 @@
 ===================
 Pluggable Namespace
 ===================
+This project is designed to facilitate the creation and management of pluggable software architectures using namespaces. The concept of pluggable namespaces enables the development of software that is modular and easy to extend.
 
-This project is used to express a Plugin Oriented Programming Paradigm. The Plugin
-Oriented Programming Paradigm has been designed to make pluggable software
-easy to write and easy to extend.
+Pluggable namespaces provide a framework for constructing applications composed entirely of interchangeable modules. This approach allows developers to scale their projects smoothly and integrate complex software components seamlessly.
 
-Plugin Oriented Programming presents a new way to scale development teams
-and deliver complex software. This is done by making the applications entirely
-out of plugins, and also making the applications themselves natively pluggable
-with each other.
+Using pluggable namespaces, developers can build software in smaller, maintainable components. These components can then be combined and deployed as a single entity, simplifying the deployment process.
 
-Using Plugin Oriented Programming it then becomes easy to have the best of both
-worlds, software can be built in small pieces, making development easier to
-maintain. The small pieces can then be merged and deployed in a single
-binary, making code deployment easy as well.
-
-All this using Cython, one of the world's most pnsular and powerful programming
-languages.
+All of this is achieved using Python, one of the world's most popular and powerful programming languages.
 
 Installation
 ============
-
-First off, set up your python environment to use a gitlab repository to gather packages:
+First, configure your Python environment to use a GitLab repository to source packages:
 
 .. code-block:: toml
 
@@ -30,15 +19,13 @@ First off, set up your python environment to use a gitlab repository to gather p
     [global]
     extra-index-url = https://__token__:<personal_access_token>@gitlab.com/api/v4/groups/<namespace>/-/packages/pypi/simple
 
-Now you can install ``pluggable-namespace`` from pypi or gitlab repositories:
+You can now install ``pluggable-namespace`` from PyPI or GitLab repositories:
 
 .. code-block:: bash
 
     pip3 install pluggable-namespace
 
-Now all it takes to create a pluggable application is a few lines of code.
-This is the root of every pluggable-namespace project.
-We create a hub, we add dynamic subsystems, and then we call them through the hub's namespace.
+Creating a pluggable application can be accomplished with just a few lines of code. The heart of every pluggable-namespace project is the creation of a hub, adding dynamic subsystems, and interacting with them through the hub's namespace.
 
 .. code-block:: python
 
@@ -48,83 +35,73 @@ We create a hub, we add dynamic subsystems, and then we call them through the hu
     loop = asyncio.get_event_loop()
     asyncio.run(main())
 
-
     async def main():
         async with pns.Hub() as hub:
             await hub.my_sub.init.cli()
 
-
 Configuration
 =============
-
-When creating a pluggable-namespace app, we put all of the pns configuration in a config.yaml
+When building a pluggable-namespace app, all configuration settings are stored in a ``config.yaml`` file.
 
 .. code-block:: yaml
 
-    # Every config option for your plugin
+    # Each configuration option for your module
     config:
-        my_namespace:
-            my_opt:
-                default: True
+      my_namespace:
+        my_opt:
+          default: True
 
-    # Options that should be exposed on the CLI when your app controls the CLI
+    # Options exposed on the CLI when your app controls the CLI
     cli_config:
-        my_namespace:
-            my_opt:
-                # All options that are accepted by ArgParser.add_argument are good here
-                help: description of this option
-                subcommands:
-                    - my_subcommand
-                group: My arg group
+      my_namespace:
+        my_opt:
+          help: Description of this option
+          subcommands:
+            - my_subcommand
+          group: My arg group
 
     # Subcommands to expose for your project
     subcommands:
-        my_namespace:
-            my_subcommand:
-                help: My subcommand
+      my_namespace:
+        my_subcommand:
+          help: My subcommand
 
     # Dynamic namespaces that your app merges onto and which folders extend those namespaces
     dyne:
-        my_dyne:
+      my_dyne:
         - src_dir
 
-    # python imports that your app uses which should be added to hub.lib for your app
+    # Python imports that your app uses, to be added to hub.lib for your app
     import:
-        - asyncio
-        - importlib
-        - importlib.resources
-        - os
-        - toml
+      - asyncio
+      - importlib
+      - importlib.resources
+      - os
+      - toml
 
 Create a pns config file:
 
 .. code-block:: yaml
 
-    # The default location is in ~/.pns/config.yaml
-    # But you can change that by setting the PNS_CONFIG environment variable
-
+    # Default location is ~/.pns/config.yaml
+    # To change, set the PNS_CONFIG environment variable
     pns_cli:
-        # Setting this option will make your hub persist on the cli between calls
-        hub_state: ~/.pns/hub.pkl
+      # Setting this will persist your hub on the CLI between calls
+      hub_state: ~/.pns/hub.pkl
     log:
-        log_plugin: async
+      log_plugin: async
 
-From the above example, all arguments would be loaded onto the namespace under hub.OPT.my_namesapce.
-One config.yaml can add config options to multiple namespaces.
-They are all merged together in the order they are found in sys.path
+From the example above, all arguments are loaded onto the namespace under hub.OPT.my_namespace. One ``config.yaml`` can add configuration options to multiple namespaces. They are merged in the order found in sys.path.
 
 Extending Namespaces
 ====================
-
-Extending ``pluggable-namesapce``  is extremely easy with dynamic namespaces.
-You can extend any dynamic namespace on the hub simply by adding a directory containing a "conifg.yaml" to the PYTHONPATH.
-I.e.
+Extending ``pluggable-namespace`` is straightforward with dynamic namespaces. Extend any dynamic namespace on the hub by adding a directory containing a "config.yaml" to PYTHONPATH.
 
 .. code-block:: bash
 
     export PYTHONPATH=$PYTHONPATH:/path/to/my/code
 
-Then you can add a config.yaml to that directory:
+Add a config.yaml to that directory:
 
 .. code-block:: yaml
 
@@ -133,19 +110,18 @@ Then you can add a config.yaml to that directory:
       namespace:
         - src
 
-Now every python file under ``/path/to/my/code/src/`` will be added to the hub under ``hub.namespace``.
-
+Now, every Python file in ``/path/to/my/code/src/`` will be added to the hub under ``hub.namespace``.
 
 Testing
 =======
-Clone the repo
+Clone the repository:
 
 .. code-block:: bash
 
     git clone https://gitlab.com/tac_tech/pluggable-namespace.git
     cd pluggable-namespace
 
-Install ``pluggable-namespace`` with the testing extras
+Install ``pluggable-namespace`` with the testing extras:
 
 .. code-block:: bash
 
