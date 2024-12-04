@@ -1,6 +1,7 @@
 stages:
   - lint
   - test
+  - build
   - release
 
 include:
@@ -10,3 +11,7 @@ include:
     file: /lint/pre-commit.yml
   - project: tac_tech/ci-templates
     file: /test/default.yml
+  - project: tac_tech/ci-templates
+    file: /build/default.yml
+  - project: tac_tech/ci-templates
+    file: /release/default.yml
