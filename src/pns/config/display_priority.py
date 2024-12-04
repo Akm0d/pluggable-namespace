@@ -14,7 +14,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
               positional: True
               display_priority: 2
     """
-    display_priority = opts.pns("display_priority", None)
+    display_priority = opts.pop("display_priority", None)
     return {"display_priority": display_priority}
 
 

@@ -12,7 +12,7 @@ from collections.abc import Iterable
 import msgpack
 import yaml
 
-import cpns.data
+import pns.data
 
 
 async def dir_list(pypath: list[str] = None, static: list[str] = None) -> list[pathlib.Path]:
@@ -75,10 +75,10 @@ async def dynamic_dirs():
                 dirs.add(full)
 
     # Set up the _dynamic return
-    ret = cpns.data.NamespaceDict(
-        dyne=cpns.data.NamespaceDict(),
-        config=cpns.data.NamespaceDict(),
-        imports__=cpns.data.NamespaceDict(),
+    ret = pns.data.NamespaceDict(
+        dyne=pns.data.NamespaceDict(),
+        config=pns.data.NamespaceDict(),
+        imports__=pns.data.NamespaceDict(),
     )
 
     # Iterate over namespaces in sys.path
@@ -97,11 +97,11 @@ async def dynamic_dirs():
 
         dynes, configs, imports = await parse_config(config_file)
         if dynes:
-            cpns.data.update(ret.dyne, dynes, merge_lists=True)
+            pns.data.update(ret.dyne, dynes, merge_lists=True)
         if configs:
-            cpns.data.update(ret.config, configs, merge_lists=True)
+            pns.data.update(ret.config, configs, merge_lists=True)
         if imports:
-            cpns.data.update(ret.imports__, imports)
+            pns.data.update(ret.imports__, imports)
 
     return ret
 
@@ -109,13 +109,13 @@ async def dynamic_dirs():
 async def parse_config(
     config_file: pathlib.Path,
 ) -> tuple[dict[str, object], dict[str, object], set[str]]:
-    dyne = defaultdict(lambda: cpns.data.NamespaceDict(paths=set()))
-    config = cpns.data.NamespaceDict(
-        config=cpns.data.NamespaceDict(),
-        cli_config=cpns.data.NamespaceDict(),
-        subcommands=cpns.data.NamespaceDict(),
+    dyne = defaultdict(lambda: pns.data.NamespaceDict(paths=set()))
+    config = pns.data.NamespaceDict(
+        config=pns.data.NamespaceDict(),
+        cli_config=pns.data.NamespaceDict(),
+        subcommands=pns.data.NamespaceDict(),
     )
-    imports = cpns.data.NamespaceDict()
+    imports = pns.data.NamespaceDict()
 
     if not config_file.is_file():
         return dyne, config, imports
@@ -144,7 +144,7 @@ async def parse_config(
         for namespace, data in section_data.items():
             if data is None:
                 continue
-            config[section].setdefault(namespace, cpns.data.NamespaceDict()).update(data)
+            config[section].setdefault(namespace, pns.data.NamespaceDict()).update(data)
 
     # Handle python imports
     for imp in pns_config.get("import", []):

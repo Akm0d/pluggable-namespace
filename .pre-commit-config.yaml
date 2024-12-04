@@ -56,18 +56,6 @@ repos:
         args: [--report-level=warning]
         additional_dependencies: [sphinx]
 
-  - repo: local
-    hooks:
-      - id: hatch-fmt
-        name: Format code with hatch fmt
-        entry: hatch fmt
-        language: python
-        pass_filenames: false
-        verbose: true
-        additional_dependencies:
-          - hatch
-          - hatch-cython
-
   - repo: https://github.com/MarcoGorelli/cython-lint
     rev: v0.16.2
     hooks:

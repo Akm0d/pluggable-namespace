@@ -16,7 +16,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
         my_opt:
           default: hub.my_sub.mod.func()
     """
-    default = opts.pns("default", None)
+    default = opts.pop("default", None)
 
     if default and isinstance(default, str):
         match = hub._.REF_PATTERN.match(default)

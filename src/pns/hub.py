@@ -9,8 +9,8 @@ from collections.abc import Awaitable, Iterable
 from contextvars import copy_context
 from types import ModuleType
 
-import cpns.contract
-import cpns.data
+import pns.contract
+import pns.data
 import pns.dirs
 import pns.exc
 import pns.loader
@@ -33,7 +33,7 @@ def ex_path(path):
 
 SHUTDOWN_SIGNAL = object()
 
-class Hub(cpns.data.PnsMeta):
+class Hub(pns.data.PnsMeta):
     """
     The redistributed pns central hub. All components of the system are
     rooted to the Hub.
@@ -59,7 +59,7 @@ class Hub(cpns.data.PnsMeta):
         subs = {}
         sub_alias = {}
         imports = {}
-        cpns.data.PnsMeta.__init__(self, [subs, sub_alias, imports], parent=self)
+        pns.data.PnsMeta.__init__(self, [subs, sub_alias, imports], parent=self)
         self._subs = subs
         self._sub_alias = sub_alias
         self._imports = imports
@@ -224,7 +224,7 @@ class Hub(cpns.data.PnsMeta):
             "init_kwargs": self.__init_kwargs,
             "subs": {name: sub.__getstate__() for name, sub in self._subs.items()},
             "aliases": self._sub_alias,
-            "OPT": cpns.data.unfreeze(self._opt),
+            "OPT": pns.data.unfreeze(self._opt),
             "imports": {subname: mod.__name__ for subname, mod in self._imports.items()},
             "attrs": attrs,
         }
@@ -245,7 +245,7 @@ class Hub(cpns.data.PnsMeta):
                 ...
         self._attrs.update(state["attrs"])
         self._sub_alias.update(aliases)
-        self._opt = cpns.data.freeze(opt)
+        self._opt = pns.data.freeze(opt)
 
         # Schedule the hub's async init function to run later
         self._auto(self.__aenter__())
@@ -267,7 +267,7 @@ class Hub(cpns.data.PnsMeta):
         self._dscan = True
 
 
-class Sub(cpns.data.PnsMeta):
+class Sub(pns.data.PnsMeta):
     """
     The pns object that contains the loaded module data
     """
@@ -277,7 +277,7 @@ class Sub(cpns.data.PnsMeta):
         hub: Hub,
         *,
         subname: str,
-        root: cpns.data.PnsMeta = None,
+        root: pns.data.PnsMeta = None,
         pypath: list[str] = None,
         static: list[str] = None,
         contracts_pypath: list[str] = None,
@@ -612,11 +612,11 @@ class Sub(cpns.data.PnsMeta):
 
         contracts = []
         for contract_sub in self._contract_subs:
-            contracts.extend(cpns.contract.load_contract(contract_sub, self._default_contracts, mod, vret["name"]))
+            contracts.extend(pns.contract.load_contract(contract_sub, self._default_contracts, mod, vret["name"]))
         recursive_contracts = []
         for recursive_contract_sub in self._recursive_contract_subs:
             recursive_contracts.extend(
-                cpns.contract.load_contract(
+                pns.contract.load_contract(
                     recursive_contract_sub,
                     self._default_recursive_contracts,
                     mod,
@@ -674,11 +674,11 @@ class Sub(cpns.data.PnsMeta):
 
 
 class AsyncInitWrapper:
-    def __init__(self, cls: cpns.data.PnsMeta):
+    def __init__(self, cls: pns.data.PnsMeta):
         self.cls = cls
 
     async def __call__(self, *args, **kwargs):
-        instance: cpns.data.PnsMeta = self.cls(*args, **kwargs)
+        instance: pns.data.PnsMeta = self.cls(*args, **kwargs)
         await instance.__ainit__(*args, **kwargs)
         return instance
 

@@ -9,11 +9,11 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
         my_opt_1:
           positional: True
     """
-    positional = opts.pns("positional", False)
+    positional = opts.pop("positional", False)
 
     if positional:
         # A positional argument cannot have flag options
-        opts.pns("options", None)
+        opts.pop("options", None)
     else:
         # For non-positional args, create an inituitive cli name
         opts["__name__"] = f"--{opts['__name__'].lower().replace('_', '-')}"

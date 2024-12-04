@@ -7,4 +7,4 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
         my_opt:
           os: MY_ENV_VAR
     """
-    return {"os": opts.pns("os", False)}
+    return {"os": opts.pop("os", False)}

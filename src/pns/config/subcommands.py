@@ -16,7 +16,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
           my_app:
             my_subcommand: {}
     """
-    subcommands = opts.pns("subcommands", ())
+    subcommands = opts.pop("subcommands", ())
     return {"subcommands": subcommands}
 
 

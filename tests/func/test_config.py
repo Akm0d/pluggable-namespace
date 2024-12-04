@@ -50,7 +50,7 @@ async def test_load_basic(hub):
     # Test loading with minimal arguments
     with hub.lib.unittest.mock.patch("sys.argv", ["pns"]):
         OPT = await hub.config.init.load()
-    assert isinstance(OPT, hub.lib.cpns.data.ImmutableNamespaceDict)
+    assert isinstance(OPT, hub.lib.pns.data.ImmutableNamespaceDict)
     assert "pns" in OPT
     assert "subparser" in OPT["pns"]
     assert "global_clis" in OPT["pns"]
@@ -63,7 +63,7 @@ async def test_load_with_cli(hub):
     cli_config = {"test_cli": {"option": {}}}
     config = {"test_cli": {"option": {"default": "default", "os": "TEST_OPTION"}}}
 
-    hub.lib.os.environ.pns("TEST_OPTION", None)
+    hub.lib.os.environ.pop("TEST_OPTION", None)
     # Test the default
     OPT = await hub.config.load(
         cli=cli,

@@ -2,7 +2,7 @@
 Pluggable Namespace
 ===================
 
-cpns is used to express the Plugin Oriented Programming Paradigm. The Plugin
+This project is used to express a Plugin Oriented Programming Paradigm. The Plugin
 Oriented Programming Paradigm has been designed to make pluggable software
 easy to write and easy to extend.
 
@@ -30,19 +30,19 @@ First off, set up your python environment to use a gitlab repository to gather p
     [global]
     extra-index-url = https://__token__:<personal_access_token>@gitlab.com/api/v4/groups/<namespace>/-/packages/pypi/simple
 
-Now you can install ``cpns`` from pypi or gitlab repositories:
+Now you can install ``pluggable-namespace`` from pypi or gitlab repositories:
 
 .. code-block:: bash
 
-    pip3 install cpns
+    pip3 install pluggable-namespace
 
 Now all it takes to create a pluggable application is a few lines of code.
-This is the root of every pns project.
+This is the root of every pluggable-namespace project.
 We create a hub, we add dynamic subsystems, and then we call them through the hub's namespace.
 
 .. code-block:: python
 
-    import cpns
+    import pns
     import asyncio
 
     loop = asyncio.get_event_loop()
@@ -50,14 +50,14 @@ We create a hub, we add dynamic subsystems, and then we call them through the hu
 
 
     async def main():
-        async with cpns.Hub() as hub:
+        async with pns.Hub() as hub:
             await hub.my_sub.init.cli()
 
 
 Configuration
 =============
 
-When creating a cpns app, we put all of the pns configuration in a config.yaml
+When creating a pluggable-namespace app, we put all of the pns configuration in a config.yaml
 
 .. code-block:: yaml
 
@@ -113,10 +113,10 @@ From the above example, all arguments would be loaded onto the namespace under h
 One config.yaml can add config options to multiple namespaces.
 They are all merged together in the order they are found in sys.path
 
-Extending cpns
-==============
+Extending Namespaces
+====================
 
-Extending ``cpns``  is extremely easy with dynamic namespaces.
+Extending ``pluggable-namesapce``  is extremely easy with dynamic namespaces.
 You can extend any dynamic namespace on the hub simply by adding a directory containing a "conifg.yaml" to the PYTHONPATH.
 I.e.
 
@@ -142,29 +142,17 @@ Clone the repo
 
 .. code-block:: bash
 
-    git clone https://gitlab.com/Akm0d/cpns.git
-    cd cpns
+    git clone https://gitlab.com/tac_tech/pluggable-namespace.git
+    cd pluggable-namespace
 
-Install ``cpns`` with the testing extras
+Install ``pluggable-namespace`` with the testing extras
 
 .. code-block:: bash
 
     pip3 install .\[test\]
 
-Run the tests in your cloned fork of cpns:
+Run the tests in your cloned fork of Pluggable Namespace:
 
 .. code-block:: bash
 
     pytest tests
-
-
-Documentation
-=============
-
-Check out the docs for more information:
-
-https://pns.readthedocs.io
-
-There is a much more in depth tutorial here, followed by documents on how to
-think in Plugin Oriented Programming. Take your time to read it, it is not long
-and can change how you look at writing software!

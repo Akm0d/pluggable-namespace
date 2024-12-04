@@ -66,10 +66,10 @@ import:
   - asyncio
   - ast
   - collections
-  - cpns.contract
-  - cpns.data
+  - pns.contract
+  - pns.data
   - pns.exc
-  - cpns.hub
+  - pns.hub
   - importlib
   - importlib.resources
   - logging

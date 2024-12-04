@@ -23,7 +23,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
             - choice_1
             - choice_2
     """
-    choices = opts.pns("choices", ())
+    choices = opts.pop("choices", ())
     if isinstance(choices, str):
         finder = hub
         for part in choices.split("."):

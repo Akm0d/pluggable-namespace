@@ -1,6 +1,6 @@
 import inspect
 
-from cpns.contract import Contracted
+from pns.contract import Contracted
 
 
 async def test_contracted_shortcut(hub):

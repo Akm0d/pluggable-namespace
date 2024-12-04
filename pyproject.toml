@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling", "hatch-cython"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "wheel", "Cython"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "Pluggable Namespaces"
-version = "1.0.0"
+name = "pluggable-namespace"
+version = "100.0.0"
 description = "Pluggable namespaces"
 readme = "README.rst"
 authors = [
@@ -19,7 +19,6 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    # Required for logging to a file
     "aiofiles",
     "aiologger",
     "argparse",
@@ -33,32 +32,12 @@ test = [
     "pytest-asyncio",
 ]
 
-build = [
-    "Cython",
-    "hatch",
-    "hatch-cython",
-]
+[tool.setuptools]
+package-dir = {"" = "src"}
 
-[tool.hatch.build.targets.wheel]
-packages = [
-    "src/cpns",
-    "src/pns",
-]
-
-[tool.hatch.build.hooks.convert-data-file.options]
-pattern = "config.yaml"
-target_format = "msgpack"
-
-[tool.hatch.build.hooks.cython.options]
-include_numpy = false
-include_pyarrow = false
-include_pythran = false
-directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true, cdivision = true, wraparound=false }
-compile_args = [
-  "-v",
-  "-O3",
-  "-flto"
-]
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
 
 [tool.pytest.ini_options]
 testpaths = "tests"

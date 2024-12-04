@@ -8,7 +8,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
             my_opt:
               type: str
     """
-    type_ = opts.pns("type", None)
+    type_ = opts.pop("type", None)
     if type_:
         opts["type"] = eval(type_)
 

@@ -37,7 +37,7 @@ async def load(
         config = hub._dynamic.config.get("config") or {}
 
     # Merge config and cli_config
-    full_config = hub.lib.cpns.data.update(cli_config, config, merge_lists=True)
+    full_config = hub.lib.pns.data.update(cli_config, config, merge_lists=True)
 
     # These CLI namespaces will be added on top of any cli
     if global_clis is None:
@@ -117,7 +117,7 @@ async def load(
         global_clis=global_clis,
     )
 
-    return hub.lib.cpns.data.freeze(opt)
+    return hub.lib.pns.data.freeze(opt)
 
 
 async def parse(
@@ -127,7 +127,7 @@ async def parse(
 ) -> dict[str, object]:
     # Actually call the main parser
     parsed_args = main_parser.parse_args(args=parser_args)
-    return hub.lib.cpns.data.NamespaceDict(parsed_args.__dict__)
+    return hub.lib.pns.data.NamespaceDict(parsed_args.__dict__)
 
 
 async def parser(hub, cli: str, parser: object = None, **kwargs) -> object:
@@ -174,7 +174,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
 
         new_extras = await hub.config[parser_mod].parse_opt(opts)
         extra.update(new_extras)
-    return hub.lib.cpns.data.NamespaceDict(extra)
+    return hub.lib.pns.data.NamespaceDict(extra)
 
 
 async def parse_cli(
@@ -214,7 +214,7 @@ async def parse_cli(
         extra = await hub.config.init.parse_opt(opts)
         options = extra.options
         group_name = extra.group
-        cli_name = opts.pns("__name__")
+        cli_name = opts.pop("__name__")
 
         argument_meta = {
             "cli_name": cli_name,
@@ -260,7 +260,7 @@ async def prioritize(
         Document_parameters: If True, hub.OPT will contain docstrings for leaf nodes
 
     Returns:
-       cpns.data.ImmutableNamespaceDict: The prioritized configuration options.
+       pns.data.ImmutableNamespaceDict: The prioritized configuration options.
     """
     opt = hub.lib.collections.defaultdict(dict)
     root_dir = None
@@ -307,7 +307,7 @@ async def prioritize(
 
             if document_parameters:
                 # Wrap the value in a class that gives it a docstring
-                value = hub.lib.cpns.data.wrap_value(arg, value, data.get("help", ""))
+                value = hub.lib.pns.data.wrap_value(arg, value, data.get("help", ""))
 
             # Set the value in the OPT dictionary
             opt[namespace][arg] = value
@@ -316,7 +316,7 @@ async def prioritize(
     opt["pns"]["subparser"] = cli_opts.get("SUBPARSER", "")
     opt["pns"]["global_clis"] = global_clis
 
-    return hub.lib.cpns.data.freeze(opt)
+    return hub.lib.pns.data.freeze(opt)
 
 
 async def manage_paths(hub, cli: str, opt: dict[str, object], root_dir: str):

@@ -9,7 +9,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
         other_opt:
           group: my_group
     """
-    group = opts.pns("group", False)
+    group = opts.pop("group", False)
     return {"group": group}
 
 

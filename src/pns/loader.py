@@ -11,8 +11,8 @@ import sys
 import types
 from collections.abc import Callable
 
-import cpns.contract
-import cpns.data
+import pns.contract
+import pns.data
 
 BASE_TYPES = (int, float, str, bytes, bool, type(None))
 
@@ -94,7 +94,7 @@ async def _load_virtual(
         return {"name": name}
 
     try:
-        virtual_func = cpns.contract.Contracted(
+        virtual_func = pns.contract.Contracted(
             hub,
             contracts=[],
             func=getattr(mod, vtype),
@@ -159,7 +159,7 @@ async def mod_init(sub, mod: "LoadedMod", mod_name: str):
     :param mod_name: The name of the module to get from the loader
     """
     if "__init__" in dir(mod):
-        init = cpns.contract.Contracted(
+        init = pns.contract.Contracted(
             sub._hub,
             contracts=[],
             func=mod.__init__,
@@ -188,8 +188,8 @@ async def prep_loaded_mod(
     this_sub,
     mod: "LoadedMod",
     mod_name: str,
-    contracts: list["cpns.contract.Wrapper"],
-    recursive_contracts: list["cpns.contract.Wrapper"],
+    contracts: list["pns.contract.Wrapper"],
+    recursive_contracts: list["pns.contract.Wrapper"],
 ) -> "LoadedMod":
     ordered_contracts = contracts + recursive_contracts
 
@@ -199,7 +199,7 @@ async def prep_loaded_mod(
     ref = f"{this_sub._ref}.{mod_name}"
 
     sub_alias(this_sub, mod, mod_name)
-    func_alias_dict: dict[str, str | Callable | cpns.contract.Contracted] = {}
+    func_alias_dict: dict[str, str | Callable | pns.contract.Contracted] = {}
 
     __func_alias__: Callable | dict[str, str | Callable] = getattr(mod, "__func_alias__", {})
     if asyncio.iscoroutinefunction(__func_alias__):
@@ -222,17 +222,17 @@ async def prep_loaded_mod(
             continue
 
         if inspect.isfunction(func) or inspect.isbuiltin(func) or type(func).__name__ == "cython_function_or_method":
-            obj = cpns.contract.create_contracted(this_sub._hub, ordered_contracts, func, ref, name, parent=lmod)
+            obj = pns.contract.create_contracted(this_sub._hub, ordered_contracts, func, ref, name, parent=lmod)
             if not this_sub._omit_func and (not this_sub._pypath or func.__module__.startswith(mod.__name__)):
                 lmod._funcs[name] = obj
         elif not this_sub._omit_class and inspect.isclass(func) and func.__module__.startswith(mod.__name__):
             lmod._classes[name] = func
 
     for attr, func_alias in func_alias_dict.items():
-        if isinstance(func_alias, cpns.contract.Contracted):
+        if isinstance(func_alias, pns.contract.Contracted):
             obj = func_alias
         elif isinstance(func_alias, Callable):
-            obj = cpns.contract.create_contracted(
+            obj = pns.contract.create_contracted(
                 this_sub._hub,
                 ordered_contracts,
                 func_alias,
@@ -248,19 +248,19 @@ async def prep_loaded_mod(
     return lmod
 
 
-class LoadedMod(types.ModuleType, cpns.data.LoadedModGetAttr):
+class LoadedMod(types.ModuleType, pns.data.LoadedModGetAttr):
     """
     The LoadedMod class allows for the module loaded onto the sub to return
     custom sequencing, for instance it can be iterated over to return all
     functions
     """
 
-    def __init__(self, name: str, parent: "cpns.hub.Sub"):
+    def __init__(self, name: str, parent: "pns.hub.Sub"):
         super().__init__(name)
         _vars: dict[str, object] = {}
         funcs: dict[str, object] = {}
         classes: dict[str, object] = {}
-        self._attrs = cpns.data.MultidictCache([funcs, classes, _vars], parent=parent)
+        self._attrs = pns.data.MultidictCache([funcs, classes, _vars], parent=parent)
         self._vars = _vars
         self._funcs = funcs
         self._classes = classes

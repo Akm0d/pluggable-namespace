@@ -4,12 +4,12 @@ from unittest import mock
 import pathlib
 import pytest
 
-import cpns
+import pns
 
 
 @pytest.fixture
 async def hub():
-    async with cpns.Hub(
+    async with pns.Hub(
         # Let each test manually add their structure
         load_all_dynes=False,
         load_all_subdirs=False,

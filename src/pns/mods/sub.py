@@ -2,7 +2,7 @@
 Control and add subsystems to the running daemon hub
 """
 
-import cpns.hub
+import pns.hub
 
 
 async def add(
@@ -60,7 +60,7 @@ async def add(
     if python_import:
         subname = subname if subname else python_import.split(".")[0]
     if pypath:
-        pypath = cpns.hub.ex_path(pypath)
+        pypath = pns.hub.ex_path(pypath)
         subname = subname if subname else pypath[0].split(".")[-1]
     elif static:
         subname = subname if subname else hub.lib.os.path.basename(static)
@@ -76,7 +76,7 @@ async def add(
         return
 
     root._clear()
-    root._subs[subname] = await cpns.hub.AsyncSub(
+    root._subs[subname] = await pns.hub.AsyncSub(
         hub,
         subname=subname,
         root=root,
@@ -159,7 +159,7 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
             stop_on_failures=sub._stop_on_failures,
         )
         if recurse:
-            if isinstance(getattr(sub, name), cpns.hub.Sub):
+            if isinstance(getattr(sub, name), pns.hub.Sub):
                 await hub.pns.sub.load_subdirs(getattr(sub, name), recurse=recurse)
 
 

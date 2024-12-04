@@ -10,5 +10,5 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
           - --opt
           - --opt1
     """
-    options = opts.pns("options", ())
+    options = opts.pop("options", ())
     return {"options": options}
