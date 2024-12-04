@@ -1,0 +1,55 @@
+config:
+  rend:
+    file:
+      default: ~
+      options: ["--file", "-f"]
+      help: "Pass in a file location that will be rendered"
+    pipe:
+      default: yaml
+      options: ["--pipe", "-p"]
+      help: "Define what render pipeline should be used"
+    output:
+      default: ~
+      options: ["--output", "-o"]
+      help: "Define which outputter system should be used to display the result of this render"
+      choices: output
+      subcommands:
+        - __global__
+    subs:
+      default: ~
+      options: ["--subs", "-s"]
+      nargs: "*"
+      help: "Set subs to scan for sls files to render"
+  jinja:
+    enable_sandbox:
+      default: False
+      help: "Enable sandboxed environment for Jinja rendering. Jinja sandboxing is disabled by default."
+    sandbox_safe_hub_refs:
+      default: [".*"]
+      help: "Hub reference paths that should be allowed for Jinja rendering in the sandboxed environment. Everything on the hub is allowed by default."
+dyne:
+  exc:
+    - exc
+  rend:
+    - rend
+  output:
+    - output
+
+import:
+  - aio_yte
+  - asyncio
+  - base64
+  - colorama
+  - collections.abc
+  - jinja2.exceptions
+  - jinja2.ext
+  - jinja2.sandbox
+  - json
+  - numbers
+  - pathlib
+  - pprint
+  - secrets
+  - toml
+  - yaml.constructor
+  - yaml.nodes
+  - unicodedata

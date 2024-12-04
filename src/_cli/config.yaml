@@ -1,0 +1,72 @@
+# This is where we put things that USED to be in the conf.py
+cli_config:
+  cli:
+    ref:
+      help: The reference on the hub to call
+      default: "."
+      positional: True
+      nargs: "?"
+    args:
+      help: Any additional arguments to forward to the next cli
+      default: []
+      positional: True
+      nargs: "..."
+    cli:
+      help: The namespace to use as the authoritative CLI
+      default: ""
+      choices: _dynamic.config.cli_config
+    history_file:
+      help: The location of the history file for the interactive console
+      default: "~/.pop/.history"
+    hub_state:
+      help: The location of a pickle file that has a re-usable hub object
+      default: ""
+    interactive:
+      help: Start a python console that contains a hub and can await functions
+      default: False
+      action: store_true
+      options:
+        - -i
+    watch:
+      help: point aionotify at Sub dirs and reload the sub on chnages
+      default: False
+      action: store_true
+    output:
+      source: rend
+      default: yaml
+    monitor:
+      action: store_true
+      default: False
+      help: Use aiomonitor to track async tasks
+    init:
+      action: append
+      default: []
+      help: Refs on the hub to call before starting the main cli
+
+dyne:
+  cli:
+    - plugin
+
+# python imports to put on the hub for this plugin
+import:
+  - aioconsole
+  - aioconsole.console
+  - aioconsole.server
+  - aionotify
+  - asyncio
+  - ast
+  - builtins
+  - contextvars
+  - cpop.loader
+  - functools
+  - pathlib
+  - pdb
+  - pop.hub
+  - pickle
+  - pprint
+  - prompt_toolkit
+  - readline
+  - rlcompleter
+  - sys
+  - typing
+  - warnings

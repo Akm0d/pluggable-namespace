@@ -1,0 +1,9 @@
+dyne:
+  test:
+    - src
+
+# These libraries are added to hub.lib for the testing "hub" fixture
+import:
+  - asyncio
+  - pytest
+  - tempfile

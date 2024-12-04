@@ -1,0 +1,32 @@
+config:
+  seed:
+    dest:
+      positional: true
+      help: The base directory to copy the files to
+    overwrite:
+      action: store_true
+      default: false
+      help: Overwrite conflicting files
+    test:
+      action: store_true
+      default: false
+      help: Don't copy the files for real
+    src:
+      choices: templates
+      default: hatch
+      help: The seed template to use
+    args:
+      help: Any key=value pairs to pass on to the jinja renderer
+      default: []
+      positional: True
+      nargs: "..."
+dyne:
+  seed:
+    - seed
+  template:
+    - template
+
+import:
+  - concurrent.futures
+  - copier
+  - functools

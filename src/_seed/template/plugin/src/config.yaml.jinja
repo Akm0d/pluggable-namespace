@@ -1,0 +1,19 @@
+config:
+  {{name}}:
+    output:
+      source: rend
+    opt:
+      default: value
+      help: "A value to load onto hub.OPT.{{name}}.opt"
+      subcommands:
+        - subcommand1
+        - __global__
+
+subcommands: {}
+
+dyne:
+  {{name}}:
+    - {{name}}
+
+import:
+  - asyncio

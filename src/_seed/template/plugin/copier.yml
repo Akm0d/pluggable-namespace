@@ -1,0 +1,6 @@
+name:
+  type: str
+  help: Please enter a name for your project
+desc:
+  type: str
+  help: Please enter a description

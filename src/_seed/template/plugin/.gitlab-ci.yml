@@ -1,0 +1,15 @@
+stages:
+  - lint
+  - test
+  - build
+  - release
+
+include:
+  - project: ctxos/cicd/ci-templates
+    file: /defaults.yml
+  - project: ctxos/cicd/ci-templates
+    file: /lint/pre-commit.yml
+  - project: ctxos/cicd/ci-templates
+    file: /test/default.yml
+  - project: ctxos/cicd/ci-templates
+    file: /release/default.yml

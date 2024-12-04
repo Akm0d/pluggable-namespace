@@ -12,3 +12,6 @@ extensions = [
 setup(
     ext_modules=cythonize(extensions),
 )
+
+# TODO calculate "full" dependencies and also gather dependencies dynamically from what imports are used in config.yamls
+# Also have extras based on each subproject name

@@ -1,0 +1,33 @@
+async def test_opt(hub):
+    pass
+    ## Set up the environment with PYTHONPATH
+    #env = dict(hub.lib.os.environ, PYTHONPATH=":".join(hub.lib.sys.path))
+
+    ## Start the CLI process
+    #result = hub.lib.subprocess.run(
+    #    [hub.lib.sys.executable, "-m", "hub", "OPT.{{name}}"],
+    #    capture_output=True,
+    #    text=True,
+    #    env=env,
+    #)
+
+    ## Check the output
+    #assert hub.lib.yaml.safe_load(result.stdout)
+
+    ## Check the exit status
+    #assert result.returncode == 0
+
+#async def test_cli(hub):
+#    # Set up the environment with PYTHONPATH
+#    env = dict(hub.lib.os.environ, PYTHONPATH=":".join(hub.lib.sys.path))
+#
+#    # Start the CLI process
+#    result = hub.lib.subprocess.run(
+#        [hub.lib.sys.executable, "-m", "hub", "{{name}}.cli", "--help"],
+#        capture_output=True,
+#        text=True,
+#        env=env,
+#    )
+#
+#    # Check the exit status
+#    assert result.returncode == 0
