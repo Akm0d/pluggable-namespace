@@ -35,7 +35,7 @@ console = [
 
 rend = [
     "aio-yte",
-    "jinja1",
+    "jinja2",
     "toml",
 ]
 
@@ -48,7 +48,6 @@ test = [
     "aioconsole",
     "aiomonitor",
     "copier",
-    "jinja1",
     "prompt-toolkit",
     "pexpect",
     "pytest",
