@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pluggable-namespace"
-version = "100.0.0"
+version = "1.0.0"
 description = "Pluggable namespaces"
 readme = "README.rst"
 authors = [
@@ -47,5 +47,3 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.cython-lint]
 max-line-length = 120
-ignore = [
-]
