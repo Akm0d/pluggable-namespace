@@ -1,0 +1,6 @@
+dyne:
+  test:
+    - src
+
+import:
+  - typing

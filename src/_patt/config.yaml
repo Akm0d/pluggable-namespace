@@ -8,4 +8,3 @@ import:
   - inspect
   - random
   - json
-  - xmltodict

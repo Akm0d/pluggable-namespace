@@ -31,12 +31,21 @@ watch= [
     "aionotify",
 ]
 
+console = [
+    "aioconsole",
+    "aiomonitor",
+    "prompt-toolkit",
+]
+
 test = [
-    "aionotify",
+    "aionotify; platform_system != 'Darwin'",
     "pexpect",
     "pytest",
     "pytest-asyncio",
 ]
+
+[project.scripts]
+hub = "hub.__main__:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
