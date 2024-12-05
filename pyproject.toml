@@ -33,22 +33,32 @@ console = [
     "prompt-toolkit",
 ]
 
+rend = [
+    "aio-yte",
+    "jinja1",
+    "toml",
+]
+
 seed = [
     "copier",
 ]
 
 test = [
-    "aionotify; platform_system != 'Darwin'",
     "aio-yte",
+    "aioconsole",
+    "aiomonitor",
     "copier",
+    "jinja1",
+    "prompt-toolkit",
     "pexpect",
     "pytest",
     "pytest-asyncio",
     "toml",
+    "aionotify; platform_system != 'Darwin'",
 ]
 
 watch= [
-    "aionotify",
+    "aionotify; platform_system != 'Darwin'",
 ]
 
 [project.scripts]
