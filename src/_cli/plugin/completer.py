@@ -3,7 +3,7 @@ async def get(hub, **kwargs):
     Creates a completer for the interactive console that provides completion suggestions for the 'hub' namespace.
 
     Args:
-        hub (pop.hub.Hub): The global namespace.
+        hub (pns.hub.Hub): The global namespace.
 
     Returns:
         HubCompleter: A completer object for the interactive console.
@@ -92,7 +92,7 @@ async def compute(hub):
                 func_name = current_attr_prefix.split("(", maxsplit=1)[0]
                 try:
                     func = _find(finder, [func_name])
-                    if isinstance(func, hub.lib.cpop.contract.Contracted):
+                    if isinstance(func, hub.lib.pns.contract.Contracted):
                         signature = func.signature
                     elif callable(func):
                         signature = hub.lib.inspect.signature(func)

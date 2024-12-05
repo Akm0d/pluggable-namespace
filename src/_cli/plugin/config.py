@@ -1,10 +1,10 @@
 async def override(hub, cli: str, opts: dict):
     """
-    Parse the cli again using arguments not used up by pop-cli.
+    Parse the cli again using arguments not used up by pns-cli.
     Override hub.OPT with the new CLI options but maintain, config, os, and defaults parsed earlier
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
         cli (str): The namespace to use as the authoritative cli
         opts (dict): Previously parsed hub.OPT
     """
@@ -12,7 +12,7 @@ async def override(hub, cli: str, opts: dict):
     for namespace, data in opts.items():
         try:
             for k, v in data.items():
-                if namespace == "pop" and k in ("subparser", "global_clis"):
+                if namespace == "pns" and k in ("subparser", "global_clis"):
                     continue
 
                 new_config[namespace][k] = hub.lib.copy.copy(hub._dynamic.config.config.get(namespace, {}).get(k, {}))
@@ -21,7 +21,7 @@ async def override(hub, cli: str, opts: dict):
             continue
 
     # There is a user defined-cli, let it parse the remaining args it's own way
-    hub._opt = await hub.pop.config.load(
+    hub._opt = await hub.pns.config.load(
         # Pass all remaining args onto the new parser
         cli=cli,
         parser_args=tuple(opts.cli.args),

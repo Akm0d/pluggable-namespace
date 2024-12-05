@@ -10,7 +10,7 @@ async def run(hub, **kwargs):
     Run an interactive python console that contains the hub, supporting TCP, Unix domain sockets, or standard I/O.
 
     Args:
-        hub (pop.hub.Hub): The global namespace.
+        hub (pns.hub.Hub): The global namespace.
         socket(str): Path to the Unix domain socket or a hostname and port <host:port>
         kwargs (dict): Any locals to add to the console namespace.
     """

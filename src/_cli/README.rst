@@ -1,8 +1,8 @@
 =======
-Pop-cli
+pns-cli
 =======
 
-A cli interface for pop that exposes a persistent hub on the command line.
+A cli interface for pns that exposes a persistent hub on the command line.
 
 Getting Started
 ===============
@@ -15,14 +15,14 @@ First off, set up your python environment to use a gitlab repository to gather p
     [global]
     extra-index-url = https://__token__:<personal_access_token>@gitlab.com/api/v4/groups/<namespace>/-/packages/pypi/simple
 
-Now you can install ``pop-cli`` from pypi or gitlab repositories:
+Now you can install ``pns-cli`` from pypi or gitlab repositories:
 
 .. code-block:: bash
 
-    pip3 install pop-cli
+    pip3 install pns-cli
 
 
-You can now initialize pop from the cli:
+You can now initialize pns from the cli:
 
 .. code-block:: bash
 
@@ -45,7 +45,7 @@ If you don't specify a --cli, unknown args will be forwarded as parameters to th
 
 .. code-block:: bash
 
-    hub pop.test.func arg1 arg2 --kwarg1=asdf --kwarg2 asdf
+    hub pns.test.func arg1 arg2 --kwarg1=asdf --kwarg2 asdf
 
 
 You can access anything that is on the hub, this is very useful for debugging.

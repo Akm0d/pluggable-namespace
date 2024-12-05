@@ -16,8 +16,8 @@ async def parameters(hub, opts: dict) -> tuple[list[str], dict[str, object]]:
         on the "," and then just as a raw value.
 
     Args:
-        hub (pop.hub.Hub): The global namespace.
-        opts (dict): The args parsed for the pop-cli.
+        hub (pns.hub.Hub): The global namespace.
+        opts (dict): The args parsed for the pns-cli.
 
     Returns:
         tuple[list[str], dict[str, object]]: A tuple containing a list of
@@ -71,7 +71,7 @@ async def parse_arg(hub, key: str, value: str):
     Parse a command-line argument key and value, processing the value as JSON if possible.
 
     Args:
-        hub (pop.hub.Hub): The global namespace.
+        hub (pns.hub.Hub): The global namespace.
         key (str): The argument key, with leading hyphens and inner hyphens replaced with underscores.
         value (str): The argument value, to be parsed as JSON or split on commas if applicable.
 
@@ -97,7 +97,7 @@ async def parse_value(hub, value: str) -> object:
     Parse a value as a format string, JSON, a comma-separated list, or a raw string.
 
     Args:
-        hub (pop.hub.Hub): The global namespace.
+        hub (pns.hub.Hub): The global namespace.
         value (str): The value to be parsed.
 
     Returns:

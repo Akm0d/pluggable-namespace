@@ -8,10 +8,10 @@ async def run(hub):
             --list="a,b,c" --json="{'a': 'b'}" --flag3
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
     """
     # Grab OPT for cli, arguments it doesn't use will be passed onward to the next cli
-    opt = hub.lib.cpop.data.NamespaceDict(hub.OPT.copy())
+    opt = hub.lib.pns.data.NamespaceDict(hub.OPT.copy())
     ref = opt.cli.ref
     await hub.log.debug(f"Using ref: hub.{ref}")
 
@@ -21,8 +21,8 @@ async def run(hub):
         finder = hub
         for part in ref.split("."):
             finder = getattr(finder, part)
-            # This is not part of pop controlled by config
-            if not isinstance(finder, hub.lib.pop.loader.LoadedMod) and not isinstance(finder, hub.lib.pop.hub.Sub):
+            # This is not part of pns controlled by config
+            if not isinstance(finder, hub.lib.pns.loader.LoadedMod) and not isinstance(finder, hub.lib.pns.hub.Sub):
                 break
             if part in hub._dynamic.config.cli_config and part != "cli":
                 cli = part
@@ -35,7 +35,7 @@ async def run(hub):
         opt.cli.cli
         or (
             (cli in hub._dynamic.config.cli_config or cli in hub._dynamic.config.config)
-            and (cli not in opt.get("pop", {}).get("global_clis", ()))
+            and (cli not in opt.get("pns", {}).get("global_clis", ()))
         )
     ):
         await hub.log.debug(f"Loading cli: {cli}")
@@ -44,24 +44,24 @@ async def run(hub):
         args = []
         kwargs = {}
     else:
-        await hub.log.debug("Using pop-cli OPTs")
+        await hub.log.debug("Using pns-cli OPTs")
         # Treat all the extra args as parameters for the named ref
         args, kwargs = await hub.cli.cli.parameters(opt)
 
         call_help = kwargs.pop("help", False)
 
         if args:
-            await hub.log.debug(f"POP-CLI Args: {' '.join(args)}")
+            await hub.log.debug(f"pns-CLI Args: {' '.join(args)}")
         if kwargs:
-            await hub.log.debug(f"POP-CLI Kwargs: {' '.join(kwargs.keys())}")
+            await hub.log.debug(f"pns-CLI Kwargs: {' '.join(kwargs.keys())}")
 
     # Get the named reference from the hub
-    finder = hub.lib.pop.ref.find(hub, ref)
+    finder = hub.lib.pns.ref.find(hub, ref)
 
     # Get the docstirng for the object
     if call_help:
         # Make sure that contracts return the docs for their underlying function
-        if isinstance(finder, hub.lib.cpop.contract.Contracted):
+        if isinstance(finder, hub.lib.pns.contract.Contracted):
             finder = finder.func
         ret = help(finder)
     else:

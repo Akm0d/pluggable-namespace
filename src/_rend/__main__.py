@@ -1,6 +1,6 @@
 import asyncio
 
-import cpop
+import pns
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
 
 async def amain():
     # Create the hub within an async context
-    async with cpop.Hub(cli="rend") as hub:
+    async with pns.Hub(cli="rend") as hub:
         # Start the hub cli
         await hub.rend.init.cli()
 

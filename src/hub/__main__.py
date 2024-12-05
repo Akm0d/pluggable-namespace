@@ -2,13 +2,13 @@ import asyncio
 
 import aiomonitor
 
-import cpop.hub
+import pns.hub
 
 
 async def amain():
     loop = asyncio.get_running_loop()
 
-    async with cpop.hub.Hub(cli="cli") as hub:
+    async with pns.hub.Hub(cli="cli") as hub:
         watch_subs = hub.OPT.cli.watch
         await hub.log.debug("Initialized the hub")
 
@@ -40,7 +40,7 @@ async def amain():
             await hub.log.debug("Cleaning up")
 
             # Send a stop signal to the holder
-            await hub._tasks.put(cpop.hub.SHUTDOWN_SIGNAL)
+            await hub._tasks.put(pns.hub.SHUTDOWN_SIGNAL)
             await hub.lib.asyncio.sleep(0)
 
             if watch_subs:

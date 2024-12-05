@@ -2,7 +2,7 @@
 rend
 ====
 
-.. image:: https://img.shields.io/badge/made%20with-pop-teal
+.. image:: https://img.shields.io/badge/made%20with-pns-teal
    :alt: Made with pop, a Python implementation of Plugin Oriented Programming
    :target: https://pop.readthedocs.io/
 
@@ -27,19 +27,19 @@ access to specific components of the hub.
 * `rend source code <https://gitlab.com/vmware/pop/rend>`__
 * `rend documentation <https://vmware.gitlab.io/pop/rend/en/latest/index.html>`__
 
-What is POP?
+What is PNS?
 ------------
 
 This project is built with `pop <https://pop.readthedocs.io/>`__, a Python-based
-implementation of *Plugin Oriented Programming (POP)*. POP seeks to bring
+implementation of *Plugin Oriented Programming (PNS)*. PNS seeks to bring
 together concepts and wisdom from the history of computing in new ways to solve
 modern computing problems.
 
 For more information:
 
-* `Intro to Plugin Oriented Programming (POP) <https://pop-book.readthedocs.io/en/latest/>`__
-* `pop-awesome <https://gitlab.com/vmware/pop/pop-awesome>`__
-* `pop-create <https://gitlab.com/vmware/pop/pop-create/>`__
+* `Intro to Plugin Oriented Programming (PNS) <https://pns-book.readthedocs.io/en/latest/>`__
+* `pns-awesome <https://gitlab.com/vmware/pop/pns-awesome>`__
+* `pns-create <https://gitlab.com/vmware/pop/pns-create/>`__
 
 Usage
 =====

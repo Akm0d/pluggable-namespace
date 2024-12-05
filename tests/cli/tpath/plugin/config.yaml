@@ -1,0 +1,33 @@
+config:
+  test:
+    opt1:
+      default: 1
+    opt2:
+      default: 2
+
+cli_config:
+  test:
+    opt1:
+      subcommands:
+        - __global__
+    opt2:
+      action: store_true
+      subcommands:
+        - sub1
+
+
+subcommands:
+  test:
+    sub1: {}
+    sub2: {}
+
+dyne:
+  test:
+    - src
+
+import:
+  - pexpect
+  - pickle
+  - pytest
+  - shutil
+  - subprocess

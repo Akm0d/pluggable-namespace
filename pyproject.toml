@@ -27,7 +27,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+watch= [
+    "aionotify",
+]
+
 test = [
+    "aionotify",
+    "pexpect",
     "pytest",
     "pytest-asyncio",
 ]

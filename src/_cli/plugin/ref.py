@@ -5,13 +5,13 @@ async def resolve(hub, ref: object, *args, **kwargs) -> object:
     As a last resort just return the plain object as is.
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
         ref (object): An object found on the hub
     """
     try:
         if (
             hub.lib.asyncio.iscoroutinefunction(ref)
-            or isinstance(ref, hub.lib.typing.Callable | hub.lib.cpop.contract.Contracted)
+            or isinstance(ref, hub.lib.typing.Callable | hub.lib.pns.contract.Contracted)
             or callable(ref)
         ):
             # Call the named reference on the hub
@@ -37,7 +37,7 @@ async def output(hub, ret: object):
     Output a serialized version of the given object to the console.
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
         ret (object): A resolved object from the hub
     """
     if isinstance(ret, int):

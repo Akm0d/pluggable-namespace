@@ -81,6 +81,6 @@ async def start(hub):
             await sub._prepare()
             sub._loaded_all = False
             await sub._load_all()
-            await hub.pop.sub.load_subdirs(sub, recurse=hub._recurse_subdirs)
+            await hub.pns.sub.load_subdirs(sub, recurse=hub._recurse_subdirs)
         except Exception as e:
             await hub.log.error(f"Error reloading objects on sub '{dyne_name}': {e}")

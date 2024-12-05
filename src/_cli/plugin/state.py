@@ -18,7 +18,7 @@ async def load(hub, state_file):
     Read a hub state from a pickle file and add its attributes to the current hub.
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
         state_file (str): A pickle file that contains serialized hub data
         cli (str): The cli config to load on the new hub
     """
@@ -43,7 +43,7 @@ async def save(hub, state_file):
     Serialize the hub and write it to a file.
 
     Args:
-        hub (pop.hub.Hub): The global namespace
+        hub (pns.hub.Hub): The global namespace
         state_file (str): A pickle file to writ ethe serialized hub to.
     """
     state_file = hub.lib.pathlib.Path(state_file)

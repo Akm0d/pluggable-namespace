@@ -5,7 +5,7 @@ Inst - The instance pattern
 Overview
 --------
 
-In POP, you don't use classes and polymorphism in the same ways that you may be accustomed to.
+In PNS, you don't use classes and polymorphism in the same ways that you may be accustomed to.
 Classes should primarily be used to define types - something we rarely need - or they are used
 to build abstractions on top of the hub.  All data stored on the hub should use basic,
 JSON-serializable types, which makes interfaces simple, clean, and portable.
@@ -147,13 +147,13 @@ async def create(hub, _name: str, _base_sub: str = None, **kwargs):
 
     keys = hub.patt.inst.INSTANCES[_base_sub].get(KEYS, {})
 
-    values = hub.lib.cpop.data.NamespaceDict(
+    values = hub.lib.pns.data.NamespaceDict(
         {key: await hub.patt.inst.initialize_value(typ) for key, typ in keys.items()}
     )
     validate_keys = hub.patt.inst.INSTANCES[_base_sub].get(VALIDATE_KEYS)
     restrict_new_keys = hub.patt.inst.INSTANCES[_base_sub].get(RESTRICT_NEW_KEYS)
 
-    class PattInstance(hub.lib.cpop.data.NamespaceDict):
+    class PattInstance(hub.lib.pns.data.NamespaceDict):
         __name__ = _name
 
         def __setitem__(self, key: str, value):

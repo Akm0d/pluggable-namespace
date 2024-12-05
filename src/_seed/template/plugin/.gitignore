@@ -158,8 +158,8 @@ Thumbs.db
 .kdev4
 *.kdev4
 
-# pop-create logs
-pop-create.log
+# pns-create logs
+pns-create.log
 
 # Poetry locks - add this back later on
 poetry.lock
