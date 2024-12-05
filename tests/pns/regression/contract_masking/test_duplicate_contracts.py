@@ -8,7 +8,7 @@ async def test_repeated_recursive_contracts(hub):
     # were defined on a parent Sub, and a different set of recursive contracts
     # including some of the same contracts were defined on a child Sub.
     await hub.pns.sub.add(
-        pypath=["tests.regression.contract_masking.sub"],
+        pypath=["tests.pns.regression.contract_masking.sub"],
         recursive_contracts_static=[
             current_dir / "contract1",
             current_dir / "contract2",
