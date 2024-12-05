@@ -39,9 +39,11 @@ console = [
 
 test = [
     "aionotify; platform_system != 'Darwin'",
+    "aio-yte",
     "pexpect",
     "pytest",
     "pytest-asyncio",
+    "toml",
 ]
 
 [project.scripts]
