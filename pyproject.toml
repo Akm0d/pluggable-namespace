@@ -27,23 +27,28 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-watch= [
-    "aionotify",
-]
-
 console = [
     "aioconsole",
     "aiomonitor",
     "prompt-toolkit",
 ]
 
+seed = [
+    "copier",
+]
+
 test = [
     "aionotify; platform_system != 'Darwin'",
     "aio-yte",
+    "copier",
     "pexpect",
     "pytest",
     "pytest-asyncio",
     "toml",
+]
+
+watch= [
+    "aionotify",
 ]
 
 [project.scripts]

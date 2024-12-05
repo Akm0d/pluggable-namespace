@@ -1,0 +1,9 @@
+dyne:
+  test:
+    - src
+
+import:
+  - asyncio
+  - difflib
+  - subprocess
+  - tempfile

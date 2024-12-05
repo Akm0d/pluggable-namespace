@@ -13,7 +13,7 @@ config:
       help: Don't copy the files for real
     src:
       choices: templates
-      default: hatch
+      default: plugin
       help: The seed template to use
     args:
       help: Any key=value pairs to pass on to the jinja renderer

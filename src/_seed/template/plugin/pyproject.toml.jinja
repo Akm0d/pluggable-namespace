@@ -6,13 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "{{name}}"
 version = "1.0.0"
 description = "{{desc}}"
+readme = "README.rst"
 authors = [
     {name = "Tyler Levy Conde", email = "yonstib@gmail.com"},
-]
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "pluggable-namespace",
 ]
 classifiers = [
     "Operating System :: OS Independent",
@@ -21,13 +17,16 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: Apache Software License",
 ]
+requires-python = ">=3.11"
+dependencies = [
+    "pluggable-namespace",
+]
 
 [project.optional-dependencies]
 test = [
     "pytest",
     "pytest-asyncio",
 ]
-
 
 [tool.setuptools]
 package-dir = {"" = "src"}
