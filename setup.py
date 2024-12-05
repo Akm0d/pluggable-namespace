@@ -15,4 +15,5 @@ SETUP_DIRNAME = Path(__file__).parent
 
 setup(
     ext_modules=cythonize(extensions),
+    include_package_data=True,
 )
