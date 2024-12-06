@@ -30,11 +30,11 @@ async def load(
     if parser_init_kwargs is None:
         parser_init_kwargs = {}
     if cli_config is None:
-        cli_config = hub._dynamic.config.get("cli_config") or {}
+        cli_config = hub.cli_config
 
     # Get the plain config data that will tell us about OS vars and defaults
     if config is None:
-        config = hub._dynamic.config.get("config") or {}
+        config = hub.config.get("config") or {}
 
     # Merge config and cli_config
     full_config = hub.lib.pns.data.update(cli_config, config, merge_lists=True)
@@ -51,7 +51,7 @@ async def load(
         active_cli.update(full_config.get(gn, {}).copy())
 
     if subcommands is None:
-        subcommands = hub._dynamic.config.get("subcommands") or {}
+        subcommands = hub.subcommands
     else:
         active_subcommands = subcommands
     if cli:
@@ -117,7 +117,7 @@ async def load(
         global_clis=global_clis,
     )
 
-    return hub.lib.pns.data.freeze(opt)
+    return opt
 
 
 async def parse(
@@ -311,48 +311,8 @@ async def prioritize(
 
             # Set the value in the OPT dictionary
             opt[namespace][arg] = value
-    await hub.config.init.manage_paths(cli, opt, root_dir)
 
     opt["pns"]["subparser"] = cli_opts.get("SUBPARSER", "")
     opt["pns"]["global_clis"] = global_clis
 
-    return hub.lib.pns.data.freeze(opt)
-
-
-async def manage_paths(hub, cli: str, opt: dict[str, object], root_dir: str):
-    """
-    Manage and rewrite paths based on the specified root directory.
-
-    Args:
-        cli (str): The name of the CLI being managed.
-        opt (dict): The options dictionary.
-        root_dir (str): The root directory path.
-    """
-    reroot = True if root_dir else False
-    if not root_dir:
-        root_dir = hub.lib.pathlib.Path(hub.lib.os.sep)
-    if root_dir == hub.lib.os.sep:
-        if hasattr(hub.lib.os, "geteuid") and hub.lib.os.geteuid() != 0 and reroot:
-            # Using pathlib.Path on all paths makes testing on multiple OSes much easier.
-            # Since we can just patch pathlib.Path to be pathlib.PureWindowsPath or pathlib.PurePosixPath
-            root_dir = (hub.lib.pathlib.Path("~").expanduser()) / f".{cli}"
-        else:
-            root_dir = hub.lib.pathlib.Path(root_dir)
-    else:
-        return
-
-    for namespace, args in opt.items():
-        for key, val in args.items():
-            if key == "root_dir":
-                opt[namespace][key] = str(root_dir)
-                continue
-            try:
-                path = hub.lib.pathlib.Path(val)
-                if key.endswith(("_dir", "_path", "_file")) and path.is_absolute():
-                    # only update absolute paths for keys
-                    #  ending in _dir, _path or _file
-                    if path.is_absolute():
-                        # remove the root from the path, then join it to the main root
-                        opt[namespace][key] = root_dir.joinpath(*path.parts[1:])
-            except TypeError:
-                continue
+    return opt

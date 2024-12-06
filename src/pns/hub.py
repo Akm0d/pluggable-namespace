@@ -4,11 +4,7 @@ import importlib.util
 import yaml
 import pns.contract
 from pathlib import Path
-
-# Assuming pns.data.NamespaceDict exists and is defined elsewhere
-class NamespaceDict(dict):
-    """A mockup for missing pns.data.NamespaceDict"""
-    pass
+from pns.data import NamespaceDict
 
 VIRTUAL = "__virtual__"
 INIT = "__init__"
@@ -48,6 +44,12 @@ class Namespace:
 
     async def add_leaf(self, name: str, module_path: str = None):
         """Add a new leaf to the tree with optional module import."""
+        if "." in name:
+            current = self
+            for part in name.split("."):
+                self.add_leaf(part, module_path)
+                current.leaf[name] = Namespace(name, root=self._)
+                current = self.leaf[name]
         mod = None
         ret = None
         if module_path:
@@ -62,7 +64,6 @@ class Namespace:
             if config_path and config_path.is_file():
                 with config_path.open('r') as file:
                     config = yaml.safe_load(file)
-                print(f"Parsed config for {module_path}: {config}")
 
             # Execute the __virtual__ function if present
             if hasattr(mod, VIRTUAL):
@@ -129,11 +130,9 @@ def load_module(path: str):
     if path in sys.modules:
         return sys.modules[path]
 
-    print(path)
     builder = []
     for part in path.split("."):
         builder.append(part)
-        print(".".join(builder))
         try:
             ret = importlib.import_module(".".join(builder))
         except ModuleNotFoundError:
@@ -146,19 +145,21 @@ async def new(*args, **kwargs):
     hub = Namespace(name="hub")
     await hub.add_leaf("pns", "pns.mods")
     await hub.pns.add_leaf("sub", "pns.mods.sub")
+    await hub.pns.add_leaf("config", "pns.mods.config")
+    await hub.add_leaf("config", "pns.config")
+    await hub.config.add_leaf("init", "pns.config.init")
     await hub.add_leaf("lib", "sys.modules")
     await hub.lib.add_leaf("logging", "logging")
     await hub.lib.add_leaf("asyncio", "asyncio")
+    await hub.lib.add_leaf("os", "os")
+    await hub.lib.add_leaf("collections", "collections")
+    await hub.lib.add_leaf("pathlib", "pathlib")
     await hub.lib.add_leaf("aiologger", "aiologger")
     await hub.lib.add_leaf("pns", "pns")
     await hub.add_leaf("log", "pns.log")
     await hub.log.add_leaf("init", "pns.log.init")
     await hub.add_leaf("cli")
     await hub.cli.add_leaf("init", "hub.plugin.init")
-    print(hub.log.init)
-    print("YES!")
-    hub.OPT.cli = NamespaceDict()
-    hub.OPT.cli.watch=False
-    hub.OPT.cli.monitor=False
-    hub.OPT.cli.init=[]
+    opt = await hub.pns.config.load(config={}, cli_config={"cli": {"watch": {"default": ""}}})
+    hub.OPT = NamespaceDict(opt)
     return hub
