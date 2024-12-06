@@ -2,7 +2,7 @@ import shutil
 import sys
 import tempfile
 from unittest import mock
-from pns import Hub
+import pns.hub
 
 import pathlib
 import pytest
@@ -11,10 +11,7 @@ import yaml
 
 @pytest.fixture(name="hub")
 async def testing_hub():
-    async with Hub(
-        logs=True,
-    ) as hub:
-        yield hub
+    yield await pns.hub.new(logs=True)
 
 
 @pytest.fixture(autouse=True)

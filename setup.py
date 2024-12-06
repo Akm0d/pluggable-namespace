@@ -5,7 +5,6 @@ from Cython.Build import cythonize
 
 extensions = [
     Extension(name="pns.contract", sources=["src/pns/contract.pyx"]),
-    Extension(name="pns.data", sources=["src/pns/data.pyx"]),
 ]
 
 SETUP_DIRNAME = Path(__file__).parent

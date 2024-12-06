@@ -75,8 +75,7 @@ async def add(
         root._imports[subname] = hub.lib.importlib.import_module(python_import)
         return
 
-    root._clear()
-    root._subs[subname] = await pns.hub.AsyncSub(
+    root._subs[subname] = await pns.sub.new(
         hub,
         subname=subname,
         root=root,
@@ -100,8 +99,7 @@ async def add(
         default_recursive_contracts=default_recursive_contracts,
     )
     # init the sub (init.py:__init__) after it can be referenced on the hub!
-    await root._subs[subname]._sub_init()
-    await root._subs[subname]._load_all()
+    root._subs[subname]._sub_init()
     for alias in root._subs[subname]._alias:
         root._sub_alias[alias] = root._subs[subname]
 

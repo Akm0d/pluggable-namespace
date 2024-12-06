@@ -5,14 +5,14 @@ async def __init__(hub):
     hub.log.QUEUE = hub.lib.asyncio.Queue()
 
     # Set up aliases for each log function
-    hub.log.trace = hub._.trace
-    hub.log.info = hub._.info
-    hub.log.debug = hub._.debug
-    hub.log.error = hub._.error
-    hub.log.warning = hub._.warning
-    hub.log.warn = hub._.warning
-    hub.log.critical = hub._.critical
-    hub.log.fatal = hub._.critical
+    hub.log.trace = hub.log.init.trace
+    hub.log.info = hub.log.init.info
+    hub.log.debug = hub.log.init.debug
+    hub.log.error = hub.log.init.error
+    hub.log.warning = hub.log.init.warning
+    hub.log.warn = hub.log.init.warning
+    hub.log.critical = hub.log.init.critical
+    hub.log.fatal = hub.log.init.critical
 
 
 async def get_logger(hub, name: str):
