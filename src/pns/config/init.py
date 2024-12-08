@@ -165,7 +165,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
         dict: The processed options.
     """
     extra = {}
-    for parser_mod in sorted(hub.config._loaded):
+    for parser_mod in sorted(hub.config):
         if parser_mod == "init":
             continue
 
@@ -263,7 +263,6 @@ async def prioritize(
        pns.data.ImmutableNamespaceDict: The prioritized configuration options.
     """
     opt = hub.lib.collections.defaultdict(dict)
-    root_dir = None
     for namespace, args in config.items():
         # Boolean to determine if the given option is part of the active cli
         is_active_namespace = namespace == cli or namespace in global_clis
@@ -302,9 +301,6 @@ async def prioritize(
                     if is_active_cli:
                         raise ValueError(msg)
                 value = data.get("default")
-            if arg == "root_dir":
-                root_dir = value
-
             if document_parameters:
                 # Wrap the value in a class that gives it a docstring
                 value = hub.lib.pns.data.wrap_value(arg, value, data.get("help", ""))

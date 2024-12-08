@@ -27,7 +27,7 @@ class Sub(pns.data.Namespace):
         mod = pns.load.load_module(module_ref)
         try:
             loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
-        except ModuleNotFoundError:
+        except NotImplementedError:
             self.data.pop(name)
             return
 
@@ -74,7 +74,7 @@ class Hub(Sub):
 
 
 
-async def new(*args, **kwargs):
+async def new(cli:str="cli", *args, **kwargs):
     # Set up the hub
     hub = Hub()
 
@@ -83,13 +83,11 @@ async def new(*args, **kwargs):
 
     # Load the config
     await hub.add_sub("config", "pns.config")
-    # TODO walk through config.load
-    opt = await hub.pns.config.load()
+    opt = await hub.pns.config.load(cli=cli, **hub.dynamic.config)
     hub.OPT = pns.data.NamespaceDict(opt)
 
     await hub.add_sub("log", "pns.log")
-    await hub.log.init.setup(**opt.log.copy())
-
+    await hub.log.init.setup(**hub.OPT.log.copy())
 
     # This is for testing until the rest is working
     await hub.add_sub("cli", "hub.plugin")
