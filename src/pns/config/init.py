@@ -30,11 +30,11 @@ async def load(
     if parser_init_kwargs is None:
         parser_init_kwargs = {}
     if cli_config is None:
-        cli_config = hub.cli_config
+        cli_config = hub.dynamic.config.cli_config
 
     # Get the plain config data that will tell us about OS vars and defaults
     if config is None:
-        config = hub.config.get("config") or {}
+        config = hub.dynamic.config.get("config") or {}
 
     # Merge config and cli_config
     full_config = hub.lib.pns.data.update(cli_config, config, merge_lists=True)
@@ -51,7 +51,7 @@ async def load(
         active_cli.update(full_config.get(gn, {}).copy())
 
     if subcommands is None:
-        subcommands = hub.subcommands
+        subcommands = hub.dynamic.config.subcommands
     else:
         active_subcommands = subcommands
     if cli:
