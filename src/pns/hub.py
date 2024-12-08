@@ -25,7 +25,12 @@ class Sub(pns.data.Namespace):
             return
 
         mod = pns.load.load_module(module_ref)
-        loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
+        try:
+            loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
+        except ModuleNotFoundError:
+            self.leaf.pop(name)
+            return
+
         sub.mod = loaded_mod
 
         # Execute the __init__ function if present
