@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import pkgutil
 import pns.data
@@ -5,6 +6,7 @@ import pns.dir
 import pns.load
 
 
+INIT = "__init__"
 
 class Sub(pns.data.Namespace):
     def __init__(self, name: str, parent: pns.data.Namespace, root: 'Hub'):
@@ -26,6 +28,22 @@ class Sub(pns.data.Namespace):
         loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
         sub.mod = loaded_mod
 
+        # Execute the __init__ function if present
+        if hasattr(mod, INIT):
+            func = getattr(mod, INIT)
+            if asyncio.iscoroutinefunction(func):
+                init = pns.contract.Contracted(
+                    self.hub,
+                    contracts=[],
+                    func=func,
+                    ref=f"{sub.ref}.{name}",
+                    parent=mod,
+                    name=INIT,
+                )
+                ret = init()
+                if asyncio.iscoroutine(ret):
+                    await ret
+
         if not recurse or not getattr(mod, "__path__", None):
             return
 
@@ -43,6 +61,7 @@ class Hub(Sub):
 
     def __init__(hub):
         super().__init__(name="hub", parent=None, root=None)
+        hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
         hub.lib.leaf = sys.modules
@@ -59,6 +78,7 @@ async def new(*args, **kwargs):
 
     # Load the config
     await hub.add_sub("config", "pns.config")
+    # TODO walk through config.load
     opt = await hub.pns.config.load()
     hub.OPT = pns.data.NamespaceDict(opt)
 

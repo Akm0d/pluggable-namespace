@@ -4,7 +4,6 @@ import pns.contract
 
 import importlib.util
 VIRTUAL = "__virtual__"
-INIT = "__init__"
 CONFIG = "conf.yaml"
 
 class LoadedMod(pns.data.Namespace):
@@ -47,7 +46,7 @@ async def prep_mod(hub, sub, name:str, mod) -> LoadedMod:
             hub,
             contracts=[],
             func=getattr(mod, VIRTUAL),
-            ref=f"{sub.ref}.{name}.{VIRTUAL}",
+            ref=f"{sub.ref}.{name}",
             parent=mod,
             name=VIRTUAL,
         )
@@ -55,20 +54,7 @@ async def prep_mod(hub, sub, name:str, mod) -> LoadedMod:
         if asyncio.iscoroutine(ret):
             ret = await ret
 
-    # Execute the __init__ function if present
-    if hasattr(mod, INIT):
-        func = getattr(mod, INIT)
-        if asyncio.iscoroutinefunction(func):
-            init = pns.contract.Contracted(
-                hub,
-                contracts=[],
-                func=func,
-                ref=f"{sub.ref}.{name}.{INIT}",
-                parent=mod,
-                name=INIT,
-            )
-            ret = init()
-            if asyncio.iscoroutine(ret):
-                await ret
+        if ret is False or (len(ret)>1 and ret[0] is False):
+            raise NotImplementedError(f"{sub.ref}.{name} virtual failed: {ret[1]}")
 
     return LoadedMod(name, module=mod, tree=sub, root=hub)
