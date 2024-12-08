@@ -16,11 +16,11 @@ class Sub(pns.data.Namespace):
         self.rcontracts = []
 
     async def add_sub(self, name: str, module_ref: str = None, recurse:bool = True):
-        if name in self.leaf:
+        if name in self.data:
             return
         mod = None
         sub = Sub(name=name, parent=self, root=self.hub)
-        self.leaf[name]  = sub
+        self.data[name]  = sub
         if not module_ref:
             return
 
@@ -28,7 +28,7 @@ class Sub(pns.data.Namespace):
         try:
             loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
         except ModuleNotFoundError:
-            self.leaf.pop(name)
+            self.data.pop(name)
             return
 
         sub.mod = loaded_mod
@@ -69,7 +69,7 @@ class Hub(Sub):
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub.lib.leaf = sys.modules
+        hub.lib.data = sys.modules
         hub.dynamic = pns.dir.dynamic()
 
 
