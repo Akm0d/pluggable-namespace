@@ -32,7 +32,7 @@ async def prep_mod(hub, sub, name:str, mod) -> pns.data.LoadedMod:
             hub,
             contracts=[],
             func=getattr(mod, VIRTUAL),
-            ref=f"{sub.ref}.{name}",
+            ref=f"{sub.__ref__}.{name}",
             parent=mod,
             name=VIRTUAL,
         )
@@ -41,6 +41,6 @@ async def prep_mod(hub, sub, name:str, mod) -> pns.data.LoadedMod:
             ret = await ret
 
         if ret is False or (len(ret)>1 and ret[0] is False):
-            raise NotImplementedError(f"{sub.ref}.{name} virtual failed: {ret[1]}")
+            raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
     return pns.data.LoadedMod(name, module=mod, tree=sub, root=hub)

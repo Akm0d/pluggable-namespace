@@ -45,7 +45,7 @@ class Sub(pns.data.Namespace):
                     self.hub,
                     contracts=[],
                     func=func,
-                    ref=f"{sub.ref}.{name}",
+                    ref=f"{sub.__ref__}.{name}",
                     parent=mod,
                     name=INIT,
                 )

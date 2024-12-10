@@ -131,7 +131,7 @@ class Namespace(Mapping):
         return current
 
     @property
-    def ref(self):
+    def __ref__(self):
         """Construct a reference string that traverses from the root to the current node."""
         parts = []
         finder = self
@@ -144,7 +144,7 @@ class Namespace(Mapping):
         return ".".join(reversed(parts))
 
     def __repr__(self):
-        return f"Namespace({self.ref})"
+        return f"Namespace({self.__ref__})"
 
     def __len__(self):
         return len(self.data)
@@ -173,7 +173,7 @@ class LoadedMod(Namespace):
                 self._,
                 contracts=self.__.contracts,
                 func=func,
-                ref=self.ref,
+                ref=self.__ref__,
                 parent=self.__,
                 name=func.__name__,
                 # Add the root hub to the function call if "hub" is an argument to the function
