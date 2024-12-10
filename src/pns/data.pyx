@@ -8,7 +8,7 @@ import pns.contract
 
 class Namespace(Mapping):
     def __init__(self, name: str, module=None, tree: "Namespace" = None, root: "Namespace" = None):
-        self.name = name
+        self.__name__ = name
         self.__ = tree or self
         self._ = root or self
         self.data = {}
@@ -112,6 +112,9 @@ class Namespace(Mapping):
         if self.mod:
             yield from self.mod
 
+    def __len__(self):
+        return len(self.data)
+
     def __bool__(self):
         """
         True if the namespace has leaves or a mod, else false
@@ -135,19 +138,18 @@ class Namespace(Mapping):
         """Construct a reference string that traverses from the root to the current node."""
         parts = []
         finder = self
-        while finder.name != self.__.name:  # Traverse up until we reach the root
-            parts.append(finder.name)
+        while finder != self._:  # Traverse up until we reach the root
+            parts.append(finder.__name__)  # Add the root name
             finder = finder.__
-        parts.append(finder.name)  # Add the root name
 
         # Reverse parts to start from the root
         return ".".join(reversed(parts))
 
-    def __repr__(self):
-        return f"Namespace({self.__ref__})"
+        def __repr__(self):
+            return f"Namespace({self.__ref__})"
 
-    def __len__(self):
-        return len(self.data)
+        def __len__(self):
+            return len(self.data)
 
     def __iter__(self):
         return iter(self.data)
