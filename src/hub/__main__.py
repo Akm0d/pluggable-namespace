@@ -15,7 +15,7 @@ async def amain():
     if watch_subs:
         watch = asyncio.create_task(hub.cli.watch.start())
 
-    if "legacy" in hub.cli:
+    if "legacy" in hub.cli.__data__:
         await hub.cli.legacy.patch(loop=loop)
 
     for ref in hub.OPT.cli.init:

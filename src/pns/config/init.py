@@ -30,11 +30,11 @@ async def load(
     if parser_init_kwargs is None:
         parser_init_kwargs = {}
     if cli_config is None:
-        cli_config = hub.dynamic.config.cli_config
+        cli_config = hub._dynamic.config.cli_config
 
     # Get the plain config data that will tell us about OS vars and defaults
     if config is None:
-        config = hub.dynamic.config.get("config") or {}
+        config = hub._dynamic.config.get("config") or {}
 
     # Merge config and cli_config
     full_config = hub.lib.pns.data.update(cli_config, config, merge_lists=True)
