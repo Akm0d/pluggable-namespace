@@ -35,7 +35,7 @@ class Sub(pns.data.Namespace):
             self.__data__.pop(name)
             return
 
-        sub.mod = loaded_mod
+        sub.__module__ = loaded_mod
 
         # Execute the __init__ function if present
         if hasattr(mod, INIT):

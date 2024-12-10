@@ -12,14 +12,14 @@ class Namespace(Mapping):
         self.__ = parent or self
         self._ = root or parent or self
         self.__data__ = {}
-        self.mod = module
+        self.__module__ = module
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""
         if name in self.__data__:
             return self.__data__[name]
-        elif hasattr(self.mod, name):
-            return getattr(self.mod, name)
+        elif hasattr(self.__module__, name):
+            return getattr(self.__module__, name)
         else:
             return self.__getattribute__(name)
 
@@ -109,8 +109,8 @@ class Namespace(Mapping):
         Iterate the leaves first, then if there is a module on this namespace, iterate that too
         """
         yield from self.__data__
-        if self.mod:
-            yield from self.mod
+        if self.__module__:
+            yield from self.__module__
 
     def __len__(self):
         return len(self.__data__)
@@ -119,7 +119,7 @@ class Namespace(Mapping):
         """
         True if the namespace has leaves or a mod, else false
         """
-        return bool(self.__data__) or bool(self.mod)
+        return bool(self.__data__) or bool(self.__module__)
 
     def _add_child(self, name: str, module_path: str = None):
         """Add a new child to the parent with optional module import."""
@@ -168,7 +168,7 @@ class NamespaceDict(dict[str, object]):
 
 class LoadedMod(Namespace):
     def __getattr__(self, name: str):
-        obj = getattr(self.mod, name)
+        obj = getattr(self.__module__, name)
         if asyncio.iscoroutinefunction(obj):
             func = obj
             return pns.contract.create_contracted(
