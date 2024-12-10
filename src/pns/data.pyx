@@ -11,13 +11,13 @@ class Namespace(Mapping):
         self.__name__ = name
         self.__ = parent or self
         self._ = root or parent or self
-        self.data = {}
+        self.__data__ = {}
         self.mod = module
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""
-        if name in self.data:
-            return self.data[name]
+        if name in self.__data__:
+            return self.__data__[name]
         elif hasattr(self.mod, name):
             return getattr(self.mod, name)
         else:
@@ -108,25 +108,25 @@ class Namespace(Mapping):
         """
         Iterate the leaves first, then if there is a module on this namespace, iterate that too
         """
-        yield from self.data
+        yield from self.__data__
         if self.mod:
             yield from self.mod
 
     def __len__(self):
-        return len(self.data)
+        return len(self.__data__)
 
     def __bool__(self):
         """
         True if the namespace has leaves or a mod, else false
         """
-        return bool(self.data) or bool(self.mod)
+        return bool(self.__data__) or bool(self.mod)
 
     def _add_child(self, name: str, module_path: str = None):
         """Add a new child to the parent with optional module import."""
         current = self
         for part in name.split("."):
-            current.data[part] = Namespace(part, root=self._, parent=self, module=module_path)
-            current = current.data[part]
+            current.__data__[part] = Namespace(part, root=self._, parent=self, module=module_path)
+            current = current.__data__[part]
 
         # Only add the module to the final place in the path
         current.mod = module_path
@@ -149,10 +149,10 @@ class Namespace(Mapping):
             return f"Namespace({self.__ref__})"
 
         def __len__(self):
-            return len(self.data)
+            return len(self.__data__)
 
     def __iter__(self):
-        return iter(self.data)
+        return iter(self.__data__)
 
 
 class NamespaceDict(dict[str, object]):
