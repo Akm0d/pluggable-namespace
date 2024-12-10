@@ -12,8 +12,12 @@ class Sub(pns.data.Namespace):
     def __init__(self, name: str, parent: pns.data.Namespace, root: 'Hub'):
         super().__init__(name, tree=parent, root=root)
         self.hub = root or parent
-        self.contracts = []
-        self.rcontracts = []
+        self._contracts = []
+        self._rcontracts = []
+
+    @property
+    def contracts(self):
+        return self._contracts + self._rcontracts
 
     async def add_sub(self, name: str, module_ref: str = None, recurse:bool = True):
         if name in self.data:
