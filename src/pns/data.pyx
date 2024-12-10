@@ -157,7 +157,10 @@ class Namespace(Mapping):
 class NamespaceDict(UserDict):
     def __getattr__(self, key: str):
         if key in self.data:
-            return self.data[key]
+            val = self.data[key]
+            if isinstance(val, dict):
+                val = NamespaceDict(val)
+            return val
         return super().__getattribute__(key)
 
 
