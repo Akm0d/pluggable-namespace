@@ -3,7 +3,6 @@
 import asyncio
 from collections.abc import Mapping
 from collections.abc import Iterable
-from collections import UserDict
 import pns.contract
 
 
@@ -154,14 +153,15 @@ class Namespace(Mapping):
         return iter(self.data)
 
 
-class NamespaceDict(UserDict):
+class NamespaceDict(dict[str, object]):
     def __getattr__(self, key: str):
-        if key in self.data:
-            val = self.data[key]
-            if isinstance(val, dict):
+        try:
+            val = self[key]
+            if isinstance(val, dict) and not isinstance(val, NamespaceDict):
                 val = NamespaceDict(val)
             return val
-        return super().__getattribute__(key)
+        except KeyError:
+            return super().__getattribute__(key)
 
 
 class LoadedMod(Namespace):
