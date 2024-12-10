@@ -10,7 +10,7 @@ INIT = "__init__"
 
 class Sub(pns.data.Namespace):
     def __init__(self, name: str, parent: pns.data.Namespace, root: 'Hub'):
-        super().__init__(name, tree=parent, root=root)
+        super().__init__(name, parent=parent, root=root)
         self.hub = root or parent
         self._contracts = []
         self._rcontracts = []

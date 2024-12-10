@@ -7,10 +7,10 @@ import pns.contract
 
 
 class Namespace(Mapping):
-    def __init__(self, name: str, module=None, tree: "Namespace" = None, root: "Namespace" = None):
+    def __init__(self, name: str, module=None, parent: "Namespace" = None, root: "Namespace" = None):
         self.__name__ = name
-        self.__ = tree or self
-        self._ = root or self
+        self.__ = parent or self
+        self._ = root or parent or self
         self.data = {}
         self.mod = module
 
@@ -34,18 +34,18 @@ class Namespace(Mapping):
 
     def __iadd__(self, other: [str or tuple]):
         """
-        Add a leaf to the namespace.
+        Add a child to the namespace.
 
         ns += (name, module_path)
 
         is the same as
 
-        ns.add(name, module_path)
+        ns._add_child(name, module_path)
         """
         if isinstance(other, str):
-            self.add(other)
+            self._add_child(other)
         elif isinstance(other, Iterable):
-            self.add(*other)
+            self._add_child(*other)
         return self
 
     def __div__(self, name: str):
@@ -121,11 +121,11 @@ class Namespace(Mapping):
         """
         return bool(self.data) or bool(self.mod)
 
-    def add(self, name: str, module_path: str = None):
-        """Add a new leaf to the tree with optional module import."""
+    def _add_child(self, name: str, module_path: str = None):
+        """Add a new child to the parent with optional module import."""
         current = self
         for part in name.split("."):
-            current.data[part] = Namespace(part, root=self._, tree=self, module=module_path)
+            current.data[part] = Namespace(part, root=self._, parent=self, module=module_path)
             current = current.data[part]
 
         # Only add the module to the final place in the path

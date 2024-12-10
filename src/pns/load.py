@@ -43,4 +43,4 @@ async def prep_mod(hub, sub, name:str, mod) -> pns.data.LoadedMod:
         if ret is False or (len(ret)>1 and ret[0] is False):
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
-    return pns.data.LoadedMod(name, module=mod, tree=sub, root=hub)
+    return pns.data.LoadedMod(name, module=mod, parent=sub, root=hub)
