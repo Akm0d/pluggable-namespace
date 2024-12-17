@@ -1,11 +1,19 @@
 import pns.hub
-import pns.contract
-import pns.data
+import os
 
-Contracted = pns.contract.Contracted
-ContractedContext = pns.contract.ContractedContext
+# Default to c versions of contract and data which skip all the internal getattrs in the debugger
+DEBUG_PNS_GETATTR = os.environ.get("PNS_DEBUG", False)
+if DEBUG_PNS_GETATTR:
+    import pns.contract as contract
+    import pns.data as data
+else:
+    import pns.ccontract as contract
+    import pns.cdata as data
+
+Contracted = contract.Contracted
+ContractedContext = contract.ContractedContext
 Hub = pns.hub.Hub
 Sub = pns.hub.Sub
-LoadedMod = pns.data.LoadedMod
-Namespace = pns.data.Namespace
-NamespaceDict = pns.data.NamespaceDict
+LoadedMod = data.LoadedMod
+Namespace = data.Namespace
+NamespaceDict = data.NamespaceDict

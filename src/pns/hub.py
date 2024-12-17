@@ -91,5 +91,6 @@ async def new(cli:str="cli", *args, **kwargs):
     await hub.log.init.setup(**hub.OPT.log.copy())
 
     # This is for testing until the rest is working
+    # TODO Add "_load_all" and integrate pop.sub.add
     await hub.add_sub("cli", "hub.plugin")
     return hub
