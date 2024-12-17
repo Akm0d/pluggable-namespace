@@ -87,8 +87,13 @@ async def new(cli:str="cli", *args, **kwargs):
     opt = await hub.pns.config.load(cli=cli, **hub._dynamic.config)
     hub.OPT = pns.data.NamespaceDict(opt)
 
+    # Setup the logger
     await hub.add_sub("log", "pns.log")
     await hub.log.init.setup(**hub.OPT.log.copy())
+
+    # Add other core modules
+    await hub.add_sub("patt", "_patt.plugin")
+    await hub.patt.sh.add_sub()
 
     # This is for testing until the rest is working
     # TODO Add "_load_all" and integrate pop.sub.add
