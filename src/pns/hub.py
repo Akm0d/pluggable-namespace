@@ -10,7 +10,7 @@ INIT = "__init__"
 # Default to c versions of contract and data which skip all the internal getattrs in the debugger
 DEBUG_PNS_GETATTR = os.environ.get("PNS_DEBUG", False)
 if DEBUG_PNS_GETATTR:
-    import pns.contract as contract
+    import pns.contract as contract # noqa
     import pns.data as data
 else:
     import pns.ccontract as contract
@@ -52,11 +52,11 @@ class Sub(data.Namespace):
             module_ref (str, optional): The module reference to load. Defaults to None.
             recurse (bool): If True, recursively loads submodules. Defaults to True.
         """
-        if name in self.__data__:
+        if name in self._subs:
             return
         mod = None
         sub = Sub(name=name, parent=self, root=self.hub)
-        self.__data__[name]  = sub
+        self._subs[name]  = sub
         if not module_ref:
             return
 
@@ -64,7 +64,7 @@ class Sub(data.Namespace):
         try:
             loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
         except NotImplementedError:
-            self.__data__.pop(name)
+            self._subs.pop(name)
             return
 
         sub.__module__ = loaded_mod
@@ -119,7 +119,7 @@ class Hub(Sub):
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub.lib.__data__ = sys.modules
+        hub.lib._subs = sys.modules
         hub._dynamic = pns.dir.dynamic()
 
 
@@ -311,9 +311,6 @@ async def new(cli:str="cli", *args, **kwargs):
     await hub.log.init.setup(**hub.OPT.log.copy())
 
     # Add the ability to shell out from the hub
-    hub.__data__["sh"] = CMD(hub)
+    hub._subs["sh"] = CMD(hub)
 
-    # This is for testing until the rest is working
-    # TODO Add "_load_all" and integrate pop.sub.add
-    await hub.add_sub("cli", "hub.plugin")
     return hub
