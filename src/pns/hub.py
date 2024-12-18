@@ -128,7 +128,7 @@ class CMD(Sub):
     A class representing a shell command execution interface that allows accessing
     shell commands through a namespace-like structure on a Hub object.
     """
-    def __init__(self, hub:Hub, command:list[str]|str=None):
+    def __init__(self, hub:Hub, command:list[str]|str=None, parent=None):
         """
         Initialize the CMD interface.
 
@@ -141,7 +141,7 @@ class CMD(Sub):
         if isinstance(command, str):
             command = [command]
         self.command = command
-        super().__init__(name="sh", parent=hub, root=hub)
+        super().__init__(name="sh", parent=parent or hub, root=hub)
 
     def __getattr__(self, name):
         """
@@ -153,7 +153,7 @@ class CMD(Sub):
         Returns:
             CMD: A new CMD instance with the extended command.
         """
-        return CMD(self.hub, self.command + [name])
+        return CMD(self.hub, self.command + [name], parent=self)
 
     def __getitem__(self, item):
         """
