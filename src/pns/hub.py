@@ -303,7 +303,7 @@ async def new(cli:str="cli", *args, **kwargs):
 
     # Load the config
     await hub.add_sub("config", "pns.config")
-    opt = await hub.pns.config.load(cli=cli, **hub._dynamic.config)
+    opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
     hub.OPT = data.NamespaceDict(opt)
 
     # Setup the logger
