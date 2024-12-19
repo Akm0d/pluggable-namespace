@@ -14,7 +14,9 @@ async def test_create_instance(hub):
     Test creating an instance and verify its attributes and type checking.
     """
     await hub.test.init.init(key1=str, key2=int, key3=dict[str, list[int]], key4=None)
-    await hub.test.init.create("my_instance", key1="", key2=0, key3={"": [0]}, key4=object())
+    await hub.test.init.create(
+        "my_instance", key1="", key2=0, key3={"": [0]}, key4=object()
+    )
 
     instance = await hub.test.init.get("my_instance")
     assert instance.key1 == ""
@@ -31,7 +33,9 @@ async def test_retrieve_instance(hub):
     Test retrieving an instance and verifying its attributes.
     """
     await hub.test.init.init(key1=str, key2=int, key3=dict[str, list[int]], key4=None)
-    await hub.test.init.create("my_instance", key1="test", key2=42, key3={"numbers": [1, 2]}, key4=None)
+    await hub.test.init.create(
+        "my_instance", key1="test", key2=42, key3={"numbers": [1, 2]}, key4=None
+    )
 
     instance = await hub.test.init.get("my_instance")
     assert instance.key1 == "test"
@@ -45,7 +49,9 @@ async def test_update_instance(hub):
     Test updating an instance and verifying the changes.
     """
     await hub.test.init.init(key1=str, key2=int, key3=dict[str, list[int]], key4=None)
-    await hub.test.init.create("my_instance", key1="initial", key2=5, key3={}, key4=None)
+    await hub.test.init.create(
+        "my_instance", key1="initial", key2=5, key3={}, key4=None
+    )
 
     instance = await hub.test.init.get("my_instance")
     instance.key1 = "updated"
@@ -92,7 +98,9 @@ async def test_dynamic_key_creation(hub):
         key4=None,
         restrict_new_keys=False,
     )
-    await hub.test.init.create("dynamic_instance", key1="dynamic", key2=50, key3={}, key4=None)
+    await hub.test.init.create(
+        "dynamic_instance", key1="dynamic", key2=50, key3={}, key4=None
+    )
 
     instance = await hub.test.init.get("dynamic_instance")
     instance.new_key = "new_value"
@@ -126,7 +134,9 @@ async def test_type_validation(hub):
     instance = await hub.test.init.get("validation_instance")
 
     with pytest.raises(TypeError):
-        instance.key2 = "should fail"  # Should raise TypeError because key2 is expected to be int
+        instance.key2 = (
+            "should fail"  # Should raise TypeError because key2 is expected to be int
+        )
 
     with pytest.raises(TypeError):
         instance.key3 = {
@@ -138,7 +148,9 @@ async def test_no_type_validation(hub):
     """
     Test type validation being disabled
     """
-    await hub.test.init.init(key1=str, key2=int, key3=dict[str, list[int]], key4=None, validate_keys=False)
+    await hub.test.init.init(
+        key1=str, key2=int, key3=dict[str, list[int]], key4=None, validate_keys=False
+    )
     await hub.test.init.create(
         "validation_instance",
         key1="validate",
@@ -164,7 +176,9 @@ async def test_restrict_new_keys(hub):
     instance = await hub.test.init.get("restricted_instance")
 
     with pytest.raises(KeyError):
-        instance.new_key = "new value"  # Should raise KeyError because new keys are restricted
+        instance.new_key = (
+            "new value"  # Should raise KeyError because new keys are restricted
+        )
 
 
 async def test_no_restrict_new_keys(hub):

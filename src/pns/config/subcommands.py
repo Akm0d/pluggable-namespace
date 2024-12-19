@@ -53,7 +53,9 @@ async def create_parsers(
         extra_subcommands = arg_meta["extra"].subcommands
 
         # Handle argument groups for top-level parser
-        target_group = await hub.config.group.merge(group_name, {None: groups}, None, main_parser)
+        target_group = await hub.config.group.merge(
+            group_name, {None: groups}, None, main_parser
+        )
         if "__global__" in extra_subcommands or not extra_subcommands:
             target_group.add_argument(cli_name, *options, **opts)
 
@@ -61,12 +63,16 @@ async def create_parsers(
         for subcommand in extra_subcommands:
             if subcommand == "__global__":
                 for subcmd, sparser in subparsers.items():
-                    subparser_group = await hub.config.group.merge(group_name, subparser_groups, subcmd, sparser)
+                    subparser_group = await hub.config.group.merge(
+                        group_name, subparser_groups, subcmd, sparser
+                    )
                     subparser_group.add_argument(cli_name, *options, **opts)
             elif subcommand in subparsers:
                 subcmd = subcommand
                 sparser = subparsers[subcommand]
-                subparser_group = await hub.config.group.merge(group_name, subparser_groups, subcmd, sparser)
+                subparser_group = await hub.config.group.merge(
+                    group_name, subparser_groups, subcmd, sparser
+                )
                 subparser_group.add_argument(cli_name, *options, **opts)
 
     return main_parser

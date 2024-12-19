@@ -4,8 +4,8 @@ from setuptools.extension import Extension
 from Cython.Build import cythonize
 
 extensions = [
-    Extension(name="pns.ccontract", sources=["src/pns/contract.py"]),
-    Extension(name="pns.cdata", sources=["src/pns/data.py"]),
+    Extension(name="pns._ccontract", sources=["src/pns/_contract.py"]),
+    Extension(name="pns._cdata", sources=["src/pns/_data.py"]),
 ]
 
 SETUP_DIRNAME = Path(__file__).parent

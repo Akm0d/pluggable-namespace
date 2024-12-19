@@ -4,6 +4,7 @@ tests.unit.rend.init
 
 Tests for unit.rend.init
 """
+
 import os
 
 import pytest
@@ -19,7 +20,9 @@ async def test_rend_parse_jinja_exc(hub, FDIR):
     fn_ = os.path.join(FDIR, "test_exc.jinja2")
     with pytest.raises(hub.exc.rend.RenderError) as exc:
         await hub.rend.init.parse(fn_, "jinja")
-    assert exc.value.args[0] == "Jinja syntax error: Encountered unknown tag 'test_exc'."
+    assert (
+        exc.value.args[0] == "Jinja syntax error: Encountered unknown tag 'test_exc'."
+    )
 
 
 @pytest.mark.asyncio
@@ -48,7 +51,10 @@ async def test_rend_parse_toml_exc(hub, FDIR):
     fn_ = os.path.join(FDIR, "test_exc.toml")
     with pytest.raises(hub.exc.rend.RenderError) as exc:
         await hub.rend.init.parse(fn_, "toml")
-    assert exc.value.args[0] == "Toml render error: Empty value is invalid on line: 6 column: 1"
+    assert (
+        exc.value.args[0]
+        == "Toml render error: Empty value is invalid on line: 6 column: 1"
+    )
 
 
 async def test_empty_blocks(hub, FDIR):

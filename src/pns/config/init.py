@@ -72,7 +72,9 @@ async def load(
         )
 
         # Add all the cli options to argparse and call the parser
-        main_parser = await hub.config.subcommands.create_parsers(main_parser, arguments, subparsers)
+        main_parser = await hub.config.subcommands.create_parsers(
+            main_parser, arguments, subparsers
+        )
 
         cli_opts = await hub.config.init.parse(main_parser, parser_args)
     else:
@@ -202,7 +204,9 @@ async def parse_cli(
     subparsers = {}
 
     for subcommand, opts in subcommands.items():
-        subparsers[subcommand] = await hub.config.init.parser(subcommand, sparser, **opts)
+        subparsers[subcommand] = await hub.config.init.parser(
+            subcommand, sparser, **opts
+        )
 
     # Collect all arguments and their metadata
     arguments = []

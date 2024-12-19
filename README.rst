@@ -29,15 +29,15 @@ Creating a pluggable application can be accomplished with just a few lines of co
 
 .. code-block:: python
 
-    import pns
+    import pns.shim
     import asyncio
 
     loop = asyncio.get_event_loop()
     asyncio.run(main())
 
     async def main():
-        async with pns.Hub() as hub:
-            await hub.my_sub.init.cli()
+        hub = pns.shim.loaded_hub()
+        await hub.my_sub.init.cli()
 
 Configuration
 =============

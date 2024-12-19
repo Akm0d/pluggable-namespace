@@ -14,4 +14,6 @@ async def display(hub, data):
         return hub.lib.json.dumps(data, default=repr, indent=indent)
 
     except UnicodeDecodeError as exc:
-        return hub.lib.json.dumps({"error": "Unable to serialize output to json", "message": str(exc)})
+        return hub.lib.json.dumps(
+            {"error": "Unable to serialize output to json", "message": str(exc)}
+        )

@@ -11,6 +11,7 @@ async def integration_hub():
     async with pns.hub.Hub() as hub:
         yield hub
 
+
 @pytest.fixture(autouse=True)
 async def tpath():
     tpath_dir = pathlib.Path(__file__).parent / "tpath"

@@ -34,7 +34,15 @@ async def test_cli(hub):
         template_dir = hub.template["plugin"]._static[0]
 
         # Prepare the CLI command
-        command = [hub.lib.sys.executable, "-m", "hub", "seed.cli", temp_dir, "name=name", "desc=desc"]
+        command = [
+            hub.lib.sys.executable,
+            "-m",
+            "hub",
+            "seed.cli",
+            temp_dir,
+            "name=name",
+            "desc=desc",
+        ]
 
         # Start the CLI process
         result = hub.lib.subprocess.run(
@@ -48,7 +56,9 @@ async def test_cli(hub):
         assert result.stdout
 
         # Check the exit status
-        assert result.returncode == 0, f"CLI exited with non-zero status: {result.returncode}"
+        assert (
+            result.returncode == 0
+        ), f"CLI exited with non-zero status: {result.returncode}"
 
         # Validate that the template was copied to the temporary directory
         assert hub.lib.os.path.exists(temp_dir), "Destination directory was not created"
@@ -61,7 +71,11 @@ async def test_cli(hub):
         dest_structure = get_directory_structure(dest_path)
 
         # Remove 'copier.yml' from the source structure
-        source_structure = [path for path in source_structure if path != "copier.yml" and "__pycache__" not in path]
+        source_structure = [
+            path
+            for path in source_structure
+            if path != "copier.yml" and "__pycache__" not in path
+        ]
 
         # Check that the lengths of the directory structures are the same
         assert len(source_structure) == len(dest_structure), (
@@ -72,4 +86,6 @@ async def test_cli(hub):
         # Check for presence of specific files, including hidden ones
         expected_files = [".gitignore", ".pre-commit-config.yaml"]
         for file in expected_files:
-            assert any(file in s for s in dest_structure), f"{file} was not copied to the destination"
+            assert any(
+                file in s for s in dest_structure
+            ), f"{file} was not copied to the destination"

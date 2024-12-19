@@ -6,6 +6,7 @@ async def test_render(hub):
     ret = await hub.rend.yte.render("a: ?hub.foo")
     assert ret == {"a": "bar"}
 
+
 async def test_render_async(hub):
     """
     test rend.yte.render with an async call
@@ -17,4 +18,4 @@ async def test_render_async(hub):
         tmp.flush()
         ret = await hub.rend.init.parse(tmp.name, pipe="yte")
 
-    assert ret == {'a': ((), {'a': 1}, 'warning')}
+    assert ret == {"a": ((), {"a": 1}, "warning")}

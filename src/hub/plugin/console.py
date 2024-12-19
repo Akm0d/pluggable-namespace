@@ -67,7 +67,10 @@ async def prompt(hub, local_namespace: dict, session):
         # The locals didn't change, this wasn't a variable assignment
         if previous == post:
             # If an async function was called without being assigned to a variable then await it
-            if hub.lib.asyncio.iscoroutine(result) and result not in local_namespace.values():
+            if (
+                hub.lib.asyncio.iscoroutine(result)
+                and result not in local_namespace.values()
+            ):
                 result = await result
 
             # If the result wasn't assigned to a variable then print it out

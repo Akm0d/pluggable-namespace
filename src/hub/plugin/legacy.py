@@ -25,13 +25,17 @@ async def patch(hub, loop):
 
     # Patch the legacy hub's logger with trace logging for pns-config's noisy logger
     for name in LOG_NAMES:
-        setattr(hub.legacy.log, name, lambda *a, **kw: hub._auto(hub.log.trace(*a, **kw)))
+        setattr(
+            hub.legacy.log, name, lambda *a, **kw: hub._auto(hub.log.trace(*a, **kw))
+        )
 
     # Populate the legacy hub's OPT
     dyne_names = list(hub.legacy._dynamic.keys())
 
     config_dynes = hub.legacy.config.dirs.find_configs(dyne_names)
-    hub.legacy.pop.config.load(list(config_dynes.keys()), "pop_config", dyne_names, parse_cli=False, logs=False)
+    hub.legacy.pop.config.load(
+        list(config_dynes.keys()), "pop_config", dyne_names, parse_cli=False, logs=False
+    )
 
     # Patch the legacy hub's logger with pns's logger
     for name in LOG_NAMES:

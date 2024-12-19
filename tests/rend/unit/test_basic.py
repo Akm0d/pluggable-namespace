@@ -28,5 +28,7 @@ async def test_toml(hub, FDIR):
 @pytest.mark.asyncio
 async def test_shebang(hub, FDIR):
     fn = os.path.join(FDIR, "shebang.yml")
-    ret = await hub.rend.init.parse(fn, "toml")  # Pass in bad pipe so we use the one in the file
+    ret = await hub.rend.init.parse(
+        fn, "toml"
+    )  # Pass in bad pipe so we use the one in the file
     assert ret == {"test": {"foo": "bar"}}

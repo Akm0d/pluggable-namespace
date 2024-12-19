@@ -24,7 +24,9 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
     return {}
 
 
-async def resolve(hub, cli: str, active_cli: dict[str, object], full_config: dict[str, object]):
+async def resolve(
+    hub, cli: str, active_cli: dict[str, object], full_config: dict[str, object]
+):
     """
     Add an option from another app's cli_config to the active cli
     """

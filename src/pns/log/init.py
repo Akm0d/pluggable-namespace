@@ -26,7 +26,9 @@ async def get_logger(hub, name: str):
                 handler.level = hub.log.INT_LEVEL
                 logger.add_handler(handler)
         else:
-            logger = hub.lib.aiologger.Logger.with_default_handlers(name=name, level=hub.log.INT_LEVEL)
+            logger = hub.lib.aiologger.Logger.with_default_handlers(
+                name=name, level=hub.log.INT_LEVEL
+            )
         logger.emit = hub.log.init.emit
 
         hub.log.LOGGER[name] = logger
@@ -34,7 +36,9 @@ async def get_logger(hub, name: str):
     return hub.log.LOGGER[name]
 
 
-async def setup(hub, log_plugin: str = "init", *, log_level: str, log_file: str, **kwargs):
+async def setup(
+    hub, log_plugin: str = "init", *, log_level: str, log_file: str, **kwargs
+):
     """
     Initialize the logger with the named plugin
     """

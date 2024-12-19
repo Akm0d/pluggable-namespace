@@ -11,7 +11,9 @@ async def resolve(hub, ref: object, *args, **kwargs) -> object:
     try:
         if (
             hub.lib.asyncio.iscoroutinefunction(ref)
-            or isinstance(ref, hub.lib.typing.Callable | hub.lib.pns.contract.Contracted)
+            or isinstance(
+                ref, hub.lib.typing.Callable | hub.lib.pns.contract.Contracted
+            )
             or callable(ref)
         ):
             # Call the named reference on the hub

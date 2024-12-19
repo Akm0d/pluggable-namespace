@@ -71,7 +71,9 @@ async def test_module_level_direct_call(hub):
 
 
 async def test_contract(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"])
+    await hub.pns.sub.add(
+        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+    )
     with pytest.raises(Exception):
         await hub.mods.test.ping(4)
 
@@ -89,7 +91,9 @@ async def test_no_contract(hub):
 
 
 async def test_contract_manipulate(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"])
+    await hub.pns.sub.add(
+        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+    )
     assert "override" in await hub.mods.all.list()
     assert "post called" in await hub.mods.all.list()
     assert "post" in await hub.mods.all.dict()
@@ -109,7 +113,9 @@ async def test_private_function_cross_access(hub):
 
 async def test_private_function_cross_access_with_contracts(hub):
     hub.opts = "OPTS!"
-    await hub.pns.sub.add(pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"])
+    await hub.pns.sub.add(
+        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+    )
     # Let's make sure that the private function is not accessible through the sub
     with pytest.raises(AttributeError):
         await hub.mods.priv._private() == "OPTS!"
@@ -120,7 +126,9 @@ async def test_private_function_cross_access_with_contracts(hub):
 
 async def test_cross_in_virtual(hub):
     hub.opts = "OPTS!"
-    await hub.pns.sub.add(pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"])
+    await hub.pns.sub.add(
+        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+    )
     assert await hub.mods.virt.present() is True
 
 

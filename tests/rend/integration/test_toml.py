@@ -4,6 +4,7 @@ tests.unit.rend.test_toml
 
 Unit tests for the toml renderer
 """
+
 import pytest
 
 
@@ -52,4 +53,7 @@ async def test_toml_decode_error(hub):
 
     with pytest.raises(hub.exc.rend.RenderError) as exc:
         await hub.rend.toml.render(data)
-    assert exc.value.args[0] == "Toml render error: Key group not on a line by itself. on line: 4 column: 1"
+    assert (
+        exc.value.args[0]
+        == "Toml render error: Key group not on a line by itself. on line: 4 column: 1"
+    )

@@ -4,6 +4,7 @@ tests.unit.rend.test_json
 
 Unit tests for the json renderer
 """
+
 import pytest
 
 
@@ -35,4 +36,7 @@ async def test_json_error(hub):
 
     with pytest.raises(hub.exc.rend.RenderError) as exc:
         await hub.rend.json.render('{"test1"}}')
-    assert exc.value.args[0] == "Json render error: Expecting ':' delimiter on line: 1 column: 9"
+    assert (
+        exc.value.args[0]
+        == "Json render error: Expecting ':' delimiter on line: 1 column: 9"
+    )

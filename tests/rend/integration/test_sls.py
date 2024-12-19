@@ -4,4 +4,4 @@ async def test_render_sls(hub):
     """
     assert "sls" in hub._subs
     ret = await hub.rend.init.parse_subs(["sls"], pipe="jinja|yaml")
-    assert ret == {'state_name': {"test.nop": [{"name": "taco"}]}}
+    assert ret == {"state_name": {"test.nop": [{"name": "taco"}]}}

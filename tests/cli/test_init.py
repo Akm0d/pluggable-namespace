@@ -4,7 +4,15 @@ async def test_run_defaults(hub):
 
     # Start the CLI process
     result = hub.lib.subprocess.run(
-        [hub.lib.sys.executable, "-m", "hub", "--output=raw", "--cli", "test", "test.init.cli"],
+        [
+            hub.lib.sys.executable,
+            "-m",
+            "hub",
+            "--output=raw",
+            "--cli",
+            "test",
+            "test.init.cli",
+        ],
         capture_output=True,
         text=True,
         env=env,

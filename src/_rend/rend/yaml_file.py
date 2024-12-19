@@ -18,11 +18,19 @@ async def __init__(hub):
             super().__init__(stream)
             if dictclass is not dict:
                 # then assume ordered dict and use it for both !map and !omap
-                self.add_constructor("tag:yaml.org,2002:map", type(self).construct_yaml_map)
-                self.add_constructor("tag:yaml.org,2002:omap", type(self).construct_yaml_map)
+                self.add_constructor(
+                    "tag:yaml.org,2002:map", type(self).construct_yaml_map
+                )
+                self.add_constructor(
+                    "tag:yaml.org,2002:omap", type(self).construct_yaml_map
+                )
             self.add_constructor("tag:yaml.org,2002:str", type(self).construct_yaml_str)
-            self.add_constructor("tag:yaml.org,2002:python/unicode", type(self).construct_unicode)
-            self.add_constructor("tag:yaml.org,2002:timestamp", type(self).construct_scalar)
+            self.add_constructor(
+                "tag:yaml.org,2002:python/unicode", type(self).construct_unicode
+            )
+            self.add_constructor(
+                "tag:yaml.org,2002:timestamp", type(self).construct_scalar
+            )
             self.dictclass = dictclass
 
         def construct_yaml_map(self, node):
@@ -80,7 +88,9 @@ async def __init__(hub):
             if node.tag == "tag:yaml.org,2002:int":
                 if node.value == "0":
                     pass
-                elif node.value.startswith("0") and not node.value.startswith(("0b", "0x")):
+                elif node.value.startswith("0") and not node.value.startswith(
+                    ("0b", "0x")
+                ):
                     node.value = node.value.lstrip("0")
                     # If value was all zeros, node.value would have been reduced to
                     # an empty string. Change it to '0'.
@@ -134,7 +144,9 @@ async def __init__(hub):
                     index += 1
             if merge:
                 # Here we need to discard any duplicate entries based on key_node
-                existing_nodes = [name_node.value for name_node, value_node in node.value]
+                existing_nodes = [
+                    name_node.value for name_node, value_node in node.value
+                ]
                 mergeable_items = [x for x in merge if x[0].value not in existing_nodes]
 
                 node.value = mergeable_items + node.value

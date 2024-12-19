@@ -1,14 +1,18 @@
 import asyncio
+import pns.shim
 
-import aiomonitor
+try:
+    import aiomonitor
 
-import pns.hub
+    HAS_AIOMONITOR = True
+except ImportError:
+    HAS_AIOMONITOR = False
 
 
 async def amain():
     loop = asyncio.get_running_loop()
 
-    hub = await pns.hub.new(cli="cli")
+    hub = await pns.shim.loaded_hub(cli="cli")
     watch_subs = hub.OPT.cli.watch
     await hub.log.debug("Initialized the hub")
 
@@ -26,7 +30,7 @@ async def amain():
     try:
         # Start the hub cli
         coro = hub.cli.init.run()
-        if hub.OPT.cli.monitor:
+        if HAS_AIOMONITOR and hub.OPT.cli.monitor:
             with aiomonitor.start_monitor(loop=loop, locals={"hub": hub}):
                 await coro
         else:

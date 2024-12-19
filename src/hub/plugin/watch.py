@@ -13,7 +13,9 @@ async def start(hub):
             watcher.watch(
                 alias=(dyne_name, str(path)),
                 path=str(path),
-                flags=hub.lib.aionotify.Flags.MODIFY | hub.lib.aionotify.Flags.CREATE | hub.lib.aionotify.Flags.DELETE,
+                flags=hub.lib.aionotify.Flags.MODIFY
+                | hub.lib.aionotify.Flags.CREATE
+                | hub.lib.aionotify.Flags.DELETE,
             )
 
     await watcher.setup(loop=hub._loop)

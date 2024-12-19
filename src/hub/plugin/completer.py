@@ -18,7 +18,9 @@ async def get(hub, **kwargs):
             self._cache = document._cache
 
         def __hash__(self):
-            return hash((self._text, self._cursor_position, self._selection, self._cache))
+            return hash(
+                (self._text, self._cursor_position, self._selection, self._cache)
+            )
 
     class HubCompleter(hub.lib.prompt_toolkit.completion.Completer):
         def get_completions(self, document, complete_event):
@@ -26,11 +28,15 @@ async def get(hub, **kwargs):
 
     completer = HubCompleter()
     # Create a completer for local variables
-    local_completer = hub.lib.prompt_toolkit.completion.WordCompleter(list(kwargs.keys()), ignore_case=True)
+    local_completer = hub.lib.prompt_toolkit.completion.WordCompleter(
+        list(kwargs.keys()), ignore_case=True
+    )
 
     # Create a completer for built-in functions
     builtins = [*list(dir(hub.lib.builtins)), "await", "hub"]
-    builtins_completer = hub.lib.prompt_toolkit.completion.WordCompleter(builtins, ignore_case=True)
+    builtins_completer = hub.lib.prompt_toolkit.completion.WordCompleter(
+        builtins, ignore_case=True
+    )
 
     # Combine the hub, local, and built-in completers
     combined_completer = hub.lib.prompt_toolkit.completion.merge_completers(
@@ -99,7 +105,9 @@ async def compute(hub):
                     else:
                         return
                     for param in signature.parameters.values():
-                        yield hub.lib.prompt_toolkit.completion.Completion(param.name + "=", start_position=0)
+                        yield hub.lib.prompt_toolkit.completion.Completion(
+                            param.name + "=", start_position=0
+                        )
 
                 except (AttributeError, ValueError):
                     ...

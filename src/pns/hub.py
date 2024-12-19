@@ -3,20 +3,12 @@ import sys
 import pkgutil
 import pns.dir
 import pns.load
-import os
+import pns.data
 
 INIT = "__init__"
 
-# Default to c versions of contract and data which skip all the internal getattrs in the debugger
-DEBUG_PNS_GETATTR = os.environ.get("PNS_DEBUG", False)
-if DEBUG_PNS_GETATTR:
-    import pns.contract as contract # noqa
-    import pns.data as data
-else:
-    import pns.ccontract as contract
-    import pns.cdata as data
 
-class Sub(data.Namespace):
+class Sub(pns.data.Namespace):
     """
     Represents a sub-component or module that can be dynamically added to a Hub.
 
@@ -28,7 +20,7 @@ class Sub(data.Namespace):
         contracts: A list of contract definitions associated with this Sub.
     """
 
-    def __init__(self, name: str, parent: data.Namespace, root: 'Hub'):
+    def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub"):
         """
         Initializes a Sub instance.
 
@@ -43,7 +35,7 @@ class Sub(data.Namespace):
         self._rcontracts = []
         self.contracts = self._contracts + self._rcontracts
 
-    async def add_sub(self, name: str, module_ref: str = None, recurse:bool = True):
+    async def add_sub(self, name: str, module_ref: str = None, recurse: bool = True):
         """
         Adds a sub-component or module to this Sub.
 
@@ -56,7 +48,7 @@ class Sub(data.Namespace):
             return
         mod = None
         sub = Sub(name=name, parent=self, root=self.hub)
-        self._subs[name]  = sub
+        self._subs[name] = sub
         if not module_ref:
             return
 
@@ -91,8 +83,9 @@ class Sub(data.Namespace):
         module_paths = mod.__path__._path
         for _, subname, _ in pkgutil.iter_modules(module_paths):
             # Add a sub to this one for every submodule in the module
-            await sub.add_sub(name=subname, module_ref = f"{module_ref}.{subname}", recurse=recurse)
-
+            await sub.add_sub(
+                name=subname, module_ref=f"{module_ref}.{subname}", recurse=recurse
+            )
 
 
 class Hub(Sub):
@@ -107,6 +100,7 @@ class Hub(Sub):
         _last_call: The last call made through the hub.
         _dynamic: A dynamic configuration or state connected to the directory structure.
     """
+
     _last_ref = None
     _last_call = None
     _dynamic = None
@@ -128,7 +122,8 @@ class CMD(Sub):
     A class representing a shell command execution interface that allows accessing
     shell commands through a namespace-like structure on a Hub object.
     """
-    def __init__(self, hub:Hub, command:list[str]|str=None, parent=None):
+
+    def __init__(self, hub: Hub, command: list[str] | str = None, parent=None):
         """
         Initialize the CMD interface.
 
@@ -198,10 +193,11 @@ class CMD(Sub):
         """
         cmd = self.command[0]
         proc = await asyncio.create_subprocess_exec(
-            cmd, *args,
+            cmd,
+            *args,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            **kwargs
+            **kwargs,
         )
         return proc
 
@@ -244,7 +240,7 @@ class CMD(Sub):
             line = await proc.stdout.readline()
             if not line:
                 break
-            yield line.decode('utf-8').strip()
+            yield line.decode("utf-8").strip()
 
     async def json(self, *args, **kwargs):
         """
@@ -273,7 +269,7 @@ class CMD(Sub):
         """
         proc = await self._execute_command(*args, **kwargs)
         _, stderr = await proc.communicate()
-        return stderr.decode('utf-8')
+        return stderr.decode("utf-8")
 
     async def stdout(self, *args, **kwargs):
         """
@@ -288,29 +284,4 @@ class CMD(Sub):
         """
         proc = await self._execute_command(*args, **kwargs)
         stdout, _ = await proc.communicate()
-        return stdout.decode('utf-8')
-
-
-async def new(cli:str="cli", *args, **kwargs):
-    """
-    Initializes a new hub with standard subs.
-    """
-    # Set up the hub
-    hub = Hub()
-
-    # Add essential pns modules
-    await hub.add_sub("pns", "pns.mods")
-
-    # Load the config
-    await hub.add_sub("config", "pns.config")
-    opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
-    hub.OPT = data.NamespaceDict(opt)
-
-    # Setup the logger
-    await hub.add_sub("log", "pns.log")
-    await hub.log.init.setup(**hub.OPT.log.copy())
-
-    # Add the ability to shell out from the hub
-    hub._subs["sh"] = CMD(hub)
-
-    return hub
+        return stdout.decode("utf-8")

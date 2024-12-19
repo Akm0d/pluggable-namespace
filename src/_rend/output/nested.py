@@ -22,7 +22,9 @@ Example output::
 """
 
 
-async def to_str(hub, s, encoding="utf-8", errors: str = "strict", *, normalize: bool = False):
+async def to_str(
+    hub, s, encoding="utf-8", errors: str = "strict", *, normalize: bool = False
+):
     """
     Given str, bytes, bytearray, or unicode (py2), return str
     """
@@ -55,7 +57,9 @@ async def to_str(hub, s, encoding="utf-8", errors: str = "strict", *, normalize:
     raise TypeError(msg)
 
 
-async def to_unicode(hub, s, encoding="utf-8", errors: str = "strict", *, normalize: bool = False):
+async def to_unicode(
+    hub, s, encoding="utf-8", errors: str = "strict", *, normalize: bool = False
+):
     def _normalize(st):
         return hub.lib.unicodedata.normalize("NFC", st) if normalize else st
 
@@ -108,14 +112,20 @@ async def recurse(hub, ret, indent, prefix, out):
         ret = ret._asdict()
 
     if ret is None or ret is True or ret is False:
-        out.append(await hub.output.nested.ustring(indent, hub.lib.colorama.Fore.LIGHTYELLOW_EX, ret, prefix=prefix))
+        out.append(
+            await hub.output.nested.ustring(
+                indent, hub.lib.colorama.Fore.LIGHTYELLOW_EX, ret, prefix=prefix
+            )
+        )
     # Number includes all python numbers types
     #  (float, int, long, complex, ...)
     # use repr() to get the full precision also for older python versions
     # as until about python32 it was limited to 12 digits only by default
     elif isinstance(ret, hub.lib.numbers.Number):
         out.append(
-            await hub.output.nested.ustring(indent, hub.lib.colorama.Fore.LIGHTYELLOW_EX, repr(ret), prefix=prefix)
+            await hub.output.nested.ustring(
+                indent, hub.lib.colorama.Fore.LIGHTYELLOW_EX, repr(ret), prefix=prefix
+            )
         )
     elif isinstance(ret, str):
         first_line = True
@@ -131,14 +141,20 @@ async def recurse(hub, ret, indent, prefix, out):
                     )
                 )
                 break
-            out.append(await hub.output.nested.ustring(indent, hub.lib.colorama.Fore.GREEN, line, prefix=line_prefix))
+            out.append(
+                await hub.output.nested.ustring(
+                    indent, hub.lib.colorama.Fore.GREEN, line, prefix=line_prefix
+                )
+            )
             first_line = False
     elif isinstance(ret, list | tuple):
         color = hub.lib.colorama.Fore.GREEN
         for ind in ret:
             if isinstance(ind, list | tuple | hub.lib.collections.abc.Mapping):
                 out.append(await hub.output.nested.ustring(indent, color, "|_"))
-                prefix = "" if isinstance(ind, hub.lib.collections.abc.Mapping) else "- "
+                prefix = (
+                    "" if isinstance(ind, hub.lib.collections.abc.Mapping) else "- "
+                )
                 await hub.output.nested.recurse(ind, indent + 2, prefix, out)
             else:
                 await hub.output.nested.recurse(ind, indent, "- ", out)
@@ -151,7 +167,11 @@ async def recurse(hub, ret, indent, prefix, out):
         color = hub.lib.colorama.Fore.CYAN
         for key in keys:
             val = ret[key]
-            out.append(await hub.output.nested.ustring(indent, color, str(key), suffix=":", prefix=prefix))
+            out.append(
+                await hub.output.nested.ustring(
+                    indent, color, str(key), suffix=":", prefix=prefix
+                )
+            )
             await hub.output.nested.recurse(val, indent + 4, "", out)
     return out
 
@@ -166,4 +186,6 @@ async def display(hub, data):
         return "\n".join(lines)
     except UnicodeDecodeError:
         # output contains binary data that can't be decoded
-        return "\n".join([str(x) for x in lines])  # future lint: disable=blacklisted-function
+        return "\n".join(
+            [str(x) for x in lines]
+        )  # future lint: disable=blacklisted-function

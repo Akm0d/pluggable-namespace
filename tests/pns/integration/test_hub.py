@@ -3,6 +3,7 @@ async def test_mod_clash(hub):
     # The "dyn" sub contains two files that both define a "clash" function
     assert await hub.dyn.mod.clash() == 1
 
+
 async def test_mod_merge(hub):
     await hub.pns.sub.add(dyne_name="dyn")
     # The unique functions from each mod should make it onto the same mod

@@ -4,6 +4,7 @@ tests.unit.rend.test_jinja
 
 Unit tests for the jinja renderer
 """
+
 import os
 import pathlib
 
@@ -73,13 +74,21 @@ async def test_jinja_file_import(hub, FDIR):
     expected = "things"
     fn = str(pathlib.PurePosixPath((FDIR / "import.sls").relative_to(os.getcwd())))
     # test import of specific variable
-    ret = await hub.rend.jinja.render('{% from "' + fn + '" import mytest %}{{ mytest }}')
+    ret = await hub.rend.jinja.render(
+        '{% from "' + fn + '" import mytest %}{{ mytest }}'
+    )
     assert ret == expected
     # test import of all variables/macros
-    ret = await hub.rend.jinja.render('{% import "' + fn + '" as awesome %}{{ awesome.mytest }}')
+    ret = await hub.rend.jinja.render(
+        '{% import "' + fn + '" as awesome %}{{ awesome.mytest }}'
+    )
     assert ret == expected
     # test ability to break out of the path. this file exists, but fails due to presence of ".." in path
-    fn = str(pathlib.PurePosixPath((FDIR / ".." / "files" / "import.sls").relative_to(os.getcwd())))
+    fn = str(
+        pathlib.PurePosixPath(
+            (FDIR / ".." / "files" / "import.sls").relative_to(os.getcwd())
+        )
+    )
     with pytest.raises(jinja2.exceptions.TemplateNotFound) as exc:
         await hub.rend.jinja.render('{% from "' + fn + '" import mytest %}{{ mytest }}')
     assert exc.value.args[0] == fn
@@ -91,7 +100,9 @@ async def test_jinja_base64_encode(hub):
     test rend.jinja.render renders correctly for b64encode filter.
     """
 
-    ret = await hub.rend.jinja.render('{% set test = "itworked" | b64encode %}{{ test }}')
+    ret = await hub.rend.jinja.render(
+        '{% set test = "itworked" | b64encode %}{{ test }}'
+    )
     assert ret == "aXR3b3JrZWQ="
 
 
@@ -111,5 +122,7 @@ async def test_jinja_base64_decode(hub):
     test rend.jinja.render renders correctly for b64decode filter.
     """
 
-    ret = await hub.rend.jinja.render('{% set test = "aXR3b3JrZWQ=" | b64decode %}{{ test }}')
+    ret = await hub.rend.jinja.render(
+        '{% set test = "aXR3b3JrZWQ=" | b64decode %}{{ test }}'
+    )
     assert ret == "itworked"

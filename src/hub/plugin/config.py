@@ -15,7 +15,9 @@ async def override(hub, cli: str, opts: dict):
                 if namespace == "pns" and k in ("subparser", "global_clis"):
                     continue
 
-                new_config[namespace][k] = hub.lib.copy.copy(hub._dynamic.config.config.get(namespace, {}).get(k, {}))
+                new_config[namespace][k] = hub.lib.copy.copy(
+                    hub._dynamic.config.config.get(namespace, {}).get(k, {})
+                )
                 new_config[namespace][k]["default"] = v
         except AttributeError:
             continue

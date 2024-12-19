@@ -12,7 +12,9 @@ async def display(hub, data):
     def any_dict_representer(dumper, data):
         return dumper.represent_dict(data)
 
-    hub.lib.yaml.add_multi_representer(dict, any_dict_representer, Dumper=hub.lib.yaml.SafeDumper)
+    hub.lib.yaml.add_multi_representer(
+        dict, any_dict_representer, Dumper=hub.lib.yaml.SafeDumper
+    )
     hub.lib.yaml.add_multi_representer(
         hub.lib.collections.abc.Mapping,
         any_dict_representer,

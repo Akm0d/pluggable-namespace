@@ -4,6 +4,7 @@ tests.unit.rend.test_yaml
 
 Unit tests for the yaml renderer
 """
+
 from collections.abc import Mapping
 
 import pytest

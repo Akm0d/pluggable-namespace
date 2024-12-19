@@ -1,8 +1,11 @@
 """
 Render jinja data
 """
+
+
 async def __virtual__(hub):
     return "jinja2" in hub.lib, "Jinja is not available"
+
 
 async def __init__(hub):
     class RenderSandboxedEnvironment(hub.lib.jinja2.sandbox.SandboxedEnvironment):
