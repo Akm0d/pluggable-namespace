@@ -15,7 +15,7 @@ async def pop_hub():
     hub = pns.hub.Hub()
 
     # Add essential POP modules
-    await hub.add_sub("pns", "pns.mods")
+    await hub.add_sub("pop", "pns.mods")
 
     return hub
 
@@ -35,7 +35,10 @@ async def loaded_hub(
     Compatible with cPOP projects.
     """
     # Set up the hub
-    hub = await pop_hub()
+    hub = pns.hub.Hub()
+
+    # Add essential POP modules
+    await hub.add_sub("pns", "pns.mods")
 
     # Load the config
     await hub.add_sub("config", "pns.config")
@@ -59,14 +62,17 @@ async def loaded_hub(
 
 
 async def load_all(hub, load_all_subdirs: bool):
-    for base, imp in hub._dynamic.imports__.items():
-        hub._subs["lib"]._imports[base] = imp
-
     # Load all dynamic subs onto the hub
     for dyne in hub._dynamic.dyne:
         if dyne in hub._subs:
             continue
-        await hub.pop.sub.add(dyne_name=dyne)
+        await hub.pns.sub.add(dyne_name=dyne)
         if not load_all_subdirs:
             continue
-        await hub.pop.sub.load_subdirs(hub._subs[dyne], recurse=True)
+        await hub.pns.sub.load_subdirs(hub._subs[dyne], recurse=True)
+
+
+async def salt_loader():
+    """
+    Create a hub compatible with salt
+    """

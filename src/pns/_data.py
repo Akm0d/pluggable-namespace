@@ -7,6 +7,8 @@ import pns.contract
 
 
 class Namespace(Mapping):
+    _virtual = True
+    
     def __init__(
         self,
         name: str,
@@ -17,14 +19,29 @@ class Namespace(Mapping):
         self.__name__ = name
         self.__ = parent or self
         self._ = root or parent or self
+        self._alias = []
         self._subs = {}
+        self._contracts = []
+        self._rcontracts = []
         self.__module__ = module
+        
+    @property
+    def contracts(self):
+        return self._contracts + self._rcontracts
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""
         if name in self._subs:
-            return self._subs[name]
-        elif hasattr(self.__module__, name):
+            sub = self._subs[name]
+            if getattr(sub, "_virtual", True):
+                return sub
+            
+        # Check if a sub is aliased to this name
+        for sub in self._subs:
+            if name in sub._alias and getattr(sub,  "_virtual", True):
+                return sub
+
+        if hasattr(self.__module__, name):
             return getattr(self.__module__, name)
         else:
             return self.__getattribute__(name)

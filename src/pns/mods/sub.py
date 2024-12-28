@@ -3,15 +3,16 @@ Control and add subsystems to the running daemon hub
 """
 
 import pns.hub
+import pns.data
 
 
 async def add(
-    hub,
+    hub: pns.hub.Hub,
     dyne_name: str = None,
     *,
     pypath: list[str] = None,
     subname: str = None,
-    sub=None,
+    sub:pns.hub.Sub=None,
     static: list[str] = None,
     contracts_pypath: list[str] = None,
     contracts_static: list[str] = None,
@@ -66,7 +67,7 @@ async def add(
         subname = subname if subname else hub.lib.os.path.basename(static)
     if dyne_name:
         subname = subname if subname else dyne_name
-    root = sub or hub
+    root: pns.hub.Sub = sub or hub
     # The dynamic namespace is already on the hub
     if dyne_name in root._subs:
         return
@@ -75,42 +76,9 @@ async def add(
         root._imports[subname] = hub.lib.importlib.import_module(python_import)
         return
 
-    root._subs[subname] = await pns.sub.new(
-        hub,
-        subname=subname,
-        root=root,
-        pypath=pypath,
-        static=static,
-        contracts_pypath=contracts_pypath,
-        contracts_static=contracts_static,
-        default_contracts=default_contracts,
-        virtual=virtual,
-        dyne_name=dyne_name,
-        omit_start=omit_start,
-        omit_end=omit_end,
-        omit_func=omit_func,
-        omit_class=omit_class,
-        omit_vars=omit_vars,
-        mod_basename=mod_basename,
-        stop_on_failures=stop_on_failures,
-        init=init,
-        sub_virtual=getattr(root, "_subvirt", True),
-        recursive_contracts_static=recursive_contracts_static,
-        default_recursive_contracts=default_recursive_contracts,
-    )
-    # init the sub (init.py:__init__) after it can be referenced on the hub!
-    root._subs[subname]._sub_init()
-    for alias in root._subs[subname]._alias:
-        root._sub_alias[alias] = root._subs[subname]
-
-
-async def get_dirs(hub, sub) -> list[str]:
-    """
-    Return a list of directories that contain the modules for this subname
-    :param hub: The redistributed pns central hub
-    :param sub: The pns object that contains the loaded module data
-    """
-    return sub._dirs
+    await root.add_sub(subname)
+    root._subs[subname]._contracts = (default_contracts or []) + (contracts_pypath or []) + (contracts_static or [])
+    root._subs[subname]._rcontracts = (default_recursive_contracts or []) + (recursive_contracts_static or [])
 
 
 async def load_subdirs(hub, sub, *, recurse: bool = False):
@@ -120,9 +88,9 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
     :param sub: The pns object that contains the loaded module data
     :param recurse: Recursively iterate over nested subs
     """
-    if not sub._sub_virtual:
+    if not sub._virtual:
         return
-    dirs = await hub.pns.sub.get_dirs(sub)
+    dirs = sub._dirs
     roots = hub.lib.collections.defaultdict(list)
     for dir_name in dirs:
         dir_ = hub.lib.pathlib.Path(dir_name)
@@ -188,7 +156,7 @@ async def iter_subs(hub, sub, *, recurse: bool = False):
     """
     for name in sorted(sub._subs):
         ret = sub._subs[name]
-        if ret._sub_virtual:
+        if ret._virtual:
             yield ret
             if recurse:
                 if hasattr(ret, "_subs"):

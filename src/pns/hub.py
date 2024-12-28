@@ -19,6 +19,11 @@ class Sub(pns.data.Namespace):
         hub: Reference to the root Hub instance.
         contracts: A list of contract definitions associated with this Sub.
     """
+    _omit_start=("_",)
+    _omit_end=()
+    _omit_func=False
+    _omit_class=False
+    _omit_vars=False
 
     def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub"):
         """
@@ -31,9 +36,10 @@ class Sub(pns.data.Namespace):
         """
         super().__init__(name, parent=parent, root=root)
         self.hub = root or parent
-        self._contracts = []
-        self._rcontracts = []
-        self.contracts = self._contracts + self._rcontracts
+        # static plus the __path__ from modules
+        
+        self._dirs = []
+        
 
     async def add_sub(self, name: str, module_ref: str = None, recurse: bool = True):
         """
@@ -48,6 +54,10 @@ class Sub(pns.data.Namespace):
             return
         mod = None
         sub = Sub(name=name, parent=self, root=self.hub)
+        # Propogate the parent's virtual status
+        sub._virtual = self._virtual
+        # Propogate the parent's recursive contracts
+        sub._rcontracts = self._rcontracts
         self._subs[name] = sub
         if not module_ref:
             return
