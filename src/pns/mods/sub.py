@@ -127,38 +127,3 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
         if recurse:
             if isinstance(getattr(sub, name), pns.hub.Sub):
                 await hub.pns.sub.load_subdirs(getattr(sub, name), recurse=recurse)
-
-
-async def reload(hub, subname: str):
-    """
-    Instruct the hub to reload the modules for the given sub. This does not call
-    the init.new function or remove sub level variables. But it does re-read the
-    directory list and re-initialize the loader causing all modules to be re-evaluated
-    when started.
-    :param hub: The redistributed pns central hub
-    :param subname: The name that the sub is going to take on the hub
-        if nothing else is passed, it is used as the pypath
-    """
-    if hasattr(hub, subname):
-        sub = getattr(hub, subname)
-        await sub._prepare()
-        return True
-    else:
-        return False
-
-
-async def iter_subs(hub, sub, *, recurse: bool = False):
-    """
-    Return an iterator that will traverse just the subs. This is useful for
-    nested subs
-    :param hub: The redistributed pns central hub
-    :param recurse: Recursively iterate over nested subs
-    """
-    for name in sorted(sub._subs):
-        ret = sub._subs[name]
-        if ret._virtual:
-            yield ret
-            if recurse:
-                if hasattr(ret, "_subs"):
-                    async for rsub in hub.pns.sub.iter_subs(ret, recurse=recurse):
-                        yield rsub
