@@ -1,7 +1,7 @@
 import sys
 import asyncio
 import pns.contract
-import pns.data
+import pns.hub
 
 import importlib.util
 
@@ -26,7 +26,7 @@ def load_module(path: str):
     return ret
 
 
-async def prep_mod(hub, sub, name: str, mod) -> pns.data.LoadedMod:
+async def prep_mod(hub, sub: "pns.hub.Sub", name: str, mod) -> "pns.hub.LoadedMod":
     # Execute the __virtual__ function if present
     if hasattr(mod, VIRTUAL):
         virtual = pns.contract.Contracted(
@@ -44,4 +44,4 @@ async def prep_mod(hub, sub, name: str, mod) -> pns.data.LoadedMod:
         if ret is False or (len(ret) > 1 and ret[0] is False):
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
-    return pns.data.LoadedMod(name, module=mod, parent=sub, root=hub)
+    return pns.hub.LoadedMod(name, module=mod, parent=sub, root=hub)

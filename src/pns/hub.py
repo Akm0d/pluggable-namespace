@@ -5,10 +5,20 @@ import pns.dir
 import pns.load
 import pns.data
 
+from ._debug import DEBUG_PNS_GETATTR
+
+if DEBUG_PNS_GETATTR:
+    from pns._hub import Namespace
+    from pns._hub import LoadedMod # noqa
+else:
+    from pns._chub import Namespace
+    from pns._chub import LoadedMod # noqa
+
 INIT = "__init__"
 
 
-class Sub(pns.data.Namespace):
+
+class Sub(Namespace):
     """
     Represents a sub-component or module that can be dynamically added to a Hub.
 
@@ -19,13 +29,9 @@ class Sub(pns.data.Namespace):
         hub: Reference to the root Hub instance.
         contracts: A list of contract definitions associated with this Sub.
     """
-    _omit_start=("_",)
-    _omit_end=()
-    _omit_func=False
-    _omit_class=False
-    _omit_vars=False
 
-    def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub"):
+
+    def __init__(self, name: str, parent: Namespace, root: "Hub"):
         """
         Initializes a Sub instance.
 
@@ -36,12 +42,9 @@ class Sub(pns.data.Namespace):
         """
         super().__init__(name, parent=parent, root=root)
         self.hub = root or parent
-        # static plus the __path__ from modules
-        
-        self._dirs = []
         
 
-    async def add_sub(self, name: str, module_ref: str = None, recurse: bool = True):
+    async def add_sub(self, name: str, recurse: bool = True, **kwargs):
         """
         Adds a sub-component or module to this Sub.
 
@@ -50,23 +53,27 @@ class Sub(pns.data.Namespace):
             module_ref (str, optional): The module reference to load. Defaults to None.
             recurse (bool): If True, recursively loads submodules. Defaults to True.
         """
-        if name in self._subs:
+        if name in self._nest:
+            return
+        if not self._virtual:
+            # TODO also call the sub's init.__virtual__ function and act based on the result
             return
         mod = None
-        sub = Sub(name=name, parent=self, root=self.hub)
-        # Propogate the parent's virtual status
-        sub._virtual = self._virtual
+        sub = self._add_child(name=name, **kwargs)
+        
         # Propogate the parent's recursive contracts
         sub._rcontracts = self._rcontracts
-        self._subs[name] = sub
-        if not module_ref:
-            return
-
+        
+        return sub
+        
+        
+        # TODO load modules... dynamically?  Should i worry about this in getattr of Namespace?
+        self._mod
         mod = pns.load.load_module(module_ref)
         try:
             loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
         except NotImplementedError:
-            self._subs.pop(name)
+            self._nest.pop(name)
             return
 
         sub.__module__ = loaded_mod
@@ -123,7 +130,7 @@ class Hub(Sub):
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub.lib._subs = sys.modules
+        hub.lib._nest = sys.modules
         hub._dynamic = pns.dir.dynamic()
 
 

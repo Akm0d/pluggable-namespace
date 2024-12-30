@@ -13,7 +13,7 @@ import yaml
 import pns.data
 
 
-def walk(pypath: list[str] = None, static: list[str] = None) -> list[pathlib.Path]:
+def walk(pypath: list[str], static: list[str]) -> list[pathlib.Path]:
     """
     Return the directories to look for modules in, pypath specifies files
     relative to an installed python package, static is for static dirs
@@ -21,17 +21,15 @@ def walk(pypath: list[str] = None, static: list[str] = None) -> list[pathlib.Pat
     :param static: Directories that can be explicitly passed
     """
     ret = set()
-    if pypath:
-        for path in pypath:
-            try:
-                mod = importlib.import_module(path)
-            except ModuleNotFoundError:
-                continue
-            for m_path in mod.__path__:
-                # If we are inside of an executable the path will be different
-                ret.add(pathlib.Path(m_path))
-    if static:
-        ret.update(pathlib.Path(dir_) for dir_ in static)
+    for path in pypath:
+        try:
+            mod = importlib.import_module(path)
+        except ModuleNotFoundError:
+            continue
+        for m_path in mod.__path__:
+            # If we are inside of an executable the path will be different
+            ret.add(pathlib.Path(m_path))
+    ret.update(pathlib.Path(dir_) for dir_ in static)
     return sorted(ret)
 
 
