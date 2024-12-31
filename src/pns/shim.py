@@ -38,10 +38,10 @@ async def loaded_hub(
     hub = pns.hub.Hub()
 
     # Add essential POP modules
-    await hub.add_sub("pns", "pns.mods")
+    await hub.add_sub("pns", pypath=["pns.mods"])
 
     # Load the config
-    await hub.add_sub("config", "pns.config")
+    await hub.add_sub("config", pypath=["pns.config"])
     if load_config:
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
         hub.OPT = pns.data.NamespaceDict(opt)

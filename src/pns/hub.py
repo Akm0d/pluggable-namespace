@@ -1,8 +1,7 @@
 import asyncio
 import sys
-import pkgutil
 import pns.dir
-import pns.load
+import pns.mod
 import pns.data
 
 from ._debug import DEBUG_PNS_GETATTR
@@ -13,8 +12,6 @@ if DEBUG_PNS_GETATTR:
 else:
     from pns._chub import Namespace
     from pns._chub import LoadedMod # noqa
-
-INIT = "__init__"
 
 
 
@@ -58,7 +55,7 @@ class Sub(Namespace):
         if not self._virtual:
             # TODO also call the sub's init.__virtual__ function and act based on the result
             return
-        mod = None
+        
         sub = self._add_child(name=name, **kwargs)
         
         # Propogate the parent's recursive contracts
@@ -66,45 +63,6 @@ class Sub(Namespace):
         
         return sub
         
-        
-        # TODO load modules... dynamically?  Should i worry about this in getattr of Namespace?
-        self._mod
-        mod = pns.load.load_module(module_ref)
-        try:
-            loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
-        except NotImplementedError:
-            self._nest.pop(name)
-            return
-
-        sub.__module__ = loaded_mod
-
-        # Execute the __init__ function if present
-        if hasattr(mod, INIT):
-            func = getattr(mod, INIT)
-            if asyncio.iscoroutinefunction(func):
-                init = pns.contract.Contracted(
-                    self.hub,
-                    contracts=[],
-                    func=func,
-                    ref=f"{sub.__ref__}.{name}",
-                    parent=mod,
-                    name=INIT,
-                )
-                ret = init()
-                if asyncio.iscoroutine(ret):
-                    await ret
-
-        if not recurse or not getattr(mod, "__path__", None):
-            return
-
-        module_paths = mod.__path__._path
-        for _, subname, _ in pkgutil.iter_modules(module_paths):
-            # Add a sub to this one for every submodule in the module
-            await sub.add_sub(
-                name=subname, module_ref=f"{module_ref}.{subname}", recurse=recurse
-            )
-
-
 class Hub(Sub):
     """
     Represents the central hub of the modular system.
@@ -132,6 +90,9 @@ class Hub(Sub):
         hub += "lib"
         hub.lib._nest = sys.modules
         hub._dynamic = pns.dir.dynamic()
+    
+    def __repr__(hub):
+        return "Hub()"
 
 
 class CMD(Sub):
