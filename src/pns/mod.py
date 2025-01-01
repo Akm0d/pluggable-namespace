@@ -1,6 +1,7 @@
 import pathlib
 import sys
 import asyncio
+import inspect
 import pns.contract
 import pns.hub
 from types import ModuleType
@@ -13,6 +14,52 @@ import importlib.machinery
 VIRTUAL = "__virtual__"
 CONFIG = "conf.yaml"
 
+class LoadedMod(pns.hub.Namespace):
+    def __init__(self, mod: ModuleType, **kwargs):
+        super().__init__(**kwargs)
+        self._var = {}
+        self._func = {}
+        self._class = {}
+        
+        # Sort attributes from the module
+        self._populate(mod)
+        
+        self._nest = self._attrs
+
+    def _populate(self, mod: ModuleType):
+        # Iterate over all attributes in the module
+        for name, obj in mod.__dict__.items():
+            # TODO save dunder methods in the module and attach them to the loadedmod object
+            if name[0] in self._omit_start or name[-1] in self._omit_end:
+                continue
+            if inspect.isfunction(obj) and not self._omit_func:
+                if asyncio.iscoroutinefunction(obj):
+                    func = obj
+                else:
+                    func = pns.loop.make_async(obj)
+                
+                self._func[name] = pns.contract.create_contracted(
+                    self._,
+                    contracts=self.__.contracts,
+                    func=func,
+                    ref=self.__ref__,
+                    parent=self.__,
+                    name=func.__name__,
+                    # Add the root hub to the function call if "hub" is an argument to the function
+                    implicit_hub=func.__code__.co_varnames
+                    and (func.__code__.co_varnames[0] == "hub"),
+                )
+            elif inspect.isclass(obj) and not self._omit_class:
+                self._class[name] = obj
+            elif not self._omit_vars:
+                # Consider remaining objects as variables
+                self._var[name] = obj
+        ...
+        
+    @property
+    def _attrs(self):
+        return {**self._class, **self._var, **self._func}
+        
 
 def load(path: str):
     """Load a module by name and file path into sys.modules."""
@@ -31,7 +78,7 @@ def load(path: str):
     return ret
 
 
-async def prep(hub, sub: "pns.hub.Sub", name: str, mod: ModuleType) -> "pns.hub.LoadedMod":
+async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
     # Execute the __virtual__ function if present
     if hasattr(mod, VIRTUAL):
         virtual = pns.contract.Contracted(
@@ -49,7 +96,7 @@ async def prep(hub, sub: "pns.hub.Sub", name: str, mod: ModuleType) -> "pns.hub.
         if ret is False or (len(ret) > 1 and ret[0] is False):
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
-    loaded = pns.hub.LoadedMod(mod, name=name, parent=sub, root=hub)
+    loaded = LoadedMod(mod, name=name, parent=sub, root=hub)
     return loaded
 
 def load_from_path(modname: str, path: str, ext:str = ".py"):
@@ -83,3 +130,6 @@ def load_from_path(modname: str, path: str, ext:str = ".py"):
         return module
     except Exception:
         return None
+    
+    
+    

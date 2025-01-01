@@ -1,17 +1,14 @@
 import asyncio
 import sys
 import pns.dir
-import pns.mod
 import pns.data
 
 from ._debug import DEBUG_PNS_GETATTR
 
 if DEBUG_PNS_GETATTR:
     from pns._hub import Namespace
-    from pns._hub import LoadedMod # noqa
 else:
     from pns._chub import Namespace
-    from pns._chub import LoadedMod # noqa
 
 
 
