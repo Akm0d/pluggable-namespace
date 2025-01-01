@@ -13,6 +13,7 @@ import importlib.machinery
 
 VIRTUAL = "__virtual__"
 CONFIG = "conf.yaml"
+FUNC_ALIAS = "__func_alias__"
 
 class LoadedMod(pns.hub.Namespace):
     def __init__(self, mod: ModuleType, **kwargs):
@@ -27,35 +28,54 @@ class LoadedMod(pns.hub.Namespace):
         self._nest = self._attrs
 
     def _populate(self, mod: ModuleType):
+        # Retrieve function aliases if any
+        __func_alias__ = getattr(mod, FUNC_ALIAS, {})
+        if inspect.isfunction(__func_alias__):
+            __func_alias__ = __func_alias__(self._)
+
         # Iterate over all attributes in the module
-        for name, obj in mod.__dict__.items():
-            # TODO save dunder methods in the module and attach them to the loadedmod object
-            if name[0] in self._omit_start or name[-1] in self._omit_end:
+        for attr in getattr(mod, "__load__", dir(mod)):
+            # Avoid omitted names
+            if attr.startswith(self._omit_start) or attr.endswith(self._omit_end):
                 continue
-            if inspect.isfunction(obj) and not self._omit_func:
-                if asyncio.iscoroutinefunction(obj):
-                    func = obj
-                else:
+
+            orig_name = attr
+            # Get the function alias if available
+            name = __func_alias__.get(attr, attr)
+            obj = getattr(mod, orig_name)
+
+            if inspect.isfunction(obj):
+                # TODO save dunder methods in the module and attach them to the loadedmod object
+                if self._omit_func:
+                    continue
+                # It's a function, potentially make it async
+                if not asyncio.iscoroutinefunction(obj):
+                    # Convert to async if not already
                     func = pns.loop.make_async(obj)
-                
-                self._func[name] = pns.contract.create_contracted(
+                else:
+                    func = obj
+
+                contracted_func = pns.contract.create_contracted(
                     self._,
-                    contracts=self.__.contracts,
-                    func=func,
-                    ref=self.__ref__,
-                    parent=self.__,
-                    name=func.__name__,
-                    # Add the root hub to the function call if "hub" is an argument to the function
-                    implicit_hub=func.__code__.co_varnames
-                    and (func.__code__.co_varnames[0] == "hub"),
+                    self.contracts,
+                    func,
+                    self.__ref__,
+                    name,
+                    implicit_hub=("hub" in func.__code__.co_varnames),
                 )
-            elif inspect.isclass(obj) and not self._omit_class:
+
+                self._func[name] = contracted_func
+            elif inspect.isclass(obj):
+                # It's a class
+                if self._omit_class:
+                    continue
                 self._class[name] = obj
-            elif not self._omit_vars:
-                # Consider remaining objects as variables
+            else:
+                if self._omit_vars:
+                    continue
+                # It's a variable
                 self._var[name] = obj
-        ...
-        
+
     @property
     def _attrs(self):
         return {**self._class, **self._var, **self._func}
