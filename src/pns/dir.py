@@ -21,7 +21,8 @@ def walk(pypath: list[str], static: list[str]) -> list[pathlib.Path]:
     :param static: Directories that can be explicitly passed
     """
     ret = set()
-    for path in pypath:
+    for p in pypath:
+        path = str(p)
         try:
             mod = importlib.import_module(path)
         except ModuleNotFoundError:

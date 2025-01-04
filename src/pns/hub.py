@@ -81,12 +81,32 @@ class Hub(Sub):
         """
         Initializes the hub, setting itself as its own root and setting up core namespaces.
         """
-        super().__init__(name="hub", parent=None, root=None)
+        super().__init__(name="hub", parent=hub, root=hub)
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub.lib._nest = sys.modules
         hub._dynamic = pns.dir.dynamic()
+        hub.lib._nest = sys.modules
+    
+        # Make sure the logging functions are available as early as possible
+        # NOTE This is how to add a dyne
+        hub._add_child(name="log", static=hub._dynamic.dyne.log.paths)
+        
+    @classmethod
+    async def new(cls):
+        """
+        Load all the modules on hub.log
+        """
+        hub = cls()
+        await hub.log._load_all()
+        hub.log.error("asdf")
+        hub.log.warning("asdf")
+        hub.log.info("asdf")
+        hub.log.debug("asdf")
+        hub.log.trace("asdf")
+        return hub
+        
+
     
     def __repr__(hub):
         return "Hub()"

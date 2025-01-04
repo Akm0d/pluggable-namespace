@@ -12,7 +12,7 @@ async def pop_hub():
     Compatible with POP projects
     """
     # Set up the hub
-    hub = pns.hub.Hub()
+    hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
     await hub.add_sub("pop", "pns.mods")
@@ -35,11 +35,12 @@ async def loaded_hub(
     Compatible with cPOP projects.
     """
     # Set up the hub
-    hub = pns.hub.Hub()
+    hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
     await hub.add_sub("pns", pypath=["pns.mods"])
 
+    # TODO load config and log as dynes
     # Load the config
     await hub.add_sub("config", pypath=["pns.config"])
     if load_config:
@@ -47,7 +48,7 @@ async def loaded_hub(
         hub.OPT = pns.data.NamespaceDict(opt)
 
     # Setup the logger
-    await hub.add_sub("log", "pns.log")
+    await hub.add_sub("log", pypath=["pns.log"])
     if load_config and logs:
         await hub.log.init.setup(**hub.OPT.log.copy())
 

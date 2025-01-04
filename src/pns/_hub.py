@@ -5,6 +5,7 @@ import pns.contract
 import pns.dir
 import pns.loop
 import pkgutil
+import importlib
 
 INIT = "__init__"
 
@@ -25,10 +26,13 @@ class Namespace(Mapping):
         root: "Namespace" = None,
     ):
         self.__name__ = name
-        self.__ = parent or self
-        self._ = root or parent or self
+        self.__ = parent
+        self._ = root
+        # Aliases for this sub
         self._alias = []
+        # Namespaces underneath this sub
         self._nest = {}
+        # Modules loaded onto this sub
         self._mod = {}
         self._contracts = []
         self._rcontracts = []
@@ -193,9 +197,14 @@ class Namespace(Mapping):
     def __repr__(self):
         return f"Namespace({self.__ref__})"
     
+    async def _load_all(self, *, recurse:bool = True):
+        for path, name, is_pkg in pkgutil.iter_modules(self._dirs):
+            await self._load_mod(name, recurse=recurse)
+    
     async def _load_mod(self, name: str, *, recurse:bool = True):
-        for pypath in self._dirs:
-            mod = pns.mod.load_from_path(name, pypath)
+            
+        for path in self._dirs:
+            mod = pns.mod.load_from_path(name, path)
             if mod:
                 break
         else:
@@ -207,14 +216,14 @@ class Namespace(Mapping):
             self._nest.pop(name)
             return
 
-        self.mod[name] = loaded_mod
+        self._mod[name] = loaded_mod
 
         # Execute the __init__ function if present
         if hasattr(mod, INIT):
             func = getattr(mod, INIT)
             if asyncio.iscoroutinefunction(func):
                 init = pns.contract.Contracted(
-                    self.hub,
+                    self._,
                     contracts=[],
                     func=func,
                     ref=f"{self.__ref__}.{name}",
@@ -225,6 +234,8 @@ class Namespace(Mapping):
                 if asyncio.iscoroutine(ret):
                     await ret
 
+        recurse = False
+        # TODO delete this or handle it
         if not recurse or not getattr(mod, "__path__", None):
             return
 
