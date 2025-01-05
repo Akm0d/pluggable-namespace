@@ -195,14 +195,13 @@ class Namespace(Mapping):
         return ".".join(reversed(parts))
 
     def __repr__(self):
-        return f"Namespace({self.__ref__})"
+        return f"{self.__class__.split('.')[-1]}({self.__ref__})"
     
     async def _load_all(self, *, recurse:bool = True):
         for path, name, is_pkg in pkgutil.iter_modules(self._dirs):
             await self._load_mod(name, recurse=recurse)
     
     async def _load_mod(self, name: str, *, recurse:bool = True):
-            
         for path in self._dirs:
             mod = pns.mod.load_from_path(name, path)
             if mod:

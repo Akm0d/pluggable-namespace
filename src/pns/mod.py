@@ -21,12 +21,14 @@ class LoadedMod(pns.hub.Namespace):
         self._var = {}
         self._func = {}
         self._class = {}
-        self._nest = self._attrs
-
+        
     @property
-    def _attrs(self):
+    def _nest(self):
         return {**self._class, **self._var, **self._func}
         
+    @_nest.setter
+    def _nest(self, _):
+        ...
 
 def load(path: str):
     """Load a module by name and file path into sys.modules."""
@@ -121,6 +123,7 @@ async def populate(loaded, mod: ModuleType):
             # It's a variable
             loaded._var[name] = obj
     return loaded
+
 
 def load_from_path(modname: str, path: str, ext:str = ".py"):
     """

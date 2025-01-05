@@ -99,11 +99,7 @@ class Hub(Sub):
         """
         hub = cls()
         await hub.log._load_all()
-        hub.log.error("asdf")
-        hub.log.warning("asdf")
-        hub.log.info("asdf")
-        hub.log.debug("asdf")
-        hub.log.trace("asdf")
+        await hub.log.debug("Initialized the hub")
         return hub
         
 
