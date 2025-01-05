@@ -5,7 +5,6 @@ import pns.contract
 import pns.dir
 import pns.loop
 import pkgutil
-import importlib
 
 INIT = "__init__"
 
@@ -54,6 +53,8 @@ class Namespace(Mapping):
         
         # Check if a sub is aliased to this name
         for sub in self._nest:
+            if not isinstance(sub, Namespace):
+                continue
             if name in sub._alias and getattr(sub,  "_virtual", True):
                 return sub
             
@@ -212,7 +213,7 @@ class Namespace(Mapping):
         try:
             loaded_mod = await pns.mod.prep(self._, self, name, mod)
         except NotImplementedError:
-            self._nest.pop(name)
+            self._nest.pop(name, None)
             return
 
         self._mod[name] = loaded_mod

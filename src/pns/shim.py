@@ -40,21 +40,20 @@ async def loaded_hub(
     # Add essential POP modules
     await hub.add_sub("pns", pypath=["pns.mods"])
 
-    # TODO load config and log as dynes
     # Load the config
-    await hub.add_sub("config", pypath=["pns.config"])
+    hub._add_child(name="config", static=hub._dynamic.dyne.config.paths)
     if load_config:
+        await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
         hub.OPT = pns.data.NamespaceDict(opt)
 
     # Setup the logger
-    await hub.add_sub("log", pypath=["pns.log"])
     if load_config and logs:
         await hub.log.init.setup(**hub.OPT.log.copy())
 
     # Add the ability to shell out from the hub
     if shell:
-        hub._subs["sh"] = pns.hub.CMD(hub)
+        hub._nest["sh"] = pns.hub.CMD(hub)
 
     if load_all_dynes:
         await load_all(hub, load_all_subdirs)
@@ -65,12 +64,14 @@ async def loaded_hub(
 async def load_all(hub, load_all_subdirs: bool):
     # Load all dynamic subs onto the hub
     for dyne in hub._dynamic.dyne:
-        if dyne in hub._subs:
+        if dyne in hub._nest:
             continue
-        await hub.pns.sub.add(dyne_name=dyne)
+        hub._add_child(name=dyne, static=hub._dynamic.dyne[dyne].paths)
+        await hub[dyne]._load_all()
         if not load_all_subdirs:
             continue
-        await hub.pns.sub.load_subdirs(hub._subs[dyne], recurse=True)
+        continue
+        await hub.pns.sub.load_subdirs(hub._nest[dyne], recurse=True)
 
 
 async def salt_loader():

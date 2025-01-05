@@ -23,12 +23,9 @@ class LoadedMod(pns.hub.Namespace):
         self._class = {}
         
     @property
-    def _nest(self):
+    def _attr(self):
         return {**self._class, **self._var, **self._func}
         
-    @_nest.setter
-    def _nest(self, _):
-        ...
 
 def load(path: str):
     """Load a module by name and file path into sys.modules."""
@@ -61,8 +58,10 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
         ret = virtual()
         if asyncio.iscoroutine(ret):
             ret = await ret
-
-        if ret is False or (len(ret) > 1 and ret[0] is False):
+            
+        if ret is True:
+            ...
+        elif ret is False or (len(ret) > 1 and ret[0] is False):
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
     loaded = LoadedMod(name=name, parent=sub, root=hub)
@@ -122,13 +121,14 @@ async def populate(loaded, mod: ModuleType):
                 continue
             # It's a variable
             loaded._var[name] = obj
+            
+    loaded._nest.update(loaded._attr)
     return loaded
 
 
-def load_from_path(modname: str, path: str, ext:str = ".py"):
+def load_from_path(modname: str, path: str, ext: str = ".py"):
     """
     Attempt to load the Python module named `modname` from the specified `path`.
-    
     :param modname: The name of the module to load.
     :param path: The directory path to use as the anchor point to resolve the module.
     :return: The loaded module if successful, or None if not found.
@@ -138,24 +138,29 @@ def load_from_path(modname: str, path: str, ext:str = ".py"):
     
     if not module_path.is_file():
         return None
-
+    
     # Using the absolute path for the module
-    spec = importlib.util.spec_from_file_location(modname, module_path.resolve())
+    module_abs_path = module_path.resolve()
+    # Create a unique module key with its full path
+    module_key = str(module_abs_path)
+
+    # If this unique module path is already in sys.modules, return it
+    if module_key in sys.modules:
+        return sys.modules[module_key]
+    
+    # Generate the module spec
+    spec = importlib.util.spec_from_file_location(modname, module_abs_path)
     if spec is None:
         return None
-
-    # Check if module already exists in sys.modules
-    if modname in sys.modules:
-        return sys.modules[modname]
-
+    
     # Load the module
     module = importlib.util.module_from_spec(spec)
     try:
-        sys.modules[modname] = module
+        # Store the module in sys.modules with the unique key
+        sys.modules[module_key] = module
         spec.loader.exec_module(module)
         return module
     except Exception:
+        # Remove it from sys.modules in case of failure
+        sys.modules.pop(module_key, None)
         return None
-    
-    
-    

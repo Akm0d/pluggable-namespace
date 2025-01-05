@@ -2,7 +2,7 @@ async def start(hub):
     """
     Start a continuous process that watches for changes to dynamic dirs and reloads them on changes
     """
-    if "aionotify" not in hub.lib._imports:
+    if "aionotify" not in hub.lib._nest:
         return
 
     watcher = hub.lib.aionotify.Watcher()
