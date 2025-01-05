@@ -6,7 +6,7 @@ __virtualname__ = "yte"
 
 
 async def __virtual__(hub):
-    if "aio_yte" not in hub.lib._imports:
+    if "aio_yte" not in hub.lib._nest:
         return False, "Missing yte library"
     return True
 

@@ -1,14 +1,18 @@
 import asyncio
 import sys
-import pkgutil
 import pns.dir
-import pns.load
 import pns.data
 
-INIT = "__init__"
+from ._debug import DEBUG_PNS_GETATTR
+
+if DEBUG_PNS_GETATTR:
+    from pns._hub import Namespace
+else:
+    from pns._chub import Namespace
 
 
-class Sub(pns.data.Namespace):
+
+class Sub(Namespace):
     """
     Represents a sub-component or module that can be dynamically added to a Hub.
 
@@ -19,13 +23,9 @@ class Sub(pns.data.Namespace):
         hub: Reference to the root Hub instance.
         contracts: A list of contract definitions associated with this Sub.
     """
-    _omit_start=("_",)
-    _omit_end=()
-    _omit_func=False
-    _omit_class=False
-    _omit_vars=False
 
-    def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub"):
+
+    def __init__(self, name: str, parent: Namespace, root: "Hub"):
         """
         Initializes a Sub instance.
 
@@ -36,12 +36,9 @@ class Sub(pns.data.Namespace):
         """
         super().__init__(name, parent=parent, root=root)
         self.hub = root or parent
-        # static plus the __path__ from modules
-        
-        self._dirs = []
         
 
-    async def add_sub(self, name: str, module_ref: str = None, recurse: bool = True):
+    async def add_sub(self, name: str, recurse: bool = True, **kwargs):
         """
         Adds a sub-component or module to this Sub.
 
@@ -50,54 +47,19 @@ class Sub(pns.data.Namespace):
             module_ref (str, optional): The module reference to load. Defaults to None.
             recurse (bool): If True, recursively loads submodules. Defaults to True.
         """
-        if name in self._subs:
+        if name in self._nest:
             return
-        mod = None
-        sub = Sub(name=name, parent=self, root=self.hub)
-        # Propogate the parent's virtual status
-        sub._virtual = self._virtual
+        if not self._virtual:
+            # TODO also call the sub's init.__virtual__ function and act based on the result
+            return
+        
+        sub = self._add_child(name=name, **kwargs)
+        
         # Propogate the parent's recursive contracts
         sub._rcontracts = self._rcontracts
-        self._subs[name] = sub
-        if not module_ref:
-            return
-
-        mod = pns.load.load_module(module_ref)
-        try:
-            loaded_mod = await pns.load.prep_mod(self.hub, self, name, mod)
-        except NotImplementedError:
-            self._subs.pop(name)
-            return
-
-        sub.__module__ = loaded_mod
-
-        # Execute the __init__ function if present
-        if hasattr(mod, INIT):
-            func = getattr(mod, INIT)
-            if asyncio.iscoroutinefunction(func):
-                init = pns.contract.Contracted(
-                    self.hub,
-                    contracts=[],
-                    func=func,
-                    ref=f"{sub.__ref__}.{name}",
-                    parent=mod,
-                    name=INIT,
-                )
-                ret = init()
-                if asyncio.iscoroutine(ret):
-                    await ret
-
-        if not recurse or not getattr(mod, "__path__", None):
-            return
-
-        module_paths = mod.__path__._path
-        for _, subname, _ in pkgutil.iter_modules(module_paths):
-            # Add a sub to this one for every submodule in the module
-            await sub.add_sub(
-                name=subname, module_ref=f"{module_ref}.{subname}", recurse=recurse
-            )
-
-
+        
+        return sub
+        
 class Hub(Sub):
     """
     Represents the central hub of the modular system.
@@ -119,12 +81,31 @@ class Hub(Sub):
         """
         Initializes the hub, setting itself as its own root and setting up core namespaces.
         """
-        super().__init__(name="hub", parent=None, root=None)
+        super().__init__(name="hub", parent=hub, root=hub)
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub.lib._subs = sys.modules
         hub._dynamic = pns.dir.dynamic()
+        hub.lib._nest = sys.modules
+    
+        # Make sure the logging functions are available as early as possible
+        # NOTE This is how to add a dyne
+        hub._add_child(name="log", static=hub._dynamic.dyne.log.paths)
+        
+    @classmethod
+    async def new(cls):
+        """
+        Load all the modules on hub.log
+        """
+        hub = cls()
+        await hub.log._load_all()
+        await hub.log.debug("Initialized the hub")
+        return hub
+        
+
+    
+    def __repr__(hub):
+        return "Hub()"
 
 
 class CMD(Sub):

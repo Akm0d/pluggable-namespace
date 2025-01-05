@@ -138,6 +138,7 @@ class Contracted:
 
     def _load_contracts(self):
         self.contract_functions = {
+            # TODO have these be defined in a module that could be extended
             "pre": self._get_contracts_by_type("pre"),
             "call": self._get_contracts_by_type("call")[:1],
             "post": self._get_contracts_by_type("post"),
@@ -217,14 +218,13 @@ class CallStack:
 
     def __init__(self, contract: Contracted):
         self.contract = contract
-        self.ref = contract.ref
         self._last_ref = None
         self._last_call = None
 
     async def __aenter__(self):
         self._last_ref = self.contract.hub._last_ref
         self._last_call = self.contract.hub._last_call
-        self.contract.hub._last_ref = self.ref
+        self.contract.hub._last_ref = self.contract.ref
         self.contract.hub._last_call = self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
