@@ -21,11 +21,11 @@ class LoadedMod(pns.hub.Namespace):
         self._var = {}
         self._func = {}
         self._class = {}
-        
+
     @property
     def _attr(self):
         return {**self._class, **self._var, **self._func}
-        
+
 
 def load(path: str):
     """Load a module by name and file path into sys.modules."""
@@ -58,7 +58,7 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
         ret = virtual()
         if asyncio.iscoroutine(ret):
             ret = await ret
-            
+
         if ret is True:
             ...
         elif ret is False or (len(ret) > 1 and ret[0] is False):
@@ -72,7 +72,7 @@ async def populate(loaded, mod: ModuleType):
     Add functions, classes, and variables to the hub considering function aliases
     """
     # TODO have an "implicit_alias" for functions that end in "_" and shadow builtins
-    
+
     # Retrieve function aliases if any
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
     if inspect.isfunction(__func_alias__):
@@ -121,7 +121,7 @@ async def populate(loaded, mod: ModuleType):
                 continue
             # It's a variable
             loaded._var[name] = obj
-            
+
     loaded._nest.update(loaded._attr)
     return loaded
 
@@ -135,10 +135,10 @@ def load_from_path(modname: str, path: str, ext: str = ".py"):
     """
     # Convert the given path to a Path object and resolve the module file path
     module_path = pathlib.Path(path) / (modname.replace('.', '/') + ext)
-    
+
     if not module_path.is_file():
         return None
-    
+
     # Using the absolute path for the module
     module_abs_path = module_path.resolve()
     # Create a unique module key with its full path
@@ -147,12 +147,12 @@ def load_from_path(modname: str, path: str, ext: str = ".py"):
     # If this unique module path is already in sys.modules, return it
     if module_key in sys.modules:
         return sys.modules[module_key]
-    
+
     # Generate the module spec
     spec = importlib.util.spec_from_file_location(modname, module_abs_path)
     if spec is None:
         return None
-    
+
     # Load the module
     module = importlib.util.module_from_spec(spec)
     try:

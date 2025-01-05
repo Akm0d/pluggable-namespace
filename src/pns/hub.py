@@ -36,7 +36,7 @@ class Sub(Namespace):
         """
         super().__init__(name, parent=parent, root=root)
         self.hub = root or parent
-        
+
 
     async def add_sub(self, name: str, recurse: bool = True, **kwargs):
         """
@@ -52,14 +52,14 @@ class Sub(Namespace):
         if not self._virtual:
             # TODO also call the sub's init.__virtual__ function and act based on the result
             return
-        
+
         sub = self._add_child(name=name, **kwargs)
-        
+
         # Propogate the parent's recursive contracts
         sub._rcontracts = self._rcontracts
-        
+
         return sub
-        
+
 class Hub(Sub):
     """
     Represents the central hub of the modular system.
@@ -87,11 +87,11 @@ class Hub(Sub):
         hub += "lib"
         hub._dynamic = pns.dir.dynamic()
         hub.lib._nest = sys.modules
-    
+
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
         hub._add_child(name="log", static=hub._dynamic.dyne.log.paths)
-        
+
     @classmethod
     async def new(cls):
         """
@@ -101,9 +101,7 @@ class Hub(Sub):
         await hub.log._load_all()
         await hub.log.debug("Initialized the hub")
         return hub
-        
 
-    
     def __repr__(hub):
         return "Hub()"
 

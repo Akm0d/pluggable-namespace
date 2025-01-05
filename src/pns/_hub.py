@@ -15,7 +15,7 @@ class Namespace(Mapping):
     _omit_class=False
     _omit_vars=False
     _virtual = True
-    
+
     def __init__(
         self,
         name: str,
@@ -36,7 +36,7 @@ class Namespace(Mapping):
         self._contracts = []
         self._rcontracts = []
         self._dirs = pns.dir.walk(pypath, static)
-        
+
     @property
     def contracts(self):
         return self._contracts + self._rcontracts
@@ -47,21 +47,21 @@ class Namespace(Mapping):
             sub = self._nest[name]
             if getattr(sub, "_virtual", True):
                 return sub
-            
+
         if name[0] in self._omit_start or name[-1] in self._omit_end:
             return self.__getattribute__(name)
-        
+
         # Check if a sub is aliased to this name
         for sub in self._nest:
             if not isinstance(sub, Namespace):
                 continue
             if name in sub._alias and getattr(sub,  "_virtual", True):
                 return sub
-            
+
         # If attribute not found, attempt to load the module dynamically
         if name not in self._mod:
             pns.loop.run(self._load_mod(name))
-        
+
         if name in self._mod:
             return self._mod[name]
 
@@ -197,11 +197,11 @@ class Namespace(Mapping):
 
     def __repr__(self):
         return f"{self.__class__.split('.')[-1]}({self.__ref__})"
-    
+
     async def _load_all(self, *, recurse:bool = True):
         for path, name, is_pkg in pkgutil.iter_modules(self._dirs):
             await self._load_mod(name, recurse=recurse)
-    
+
     async def _load_mod(self, name: str, *, recurse:bool = True):
         for path in self._dirs:
             mod = pns.mod.load_from_path(name, path)
@@ -209,7 +209,7 @@ class Namespace(Mapping):
                 break
         else:
             mod = pns.mod.load(name)
-            
+
         try:
             loaded_mod = await pns.mod.prep(self._, self, name, mod)
         except NotImplementedError:
@@ -245,4 +245,3 @@ class Namespace(Mapping):
             await self._load_mod(
                 name=modname, pypath=f"{name}.{modname}", recurse=recurse
             )
-
