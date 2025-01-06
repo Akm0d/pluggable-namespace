@@ -21,7 +21,6 @@ async def display(hub, data):
     """
     Print the raw data
     """
-    print(data)
     hub.lib.yaml.add_multi_representer(
         dict, _any_dict_representer, Dumper=hub.lib.yaml.SafeDumper
     )

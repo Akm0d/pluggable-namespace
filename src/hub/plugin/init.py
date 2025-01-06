@@ -60,7 +60,7 @@ async def run(hub):
     # Get the named reference from the hub
     finder = hub.lib.pns.ref.find(hub, ref)
 
-    # Get the docstirng for the object
+    # Get the docstring for the object
     if call_help:
         # Make sure that contracts return the docs for their underlying function
         if isinstance(finder, hub.lib.pns.contract.Contracted):
