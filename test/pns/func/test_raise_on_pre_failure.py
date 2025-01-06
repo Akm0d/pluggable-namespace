@@ -1,6 +1,6 @@
 import pytest
 
-import pns.exc
+# import pns.exc
 
 
 @pytest.fixture(scope="function")

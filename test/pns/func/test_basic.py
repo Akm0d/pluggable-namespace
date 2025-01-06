@@ -1,7 +1,7 @@
 # pylint: disable=expression-not-assigned
 import pytest
 
-import pns.exc
+# import pns.exc
 
 
 async def test_sub_alias(hub):

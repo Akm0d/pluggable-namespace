@@ -2,7 +2,7 @@
 # Import pytest
 import pytest
 
-import pns.exc
+# import pns.exc
 
 # Import pns
 
