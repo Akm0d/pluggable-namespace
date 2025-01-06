@@ -55,10 +55,8 @@ cli_config:
       - __global__
 
 dyne:
-  config:
-    - config
   log:
-    - log
+    - plugin
 
 import:
   - aiologger.handlers.files

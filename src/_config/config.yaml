@@ -1,0 +1,39 @@
+
+cli_config:
+  pns:
+    config:
+      default: ~/.pns/config.yaml
+      os: PNS_CONFIG
+      help: The config file used for PNS
+      group: Config Options
+      options:
+      - -c
+      subcommands:
+      - __global__
+
+dyne:
+  config:
+    - plugin
+
+import:
+  - aiologger.handlers.files
+  - argparse
+  - asyncio
+  - ast
+  - collections
+  - pns.contract
+  - pns.data
+  - pns.exc
+  - pns.hub
+  - importlib
+  - importlib.resources
+  - logging
+  - msgpack
+  - os
+  - pathlib
+  - pickle
+  - signal
+  - sys
+  - traceback
+  - yaml
+  - typing
