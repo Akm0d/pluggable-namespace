@@ -29,9 +29,6 @@ async def run(hub):
             if part in hub._dynamic.config.cli_config and part != "cli":
                 cli = part
 
-    # Try to restore the hub state
-    hub_state_file = await hub.cli.state.restore(opt)
-
     call_help = False
     if (opt.cli.cli != cli) and (
         opt.cli.cli
@@ -76,7 +73,3 @@ async def run(hub):
     elif ret:
         # output the results of finder to the console
         await hub.cli.ref.output(ret)
-
-    if hub_state_file:
-        # Write the serialized hub to a file
-        hub_state_file = await hub.cli.state.save(hub_state_file)

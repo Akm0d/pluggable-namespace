@@ -18,19 +18,12 @@ cli_config:
     history_file:
       help: The location of the history file for the interactive console
       default: "~/.pns/.history"
-    hub_state:
-      help: The location of a pickle file that has a re-usable hub object
-      default: ""
     interactive:
       help: Start a python console that contains a hub and can await functions
       default: False
       action: store_true
       options:
         - -i
-    watch:
-      help: point aionotify at Sub dirs and reload the sub on chnages
-      default: False
-      action: store_true
     output:
       source: rend
       default: yaml
@@ -52,7 +45,6 @@ import:
   - aioconsole
   - aioconsole.console
   - aioconsole.server
-  - aionotify
   - asyncio
   - ast
   - builtins

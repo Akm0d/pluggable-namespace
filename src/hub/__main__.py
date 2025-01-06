@@ -13,14 +13,7 @@ async def amain():
     loop = asyncio.get_running_loop()
 
     hub = await pns.shim.loaded_hub(cli="cli")
-    watch_subs = hub.OPT.cli.watch
     await hub.log.debug("Initialized the hub")
-
-    if watch_subs:
-        watch = asyncio.create_task(hub.cli.watch.start())
-
-    if "legacy" in hub.cli._nest:
-        await hub.cli.legacy.patch(loop=loop)
 
     for ref in hub.OPT.cli.init:
         coro = hub[ref]()
@@ -41,17 +34,6 @@ async def amain():
         ...
     finally:
         await hub.log.debug("Cleaning up")
-
-        # Send a stop signal to the holder
-        await hub.lib.asyncio.sleep(0)
-
-        if watch_subs:
-            # Cancel the inotify watcher
-            watch.cancel()
-            try:
-                await watch
-            except asyncio.CancelledError:
-                ...
 
         # Clean up async generators
         await loop.shutdown_asyncgens()
