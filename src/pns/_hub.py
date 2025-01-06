@@ -26,7 +26,7 @@ class Namespace():
     ):
         self.__name__ = name
         self.__ = parent
-        self._ = root
+        self._root = root
         # Aliases for this sub
         self._alias = []
         # Namespaces underneath this sub
@@ -36,6 +36,10 @@ class Namespace():
         self._contracts = []
         self._rcontracts = []
         self._dirs = pns.dir.walk(pypath, static)
+
+    @property
+    def _(self):
+        return self._root
 
     @property
     def contracts(self):

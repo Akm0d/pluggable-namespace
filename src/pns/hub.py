@@ -2,6 +2,7 @@ import asyncio
 import sys
 import pns.dir
 import pns.data
+import pns.ref
 
 from ._debug import DEBUG_PNS_GETATTR
 
@@ -101,6 +102,21 @@ class Hub(Sub):
         await hub.log._load_all()
         await hub.log.debug("Initialized the hub")
         return hub
+
+    @property
+    def _(self):
+        """
+        Return the parent of the last contract.
+        This allows modules to easily reference themselves with shorthand.
+        i.e.
+
+            hub._.current_module_attribute
+        """
+        if not self._last_ref:
+            return self
+        # Remove the entry from the call stack
+        last_mod = self._last_ref.rsplit(".", maxsplit=1)[0]
+        return pns.ref.last(self, last_mod)
 
     def __repr__(hub):
         return "Hub()"

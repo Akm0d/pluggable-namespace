@@ -1,3 +1,29 @@
+def last(hub, ref) -> object:
+    """
+    Takes a string that references the desired ref and returns the last object
+    called out in that ref
+    """
+    refs = path(hub, ref)
+    return refs.pop()
+
+
+def path(hub, ref) -> list[object]:
+    """
+    Returns a list of references up to the named ref
+    """
+    ret = [hub]
+
+    if isinstance(ref, str):
+        ref = ref.split(".")
+
+    root = hub
+    for chunk in ref:
+        root = getattr(root, chunk)
+        ret.append(root)
+    return ret
+
+
+
 def find(hub, ref: str) -> object:
     """
     Take a string that represents an attribute nested underneath the hub.

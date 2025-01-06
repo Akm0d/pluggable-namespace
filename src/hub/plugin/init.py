@@ -22,7 +22,7 @@ async def run(hub):
         for part in ref.split("."):
             finder = getattr(finder, part)
             # This is not part of pns controlled by config
-            if not isinstance(finder, hub.lib.pns.loader.LoadedMod) and not isinstance(
+            if not isinstance(finder, hub.lib.pns.mod.LoadedMod) and not isinstance(
                 finder, hub.lib.pns.hub.Sub
             ):
                 break
