@@ -2,7 +2,7 @@ DEFAULT_OUTPUTTER  = "yaml"
 
 async def resolve(hub, ref: object, *args, **kwargs) -> object:
     """
-    Take an object found on the hub and if it is a funciton, call it.
+    Take an object found on the hub and if it is a function, call it.
     If it is a generator, retrieve all its values.
     As a last resort just return the plain object as is.
 

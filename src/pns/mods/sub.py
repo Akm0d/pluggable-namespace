@@ -10,29 +10,25 @@ async def add(
     hub: pns.hub.Hub,
     dyne_name: str = None,
     *,
-    pypath: list[str] = None,
+    pypath: list[str] = (),
     subname: str = None,
     sub:pns.hub.Sub=None,
-    static: list[str] = None,
-    contracts_pypath: list[str] = None,
-    contracts_static: list[str] = None,
-    default_contracts: list[str] = None,
+    static: list[str] = (),
+    contracts_pypath: list[str] = (),
+    contracts_static: list[str] = (),
+    recursive_contracts_static: list[str] = (),
     virtual: bool = True,
     omit_start: tuple[str] = ("_",),
     omit_end: tuple[str] = (),
     omit_func: bool = False,
     omit_class: bool = False,
     omit_vars: bool = False,
-    mod_basename: str = "pns.sub",
-    stop_on_failures: bool = False,
-    init: bool = True,
-    recursive_contracts_static: list[str] = None,
-    default_recursive_contracts: list[str] = None,
     python_import: str = None,
 ):
     """
     Add a new subsystem to the hub
     :param hub: The redistributed pns central hub
+    :param dyne_name: The dynamic name to use to look up paths to find plugins -- linked to conf.py
     :param subname: The name that the sub is going to take on the hub
         if nothing else is passed, it is used as the dyne_name
     :param sub: The sub to use as the root to add to
@@ -40,19 +36,11 @@ async def add(
     :param contracts_static: Load additional contract paths from a specific directory
     :param default_contracts: Specifies that a specific contract plugin will be applied as a default to all plugins
     :param virtual: Toggle whether or not to process __virtual__ functions
-    :param dyne_name: The dynamic name to use to look up paths to find plugins -- linked to conf.py
     :param omit_start: Allows you to pass in a tuple of characters that would omit the loading of any object
-        I.E. Any function starting with an underscore will not be loaded onto a plugin
-        (You should probably never change this)
     :param omit_end:Allows you to pass in a tuple of characters that would omit the loading of an object
-        (You should probably never change this)
     :param omit_func: bool: Don't load any functions
     :param omit_class: bool: Don't load any classes
     :param omit_vars: bool: Don't load any vars
-    :param mod_basename: str: Manipulate the location in sys.modules that the plugin will be loaded to.
-        Allow plugins to be loaded into a separate namespace.
-    :param stop_on_failures: If any module fails to load for any reason, stacktrace and do not continue loading this sub
-    :param init: bool: determine whether or not we process __init__ functions
     :param recursive_contracts_static: Load additional recursive contract paths from a specific directory
     :param default_recursive_contracts: Specifies that a specific recursive contract plugin will be applied as a default
         to all plugins
@@ -61,7 +49,6 @@ async def add(
     if python_import:
         subname = subname if subname else python_import.split(".")[0]
     if pypath:
-        pypath = pns.hub.ex_path(pypath)
         subname = subname if subname else pypath[0].split(".")[-1]
     elif static:
         subname = subname if subname else hub.lib.os.path.basename(static)
@@ -69,16 +56,26 @@ async def add(
         subname = subname if subname else dyne_name
     root: pns.hub.Sub = sub or hub
     # The dynamic namespace is already on the hub
-    if dyne_name in root._subs:
+    if dyne_name in root._nest:
         return
 
     if python_import:
-        root._imports[subname] = hub.lib.importlib.import_module(python_import)
-        return
+        root._nest[subname] = hub.lib.importlib.import_module(python_import)
+    elif dyne_name:
+        await hub.add_sub(name=subname, static=hub._dynamic.dyne[subname].paths)
+        await hub._nest[subname]._load_all()
+    else:
+        await root.add_sub(subname)
 
-    await root.add_sub(subname)
-    root._subs[subname]._contracts = (default_contracts or []) + (contracts_pypath or []) + (contracts_static or [])
-    root._subs[subname]._rcontracts = (default_recursive_contracts or []) + (recursive_contracts_static or [])
+    root._nest[subname]._virtual = virtual
+    root._nest[subname]._omit_start = omit_start
+    root._nest[subname]._omit_end = omit_end
+    root._nest[subname]._omit_func = omit_func
+    root._nest[subname]._omit_class = omit_class
+    root._nest[subname]._omit_vars = omit_vars
+    root._nest[subname]._omit_vars = omit_vars
+    root._nest[subname]._contracts = (contracts_pypath or []) + (contracts_static or [])
+    root._nest[subname]._rcontracts = recursive_contracts_static or []
 
 
 async def load_subdirs(hub, sub, *, recurse: bool = False):
