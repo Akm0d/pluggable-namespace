@@ -82,7 +82,7 @@ class Namespace():
             finder = getattr(finder, part)
         return finder
 
-    def __iadd__(self, other: [str or tuple]):
+    def __iadd__(self, other: str | tuple):
         """
         Add a child to the namespace.
 
@@ -239,7 +239,7 @@ class Namespace():
                     await ret
 
         recurse = False
-        # TODO delete this or handle it
+        # TODO delete the rest of method or handle it
         if not recurse or not getattr(mod, "__path__", None):
             return
 

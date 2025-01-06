@@ -15,7 +15,7 @@ async def pop_hub():
     hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
-    await hub.add_sub("pop", "pns.mods")
+    await hub.add_sub("pop", pypath=["pns.mods"])
 
     return hub
 
@@ -25,7 +25,7 @@ async def loaded_hub(
     *,
     load_all_dynes: bool = True,
     load_all_subdirs: bool = True,
-    pop_mods: list[str] = None,
+    pop_mods: list[str] = (),
     logs: bool = True,
     load_config: bool = True,
     shell: bool = True,
@@ -78,3 +78,4 @@ async def salt_loader():
     """
     Create a hub compatible with salt
     """
+    raise NotImplemented("TODO")

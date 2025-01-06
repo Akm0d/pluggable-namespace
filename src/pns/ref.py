@@ -30,7 +30,7 @@ def find(hub, ref: str) -> object:
     Parse the string and retrieve the object form the hub.
 
     Args:
-        hub (cpop.hub.Hub): The global namespace.
+        hub (pns.hub.Hub): The global namespace.
         ref (str): A string separated by "." with each part being a level deeper into objects on the hub.
 
     Returns:

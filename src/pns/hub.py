@@ -9,7 +9,7 @@ from ._debug import DEBUG_PNS_GETATTR
 if DEBUG_PNS_GETATTR:
     from pns._hub import Namespace
 else:
-    from pns._chub import Namespace
+    from pns._chub import Namespace # type: ignore
 
 
 
@@ -56,7 +56,7 @@ class Sub(Namespace):
 
         sub = self._add_child(name=name, **kwargs)
 
-        # Propogate the parent's recursive contracts
+        # Propagate the parent's recursive contracts
         sub._rcontracts = self._rcontracts
 
         return sub
@@ -96,9 +96,10 @@ class Hub(Sub):
     @classmethod
     async def new(cls):
         """
-        Load all the modules on hub.log
+        Initialize a hub with async capabilities
         """
         hub = cls()
+        # Load all the modules on hub.log
         await hub.log._load_all()
         await hub.log.debug("Initialized the hub")
         return hub
