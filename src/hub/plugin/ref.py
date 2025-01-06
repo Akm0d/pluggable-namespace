@@ -1,3 +1,5 @@
+DEFAULT_OUTPUTTER  = "yaml"
+
 async def resolve(hub, ref: object, *args, **kwargs) -> object:
     """
     Take an object found on the hub and if it is a funciton, call it.
@@ -57,6 +59,6 @@ async def output(hub, ret: object):
             data = hub.lib.ast.literal_eval(str(data))
         except Exception:
             ...
-        outputter = hub.OPT.rend.get("output") or "yaml"
+        outputter = hub.OPT.rend.get("output") or DEFAULT_OUTPUTTER
         formatted = await hub.output[outputter].display(data)
         await hub.lib.aioconsole.aprint(formatted)

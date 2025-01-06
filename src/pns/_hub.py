@@ -1,6 +1,7 @@
 import asyncio
-from collections.abc import Mapping
+from types import SimpleNamespace
 from collections.abc import Iterable
+import itertools
 import pns.contract
 import pns.dir
 import pns.loop
@@ -8,7 +9,7 @@ import pkgutil
 
 INIT = "__init__"
 
-class Namespace():
+class Namespace(SimpleNamespace):
     _omit_start=("_",)
     _omit_end=()
     _omit_func=False
@@ -28,10 +29,10 @@ class Namespace():
         self.__ = parent
         self._root = root
         # Aliases for this sub
-        self._alias = []
-        # Namespaces underneath this sub
+        self._alias = set()
+        # Namespaces underneath this namespace
         self._nest = {}
-        # Modules loaded onto this sub
+        # Modules loaded onto this namespace
         self._mod = {}
         self._contracts = []
         self._rcontracts = []
@@ -56,11 +57,11 @@ class Namespace():
             return self.__getattribute__(name)
 
         # Check if a sub is aliased to this name
-        for sub in self._nest:
-            if not isinstance(sub, Namespace):
+        for ns in itertools.chain(self._nest.values(), self._mod.values()):
+            if not isinstance(ns, Namespace):
                 continue
-            if name in sub._alias and getattr(sub,  "_virtual", True):
-                return sub
+            if name in ns._alias and getattr(ns,  "_virtual", True):
+                return ns
 
         # If attribute not found, attempt to load the module dynamically
         if name not in self._mod:
@@ -200,7 +201,7 @@ class Namespace():
         return ".".join(reversed(parts))
 
     def __repr__(self):
-        return f"{self.__class__.split('.')[-1]}({self.__ref__})"
+        return f"{self.__class__.__name__.split('.')[-1]}({self.__ref__})"
 
     async def _load_all(self, *, recurse:bool = True):
         for path, name, is_pkg in pkgutil.iter_modules(self._dirs):

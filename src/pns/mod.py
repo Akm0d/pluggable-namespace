@@ -12,6 +12,7 @@ import importlib.machinery
 # TODO, let the core hub have everything so we don't need imports even in PNS code -- even put these functions on the hub
 
 VIRTUAL = "__virtual__"
+VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
 FUNC_ALIAS = "__func_alias__"
 
@@ -65,6 +66,8 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
 
     loaded = LoadedMod(name=name, parent=sub, root=hub)
+    if hasattr(mod, VIRTUAL_NAME):
+        loaded._alias.add(getattr(mod, VIRTUAL_NAME))
     return await populate(loaded, mod)
 
 async def populate(loaded, mod: ModuleType):
