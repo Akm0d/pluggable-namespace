@@ -8,7 +8,7 @@ import pkgutil
 
 INIT = "__init__"
 
-class Namespace(Mapping):
+class Namespace():
     _omit_start=("_",)
     _omit_end=()
     _omit_func=False

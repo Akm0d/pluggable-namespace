@@ -57,11 +57,12 @@ import:
   - ast
   - builtins
   - contextvars
-  - pns.loader
   - functools
   - pathlib
   - pdb
+  - pns.mod
   - pns.hub
+  - pns.ref
   - pickle
   - pprint
   - prompt_toolkit
