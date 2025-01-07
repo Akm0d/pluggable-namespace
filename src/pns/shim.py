@@ -38,7 +38,7 @@ async def loaded_hub(
     hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
-    await hub.add_sub("pns", pypath=["pns.mods"])
+    await hub.add_sub("pop", pypath=["_pop"])
 
     # Load the config
     hub._add_child(name="config", static=hub._dynamic.dyne.config.paths)
