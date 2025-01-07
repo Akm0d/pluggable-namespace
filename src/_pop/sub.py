@@ -34,7 +34,6 @@ async def add(
     :param sub: The sub to use as the root to add to
     :param contracts_pypath: Load additional contract paths
     :param contracts_static: Load additional contract paths from a specific directory
-    :param default_contracts: Specifies that a specific contract plugin will be applied as a default to all plugins
     :param virtual: Toggle whether or not to process __virtual__ functions
     :param omit_start: Allows you to pass in a tuple of characters that would omit the loading of any object
     :param omit_end:Allows you to pass in a tuple of characters that would omit the loading of an object

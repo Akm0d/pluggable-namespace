@@ -25,7 +25,7 @@ async def loaded_hub(
     *,
     load_all_dynes: bool = True,
     load_all_subdirs: bool = True,
-    pop_mods: list[str] = (),
+    pop_mods: list[str] = ("_pop",),
     logs: bool = True,
     load_config: bool = True,
     shell: bool = True,
@@ -38,7 +38,7 @@ async def loaded_hub(
     hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
-    await hub.add_sub("pop", pypath=["_pop"])
+    await hub.add_sub("pop", pypath=pop_mods)
 
     # Load the config
     hub._add_child(name="config", static=hub._dynamic.dyne.config.paths)
