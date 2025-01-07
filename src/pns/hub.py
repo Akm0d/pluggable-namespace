@@ -142,7 +142,7 @@ class CMD(Sub):
         if isinstance(command, str):
             command = [command]
         self.command = command
-        super().__init__(name="sh", parent=parent or hub, root=hub)
+        super().__init__(name="sh", parent=parent, root=hub)
 
     def __getattr__(self, name):
         """
@@ -154,7 +154,7 @@ class CMD(Sub):
         Returns:
             CMD: A new CMD instance with the extended command.
         """
-        return CMD(self.hub, self.command + [name], parent=self)
+        return CMD(self._, self.command + [name], parent=self)
 
     def __getitem__(self, item):
         """

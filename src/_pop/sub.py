@@ -17,7 +17,6 @@ async def add(
     contracts_pypath: list[str] = (),
     contracts_static: list[str] = (),
     recursive_contracts_static: list[str] = (),
-    virtual: bool = True,
     omit_start: tuple[str] = ("_",),
     omit_end: tuple[str] = (),
     omit_func: bool = False,
@@ -28,21 +27,17 @@ async def add(
     """
     Add a new subsystem to the hub
     :param hub: The redistributed pns central hub
-    :param dyne_name: The dynamic name to use to look up paths to find plugins -- linked to conf.py
-    :param subname: The name that the sub is going to take on the hub
-        if nothing else is passed, it is used as the dyne_name
+    :param dyne_name: The dynamic name to use to look up paths to find plugins -- linked to conf.yaml
+    :param subname: The name that the sub is going to take on the hub. Defaults to the dyne name
     :param sub: The sub to use as the root to add to
     :param contracts_pypath: Load additional contract paths
     :param contracts_static: Load additional contract paths from a specific directory
-    :param virtual: Toggle whether or not to process __virtual__ functions
+    :param recursive_contracts_static: Load additional recursive contract paths from a specific directory
     :param omit_start: Allows you to pass in a tuple of characters that would omit the loading of any object
     :param omit_end:Allows you to pass in a tuple of characters that would omit the loading of an object
     :param omit_func: bool: Don't load any functions
     :param omit_class: bool: Don't load any classes
     :param omit_vars: bool: Don't load any vars
-    :param recursive_contracts_static: Load additional recursive contract paths from a specific directory
-    :param default_recursive_contracts: Specifies that a specific recursive contract plugin will be applied as a default
-        to all plugins
     :param python_import: Load a module from python onto the sub
     """
     if python_import:
@@ -66,7 +61,6 @@ async def add(
     else:
         await root.add_sub(subname)
 
-    root._nest[subname]._virtual = virtual
     root._nest[subname]._omit_start = omit_start
     root._nest[subname]._omit_end = omit_end
     root._nest[subname]._omit_func = omit_func
@@ -84,6 +78,7 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
     :param sub: The pns object that contains the loaded module data
     :param recurse: Recursively iterate over nested subs
     """
+    # TODO verify functionality of this
     if not sub._virtual:
         return
     dirs = sub._dirs

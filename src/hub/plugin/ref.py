@@ -49,16 +49,6 @@ async def output(hub, ret: object):
     elif isinstance(ret, str):
         await hub.lib.aioconsole.aprint(ret)
     else:
-        data = None
-        try:
-            data = ret.__dict__
-        except Exception:
-            if ret is not None:
-                data = ret
-        try:
-            data = hub.lib.ast.literal_eval(str(data))
-        except Exception:
-            ...
         outputter = hub.OPT.rend.get("output") or DEFAULT_OUTPUTTER
-        formatted = await hub.output[outputter].display(data)
+        formatted = await hub.output[outputter].display(ret)
         await hub.lib.aioconsole.aprint(formatted)
