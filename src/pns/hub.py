@@ -1,9 +1,4 @@
-import asyncio
 import sys
-import pns.dir
-import pns.data
-import pns.ref
-
 from ._debug import DEBUG_PNS_GETATTR
 
 if DEBUG_PNS_GETATTR:
@@ -86,8 +81,8 @@ class Hub(Sub):
         hub.hub = hub
         # Add a place for sys modules to live
         hub += "lib"
-        hub._dynamic = pns.dir.dynamic()
         hub.lib._nest = sys.modules
+        hub._dynamic = hub.lib.pns.dir.dynamic()
 
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
@@ -117,7 +112,7 @@ class Hub(Sub):
             return self
         # Remove the entry from the call stack
         last_mod = self._last_ref.rsplit(".", maxsplit=1)[0]
-        return pns.ref.last(self, last_mod)
+        return self.lib.pns.ref.last(self, last_mod)
 
     def __repr__(hub):
         return "Hub()"
@@ -198,11 +193,11 @@ class CMD(Sub):
             Process: An asyncio subprocess process object.
         """
         cmd = self.command[0]
-        proc = await asyncio.create_subprocess_exec(
+        proc = await self._.lib.asyncio.create_subprocess_exec(
             cmd,
             *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+            stdout=self._.lib.asyncio.subprocess.PIPE,
+            stderr=self._.lib.asyncio.subprocess.PIPE,
             **kwargs,
         )
         return proc
