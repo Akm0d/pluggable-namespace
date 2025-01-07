@@ -9,8 +9,6 @@ from types import ModuleType
 import importlib.util
 import importlib.machinery
 
-# TODO, let the core hub have everything so we don't need imports even in PNS code -- even put these functions on the hub
-
 VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
