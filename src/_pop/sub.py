@@ -72,7 +72,7 @@ async def add(
     root._nest[subname]._contracts = (contracts_pypath or []) + (contracts_static or [])
     root._nest[subname]._rcontracts = recursive_contracts_static or []
 
-
+SPECIAL = ["contracts", "rcontracts"]
 async def load_subdirs(hub, sub, *, recurse: bool = False):
     """
     Given a sub, load all subdirectories found under the sub into a lower namespace
@@ -83,39 +83,32 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
     # TODO verify functionality of this
     if not sub._virtual:
         return
-    dirs = sub._dirs
     roots = hub.lib.collections.defaultdict(list)
-    for dir_name in dirs:
-        dir_ = hub.lib.pathlib.Path(dir_name)
+    for dir_ in sub._dirs:
         if not dir_.exists():
             continue
         for fn in dir_.iterdir():
-            if fn.name.startswith("_"):
+            if fn.name[0] in sub._omit_start or fn.name[-1] in sub._omit_end:
                 continue
-            if fn.name == "contracts":
-                continue
-            if fn.name == "recursive_contracts":
+            if fn.name in SPECIAL:
                 continue
             full = dir_ / fn
             if not full.is_dir():
                 continue
             roots[fn.name].append(str(full))
     for name, sub_dirs in roots.items():
+        # Skip hidden directories
         if name.startswith("."):
             continue
-        # Load er up!
         await hub.pop.sub.add(
             subname=name,
             sub=sub,
             static=sub_dirs,
-            virtual=sub._virtual,
             omit_start=sub._omit_start,
             omit_end=sub._omit_end,
             omit_func=sub._omit_func,
             omit_class=sub._omit_class,
             omit_vars=sub._omit_vars,
-            mod_basename=sub._mod_basename,
-            stop_on_failures=sub._stop_on_failures,
         )
         if recurse:
             if isinstance(getattr(sub, name), pns.hub.Sub):

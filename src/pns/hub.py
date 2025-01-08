@@ -21,7 +21,7 @@ class Sub(Namespace):
     """
 
 
-    def __init__(self, name: str, parent: Namespace, root: "Hub"):
+    def __init__(self, name: str, parent: Namespace, root: "Hub", **kwargs):
         """
         Initializes a Sub instance.
 
@@ -30,17 +30,16 @@ class Sub(Namespace):
             parent (data.Namespace): The parent namespace of this Sub.
             root (Hub): The root Hub instance that this Sub is part of.
         """
-        super().__init__(name, parent=parent, root=root)
+        super().__init__(name, parent=parent, root=root, **kwargs)
         self.hub = root or parent
 
 
-    async def add_sub(self, name: str, recurse: bool = True, **kwargs):
+    async def add_sub(self, name: str, recurse: bool = True, pypath:list[str] = (), static:list[str] = ()):
         """
         Adds a sub-component or module to this Sub.
 
         Args:
             name (str): The name of the sub-component to add.
-            module_ref (str, optional): The module reference to load. Defaults to None.
             recurse (bool): If True, recursively loads submodules. Defaults to True.
         """
         if name in self._nest:
@@ -49,7 +48,20 @@ class Sub(Namespace):
             # TODO also call the sub's init.__virtual__ function and act based on the result
             return
 
-        sub = self._add_child(name=name, **kwargs)
+        current = self
+        parts = name.split(".")
+        for part in parts[:-1]: # Iterate over all parts except the last one
+            if part not in current._nest:
+                current._nest[part] = Sub(part, root=self._, parent=self)
+
+            current = current._nest[part]
+
+        # Only in the last iteration, use pypath and static
+        last_part = parts[-1]
+        current._nest[last_part] = Sub(
+            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
+        )
+        sub = current._nest[last_part]
 
         # Propagate the parent's recursive contracts
         sub._rcontracts = self._rcontracts

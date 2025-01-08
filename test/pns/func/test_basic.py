@@ -22,7 +22,7 @@ async def test_basic(hub):
 
 async def test_subdirs(hub):
     await hub.pop.sub.add(pypath=["test.pns.sdirs"])
-    await hub.pns.sub.load_subdirs(hub.sdirs)
+    await hub.pop.sub.load_subdirs(hub.sdirs)
     assert await hub.sdirs.test.ping()
     assert await hub.sdirs.l11.test.ping()
     assert await hub.sdirs.l12.test.ping()
