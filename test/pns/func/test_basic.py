@@ -31,7 +31,7 @@ async def test_subdirs(hub):
 
 async def test_subdirs_recurse(hub):
     await hub.pop.sub.add(pypath=["test.pns.sdirs"])
-    await hub.pns.sub.load_subdirs(hub.sdirs, recurse=True)
+    await hub.pop.sub.load_subdirs(hub.sdirs, recurse=True)
     assert await hub.sdirs.test.ping()
     assert await hub.sdirs.l11.test.ping()
     assert await hub.sdirs.l11.l2.test.ping()

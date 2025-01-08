@@ -80,7 +80,6 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
     :param sub: The pns object that contains the loaded module data
     :param recurse: Recursively iterate over nested subs
     """
-    # TODO verify functionality of this
     if not sub._virtual:
         return
     roots = hub.lib.collections.defaultdict(list)
@@ -112,4 +111,4 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
         )
         if recurse:
             if isinstance(getattr(sub, name), pns.hub.Sub):
-                await hub.pns.sub.load_subdirs(getattr(sub, name), recurse=recurse)
+                await hub.pop.sub.load_subdirs(getattr(sub, name), recurse=recurse)
