@@ -8,6 +8,7 @@ import pns.loop
 import pkgutil
 
 INIT = "__init__"
+SUB_ALIAS = "__sub_alias__"
 
 class Namespace(SimpleNamespace):
     _omit_start=("_",)
@@ -221,6 +222,9 @@ class Namespace(SimpleNamespace):
             return
 
         self._mod[name] = loaded_mod
+
+        if hasattr(mod, SUB_ALIAS):
+            self._alias.update(getattr(mod, SUB_ALIAS))
 
         # Execute the __init__ function if present
         if hasattr(mod, INIT):
