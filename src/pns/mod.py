@@ -58,10 +58,18 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
         if asyncio.iscoroutine(ret):
             ret = await ret
 
+        error = None
         if ret is True:
             ...
-        elif ret is False or (len(ret) > 1 and ret[0] is False):
-            raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {ret[1]}")
+        elif ret is False:
+            error = "Virtual returned False"
+        elif isinstance(ret, str):
+            error = ret
+        elif len(ret) > 1 and ret[0] is False:
+            error = ret[1]
+
+        if error:
+            raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {error}")
 
     loaded = LoadedMod(name=name, parent=sub, root=hub)
     if hasattr(mod, VIRTUAL_NAME):
@@ -78,6 +86,9 @@ async def populate(loaded, mod: ModuleType):
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
     if inspect.isfunction(__func_alias__):
         __func_alias__ = __func_alias__(loaded._)
+        if asyncio.iscoroutine(__func_alias__):
+            __func_alias__ = await __func_alias__
+
 
     # Iterate over all attributes in the module
     for attr in getattr(mod, "__load__", dir(mod)):

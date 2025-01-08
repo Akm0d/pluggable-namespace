@@ -1,7 +1,5 @@
 import os
 
-from pns.scanner import scan
-
 __virtualname__ = "test"
 __contracts__ = "test"
 __func_alias__ = {"ping_": "ping"}
@@ -37,13 +35,6 @@ async def attr(hub):
 
 attr.bar = True
 attr.func = True
-
-
-async def call_scan(hub):
-    # If scan has been loaded as a Contract, the call below will throw a TypeError because
-    # we'll also pass hub
-    scan([os.path.dirname(__file__)])
-    return True
 
 
 async def double_underscore(hub):

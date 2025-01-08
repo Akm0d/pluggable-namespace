@@ -12,8 +12,8 @@ async def test_sub_parent_hub(hub):
 
 
 async def test_sub_parent_sub(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
-    await hub.pns.sub.add(pypath=["tests.pns.mods.nest"], sub=hub.mods)
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pnsmods.nest"], sub=hub.mods)
     assert hub.mods.nest.__ is hub.mods
 
 
@@ -26,5 +26,5 @@ async def test_contracted_parent(hub):
 
 
 async def test_current_mod(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     await hub.mods.dunder.func()

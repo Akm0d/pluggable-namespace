@@ -5,7 +5,7 @@ import pytest
 
 
 async def test_sub_alias(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.alias"])
+    await hub.pns.sub.add(pypath=["test.pns.alias"])
     assert await hub.alias.init.ping() is True
     assert await hub.red.init.ping() is True
     assert await hub.blue.init.ping() is True
@@ -13,7 +13,7 @@ async def test_sub_alias(hub):
 
 
 async def test_basic(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pop.sub.add(pypath=["test.pns.mods"])
     await hub.mods.test.ping()
     assert await hub.mods.test.ping() == {}
     assert await hub.mods.test.demo() is False
@@ -21,7 +21,7 @@ async def test_basic(hub):
 
 
 async def test_subdirs(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.sdirs"])
+    await hub.pns.sub.add(pypath=["test.pns.sdirs"])
     await hub.pns.sub.load_subdirs(hub.sdirs)
     assert await hub.sdirs.test.ping()
     assert await hub.sdirs.l11.test.ping()
@@ -30,7 +30,7 @@ async def test_subdirs(hub):
 
 
 async def test_subdirs_recurse(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.sdirs"])
+    await hub.pns.sub.add(pypath=["test.pns.sdirs"])
     await hub.pns.sub.load_subdirs(hub.sdirs, recurse=True)
     assert await hub.sdirs.test.ping()
     assert await hub.sdirs.l11.test.ping()
@@ -40,7 +40,7 @@ async def test_subdirs_recurse(hub):
 
 
 async def test_getattr(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     await hub.mods.test.ping()
     assert await hub["mods.test.ping"]() == {}
     assert await hub.mods.test["demo"]() is False
@@ -51,20 +51,20 @@ async def test_nest(hub):
     """
     Test the ability to nest the subs in a deeper namespace
     """
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
-    await hub.pns.sub.add(pypath=["tests.pns.mods.nest"], sub=hub.mods)
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pnsmods.nest"], sub=hub.mods)
     assert await hub.mods.nest.basic.ret_true()
 
 
 async def test_func_attrs(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     assert "bar" in hub.mods.test.attr.__dict__
     assert hub.mods.test.attr.func.bar is True
     assert hub.mods.test.attr.func.func is not hub.mods.test.attr.func
 
 
 async def test_module_level_direct_call(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     with pytest.raises(Exception):
         await hub.mods.test.module_level_non_aliased_ping_call()
     assert await hub.mods.test.module_level_non_aliased_ping_call_fw_hub() == {}
@@ -72,27 +72,27 @@ async def test_module_level_direct_call(hub):
 
 async def test_contract(hub):
     await hub.pns.sub.add(
-        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+        pypath=["test.pns.mods"], contracts_pypath=["test.pns.contracts"]
     )
     with pytest.raises(Exception):
         await hub.mods.test.ping(4)
 
 
 async def test_inline_contract(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.cmods"])
+    await hub.pns.sub.add(pypath=["test.pns.cmods"])
     assert await hub.cmods.ctest.cping()
     assert hub.CPING
 
 
 async def test_no_contract(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     with pytest.raises(TypeError):
         await hub.mods.test.ping(4)
 
 
 async def test_contract_manipulate(hub):
     await hub.pns.sub.add(
-        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+        pypath=["test.pns.mods"], contracts_pypath=["test.pns.contracts"]
     )
     assert "override" in await hub.mods.all.list()
     assert "post called" in await hub.mods.all.list()
@@ -101,7 +101,7 @@ async def test_contract_manipulate(hub):
 
 async def test_private_function_cross_access(hub):
     hub.opts = "OPTS!"
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     # Let's make sure that the private function is not accessible through the sub
     with pytest.raises(AttributeError):
         await hub.mods.priv._private() == "OPTS!"
@@ -114,7 +114,7 @@ async def test_private_function_cross_access(hub):
 async def test_private_function_cross_access_with_contracts(hub):
     hub.opts = "OPTS!"
     await hub.pns.sub.add(
-        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+        pypath=["test.pns.mods"], contracts_pypath=["test.pns.contracts"]
     )
     # Let's make sure that the private function is not accessible through the sub
     with pytest.raises(AttributeError):
@@ -127,13 +127,13 @@ async def test_private_function_cross_access_with_contracts(hub):
 async def test_cross_in_virtual(hub):
     hub.opts = "OPTS!"
     await hub.pns.sub.add(
-        pypath=["tests.pns.mods"], contracts_pypath=["tests.pns.contracts"]
+        pypath=["test.pns.mods"], contracts_pypath=["test.pns.contracts"]
     )
     assert await hub.mods.virt.present() is True
 
 
 async def test_non_module_functions_are_not_loaded(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.mods"])
+    await hub.pns.sub.add(pypath=["test.pns.mods"])
     await hub.mods._load_all()
     assert "scan" not in dir(hub.mods.test)
     await hub.mods.test.call_scan() is True
@@ -207,7 +207,7 @@ async def test_contract_signatures(hub):
     hub.LOAD_PASS = True
     hub.LOAD_FAIL = False
     # These functions should load no problem
-    await hub.pns.sub.add(pypath=["tests.pns.mods.contract_sig"])
+    await hub.pns.sub.add(pypath=["test.pnsmods.contract_sig"])
 
 
 async def test_contract_signature_fail(hub):
@@ -215,7 +215,7 @@ async def test_contract_signature_fail(hub):
     hub.LOAD_FAIL = True
     # These functions should load with sig failures
     with pytest.raises(pns.exc.ContractSigException) as e:
-        await hub.pns.sub.add(pypath=["tests.pns.mods.contract_sig"])
+        await hub.pns.sub.add(pypath=["test.pnsmods.contract_sig"])
     errs = e.value.args[0].splitlines()
 
     assert "Signature Errors" in errs[0]

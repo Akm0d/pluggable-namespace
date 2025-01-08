@@ -1,20 +1,20 @@
 # Test parameters
 async def test_parameters_single_flag(hub):
-    opts = hub.lib.pns.data.ImmutableNamespaceDict({"cli": dict(args=["--arg1"])})
+    opts = hub.lib.pns.data.NamespaceDict({"cli": dict(args=["--arg1"])})
     args, kwargs = await hub.cli.cli.parameters(opts)
     assert args == []
     assert kwargs == {"arg1": True}
 
 
 async def test_parameters_key_value_pair(hub):
-    opts = hub.lib.pns.data.ImmutableNamespaceDict({"cli": {"args": ["--key=value"]}})
+    opts = hub.lib.pns.data.NamespaceDict({"cli": {"args": ["--key=value"]}})
     args, kwargs = await hub.cli.cli.parameters(opts)
     assert args == []
     assert kwargs == {"key": "value"}
 
 
 async def test_parameters_key_value_with_space(hub):
-    opts = hub.lib.pns.data.ImmutableNamespaceDict(
+    opts = hub.lib.pns.data.NamespaceDict(
         {"cli": {"args": ["--key", "value"]}}
     )
     args, kwargs = await hub.cli.cli.parameters(opts)
@@ -23,7 +23,7 @@ async def test_parameters_key_value_with_space(hub):
 
 
 async def test_parameters_multiple_flags(hub):
-    opts = hub.lib.pns.data.ImmutableNamespaceDict(
+    opts = hub.lib.pns.data.NamespaceDict(
         {"cli": {"args": ["--arg1", "--arg2"]}}
     )
     args, kwargs = await hub.cli.cli.parameters(opts)
@@ -32,7 +32,7 @@ async def test_parameters_multiple_flags(hub):
 
 
 async def test_parameters_mixed_args(hub):
-    opts = hub.lib.pns.data.ImmutableNamespaceDict(
+    opts = hub.lib.pns.data.NamespaceDict(
         {"cli": {"args": ["positional1", "--key=value", "positional2", "--flag"]}}
     )
     args, kwargs = await hub.cli.cli.parameters(opts)

@@ -50,7 +50,7 @@ async def test_load_basic(hub):
     # Test loading with minimal arguments
     with hub.lib.unittest.mock.patch("sys.argv", ["pns"]):
         OPT = await hub.config.init.load()
-    assert isinstance(OPT, hub.lib.pns.data.ImmutableNamespaceDict)
+    assert isinstance(OPT, hub.lib.pns.data.NamespaceDict)
     assert "pns" in OPT
     assert "subparser" in OPT["pns"]
     assert "global_clis" in OPT["pns"]

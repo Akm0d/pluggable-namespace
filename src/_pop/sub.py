@@ -54,12 +54,14 @@ async def add(
         return
 
     if python_import:
-        root._nest[subname] = hub.lib.importlib.import_module(python_import)
+        new_sub = hub.lib.importlib.import_module(python_import)
+        root._nest[subname] = new_sub
     elif dyne_name:
-        await hub.add_sub(name=subname, static=hub._dynamic.dyne[subname].paths)
-        await hub._nest[subname]._load_all()
+        new_sub =await hub.add_sub(name=subname, static=hub._dynamic.dyne[subname].paths)
+        await new_sub._load_all()
     else:
-        await root.add_sub(subname)
+        new_sub = await root.add_sub(subname, pypath=pypath, static=static)
+        await new_sub._load_all()
 
     root._nest[subname]._omit_start = omit_start
     root._nest[subname]._omit_end = omit_end

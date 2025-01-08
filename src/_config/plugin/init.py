@@ -264,7 +264,7 @@ async def prioritize(
         Document_parameters: If True, hub.OPT will contain docstrings for leaf nodes
 
     Returns:
-       pns.data.ImmutableNamespaceDict: The prioritized configuration options.
+       pns.data.NamespaceDict: The prioritized configuration options.
     """
     opt = hub.lib.collections.defaultdict(dict)
     for namespace, args in config.items():

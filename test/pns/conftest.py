@@ -4,20 +4,20 @@ from unittest import mock
 import pathlib
 import pytest
 
-import pns
+import pns.shim
 
 
-@pytest.fixture
-async def hub():
-    async with pns.Hub(
+@pytest.fixture(name="hub")
+async def minimal_hub():
+    hub = await pns.shim.loaded_hub(
         # Let each test manually add their structure
         load_all_dynes=False,
         load_all_subdirs=False,
-        recurse_subdirs=False,
+        # recurse_subdirs=False,
         logs=False,
         load_config=False,
-    ) as hub:
-        yield hub
+    )
+    yield hub
 
 
 @pytest.fixture(autouse=True)

@@ -4,7 +4,7 @@ async def __virtual__(hub):
 
 async def __init__(hub):
     hub._.FOO = "bar"
-    assert hub._.__name__.endswith(".dunder"), f"name is {hub._.__name__}, not dunder"
+    assert hub._.__name__ == "dunder", f"name is {hub._.__name__}, not dunder"
 
 
 async def func(hub):

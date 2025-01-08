@@ -39,6 +39,7 @@ async def loaded_hub(
 
     # Add essential POP modules
     await hub.add_sub("pop", pypath=pop_mods)
+    await hub.pop._load_all()
 
     # Load the config
     hub._add_child(name="config", static=hub._dynamic.dyne.config.paths)

@@ -184,7 +184,7 @@ class Namespace(SimpleNamespace):
         # Only in the last iteration, use pypath and static
         last_part = parts[-1]
         current._nest[last_part] = Namespace(
-            last_part, root=self._, parent=self, pypath=pypath, static=static
+            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
         )
         return current._nest[last_part]
 
@@ -193,7 +193,7 @@ class Namespace(SimpleNamespace):
         """Construct a reference string that traverses from the root to the current node."""
         parts = []
         finder = self
-        while finder != self._:  # Traverse up until we reach the root
+        while finder.__ is not None:  # Traverse up until we reach the root
             parts.append(finder.__name__)  # Add the root name
             finder = finder.__
 
@@ -218,7 +218,6 @@ class Namespace(SimpleNamespace):
         try:
             loaded_mod = await pns.mod.prep(self._, self, name, mod)
         except NotImplementedError:
-            self._nest.pop(name, None)
             return
 
         self._mod[name] = loaded_mod

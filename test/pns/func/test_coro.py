@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_async_simple_contracts(hub):
-    await hub.pns.sub.add(pypath=["tests.pns.coro"], subname="coro")
+    await hub.pns.sub.add(pypath=["test.pns.coro"], subname="coro")
     ret = await hub.coro.test.simple()
     assert ret is True
     assert hub.PRE

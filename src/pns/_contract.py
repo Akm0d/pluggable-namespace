@@ -1,6 +1,13 @@
 import asyncio
 import inspect
 
+# TODO We need dynamic definition of contract types
+TYPE = [
+    "sig",
+    "pre",
+    "call",
+    "post",
+]
 
 class ContractedContext:
     """
@@ -52,6 +59,7 @@ class ContractedContext:
 
 
 
+# TODO this can be a subclass of Namespace
 class Contracted:
     """
     This class wraps functions that have a contract associated with them
@@ -150,6 +158,7 @@ class Contracted:
         return f"<{self.__class__.__name__} {self.ref}>"
 
 
+# TODO does this really need to be a separate contract type?
 class ContractedAsyncGen(Contracted):
     async def __call__(self, *args, **kwargs):
         async with CallStack(self):
