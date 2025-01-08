@@ -7,7 +7,7 @@ async def test_repeated_recursive_contracts(hub):
     # A scenario similar to this could occur when recursive contracts
     # were defined on a parent Sub, and a different set of recursive contracts
     # including some of the same contracts were defined on a child Sub.
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsregression.contract_masking.sub"],
         recursive_contracts_static=[
             current_dir / "contract1",

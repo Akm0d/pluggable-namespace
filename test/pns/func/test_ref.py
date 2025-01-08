@@ -5,8 +5,8 @@ import pns.ref
 
 @pytest.fixture
 async def hub(hub):
-    await hub.pns.sub.add("test")
-    await hub.pns.sub.add("subtest", sub=hub.test)
+    await hub.pop.sub.add("test")
+    await hub.pop.sub.add("subtest", sub=hub.test)
     hub.test.subtest.attr = "value"
     hub.test.subtest.dict_attr = {"key": "dict_value"}
     hub.test.subtest.list_attr = ["list_value"]

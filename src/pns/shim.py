@@ -47,6 +47,8 @@ async def loaded_hub(
         await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
         hub.OPT = pns.data.NamespaceDict(opt)
+    else:
+        hub.OPT = pns.data.NamespaceDict()
 
     # Setup the logger
     if load_config and logs:

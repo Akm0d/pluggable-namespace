@@ -4,14 +4,13 @@ from unittest import mock
 
 import pytest
 
-import pns.hub
+import pns.shim
 
 
 @pytest.fixture(name="hub")
 async def integration_hub():
-    async with pns.hub.Hub() as hub:
-        await hub.patt.sh.add_sub()
-        yield hub
+    hub = await pns.shim.loaded_hub()
+    yield hub
 
 
 @pytest.fixture(autouse=True)

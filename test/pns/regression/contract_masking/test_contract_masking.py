@@ -4,7 +4,7 @@ current_dir = Path(globals()["__file__"]).parent
 
 
 async def test_masked_contracts(hub):
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsregression.contract_masking.sub"],
         contracts_static=[
             current_dir / "contract1",
@@ -17,7 +17,7 @@ async def test_masked_contracts(hub):
 
 
 async def test_masked_recursive_contracts(hub):
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsregression.contract_masking.sub"],
         recursive_contracts_static=[
             current_dir / "contract1",

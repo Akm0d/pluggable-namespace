@@ -1,5 +1,5 @@
 async def test_contract_context(hub):
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsmods.contract_ctx"],
         subname="mods",
         contracts_pypath=["test.pns.contracts"],
@@ -11,7 +11,7 @@ async def test_contract_context(hub):
 
 async def test_contract_context_update_call(hub):
     # if a pre modifies args, make sure they persist when called via 'call' function
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsmods.contract_ctx"],
         subname="mods",
         contracts_pypath=["test.pns.contracts"],
@@ -23,7 +23,7 @@ async def test_contract_context_update_call(hub):
 
 async def test_contract_context_update_direct(hub):
     # if a pre modifies args, make sure they persist when called directly
-    await hub.pns.sub.add(
+    await hub.pop.sub.add(
         pypath=["test.pnsmods.contract_ctx"],
         subname="mods",
         contracts_pypath=["test.pns.contracts"],

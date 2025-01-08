@@ -104,7 +104,7 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
         if name.startswith("."):
             continue
         # Load er up!
-        await hub.pns.sub.add(
+        await hub.pop.sub.add(
             subname=name,
             sub=sub,
             static=sub_dirs,

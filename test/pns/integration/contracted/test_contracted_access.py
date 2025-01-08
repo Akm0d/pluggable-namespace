@@ -1,5 +1,5 @@
 async def _hub(hub):
-    await hub.pns.sub.add(pypath=["test.pnsintegration.contracted.mods"])
+    await hub.pop.sub.add(pypath=["test.pnsintegration.contracted.mods"])
     return hub
 
 
