@@ -43,7 +43,7 @@ async def loaded_hub(
     await hub.pop._load_all()
 
     # Load the config
-    hub._add_child(name="config", static=hub._dynamic.dyne.config.paths)
+    await hub.add_sub(name="config", static=hub._dynamic.dyne.config.paths)
     if load_config:
         await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
