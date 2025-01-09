@@ -1,4 +1,4 @@
-__contracts__ = "ctx"
+_contracts__ = "ctx"
 
 
 async def test(hub):

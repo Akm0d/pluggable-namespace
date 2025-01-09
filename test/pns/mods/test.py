@@ -1,7 +1,7 @@
 import os
 
 __virtualname__ = "test"
-__contracts__ = "test"
+_contracts__ = "test"
 __func_alias__ = {"ping_": "ping"}
 
 

@@ -5,6 +5,9 @@ if DEBUG_PNS_GETATTR:
 else:
     from pns._ccontract import * # type: ignore
 
+
+CONTRACTS = "__contracts__"
+
 def load_contract(
     contracts,
     mod: object,
@@ -26,8 +29,8 @@ def load_contract(
         if "init" not in loaded_contracts:
             loaded_contracts.append("init")
             raws.append(getattr(contracts, "init"))
-    if hasattr(mod, "__contracts__"):
-        cnames = getattr(mod, "__contracts__")
+    if hasattr(mod, CONTRACTS):
+        cnames = getattr(mod, CONTRACTS)
         for cname in cnames:
             if cname in contracts:
                 loaded_contracts.append(cname)
@@ -35,7 +38,7 @@ def load_contract(
     return raws
 
 
-def create_contracted(
+def create(
     hub,
     contracts: list,
     func,

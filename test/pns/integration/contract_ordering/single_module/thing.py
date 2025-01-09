@@ -1,4 +1,4 @@
-__contracts__ = ["dunder"]
+_contracts__ = ["dunder"]
 
 
 async def test_fn(hub):

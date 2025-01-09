@@ -50,7 +50,7 @@ class Sub(Namespace):
         sub = self._add_child(name, cls=Sub, **kwargs)
 
         # Propagate the parent's recursive contracts
-        sub._rcontracts = self._rcontracts
+        sub._rcontract = self._rcontract
 
         return sub
 

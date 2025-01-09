@@ -127,7 +127,7 @@ class Contracted:
         )
 
     async def __call__(self, *args, **kwargs):
-        async with CallStack(self):
+        with CallStack(self):
             if self.implicit_hub:
                 args = (self.hub,) + args
             if not self._has_contracts:
@@ -195,20 +195,19 @@ class CallStack:
     """
     A wrapper for functions to add and remove their context from the stack securely
     """
-
     def __init__(self, contract: Contracted):
         self.contract = contract
-        self._last_ref = None
-        self._last_call = None
+        self.last_ref = None
+        self.last_call = None
 
-    async def __aenter__(self):
-        self._last_ref = self.contract.hub._last_ref
-        self._last_call = self.contract.hub._last_call
+    def __enter__(self):
+        self.last_ref = self.contract.hub._last_ref
+        self.last_call = self.contract.hub._last_call
         self.contract.hub._last_ref = self.contract.ref
         self.contract.hub._last_call = self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.contract.hub._last_ref = self._last_ref
-        self.contract.hub._last_call = self._last_call
-        self._last_ref = None
-        self._last_call = self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.contract.hub._last_ref = self.last_ref
+        self.contract.hub._last_call = self.last_call
+        self.last_ref = None
+        self.last_call = self

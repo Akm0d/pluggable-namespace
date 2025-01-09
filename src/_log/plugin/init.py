@@ -109,7 +109,7 @@ async def emit(hub, record):
 
 
 def _get_caller_ref(hub) -> str:
-    ref = hub._last_call._last_ref or "hub"
+    ref = hub._last_call.last_ref or "hub"
     return ref
 
 

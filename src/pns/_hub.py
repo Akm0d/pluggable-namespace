@@ -9,6 +9,8 @@ import pkgutil
 
 INIT = "__init__"
 SUB_ALIAS = "__sub_alias__"
+CONTRACTS_DIR = ("contract", "contracts")
+RECURSIVE_CONTRACTS_DIR = ("rcontract", "recursive_contracts")
 
 class Namespace(SimpleNamespace):
     _omit_start=("_",)
@@ -28,24 +30,30 @@ class Namespace(SimpleNamespace):
     ):
         self.__name__ = name
         self.__ = parent
-        self._root = root
+        self.__root = root
         # Aliases for this sub
         self._alias = set()
         # Namespaces underneath this namespace
         self._nest = {}
         # Modules loaded onto this namespace
         self._mod = {}
-        self._contracts = []
-        self._rcontracts = []
-        self._dirs = pns.dir.walk(pypath, static)
+        self.__dir = pns.dir.walk(pypath, static)
+        # Find contracts within the dirs
+        self._contract = []
+        for d in CONTRACTS_DIR:
+            self._contract.extend(pns.dir.inline(self.__dir, d))
+        self._rcontract = []
+        for d in RECURSIVE_CONTRACTS_DIR:
+            self._rcontract.extend(pns.dir.inline(self.__dir, d))
+
 
     @property
     def _(self):
-        return self._root
+        return self.__root
 
     @property
-    def contracts(self):
-        return self._contracts + self._rcontracts
+    def contract(self):
+        return self._contract + self._rcontract
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""
@@ -187,7 +195,7 @@ class Namespace(SimpleNamespace):
         # Only in the last iteration, use pypath and static
         last_part = parts[-1]
         current._nest[last_part] = cls(
-            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
+            last_part, root=self.__root or self, parent=self, pypath=pypath, static=static
         )
         return current._nest[last_part]
 
@@ -207,11 +215,11 @@ class Namespace(SimpleNamespace):
         return f"{self.__class__.__name__.split('.')[-1]}({self.__ref__})"
 
     async def _load_all(self, *, recurse:bool = True):
-        for path, name, is_pkg in pkgutil.iter_modules(self._dirs):
+        for path, name, is_pkg in pkgutil.iter_modules(self.__dir):
             await self._load_mod(name, recurse=recurse)
 
     async def _load_mod(self, name: str, *, recurse:bool = True):
-        for path in self._dirs:
+        for path in self.__dir:
             mod = pns.mod.load_from_path(name, path)
             if mod:
                 break

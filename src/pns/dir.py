@@ -83,6 +83,23 @@ def dynamic():
     return ret
 
 
+def inline(dirs: list[str], subdir: str) -> list[str]:
+    """
+    Look for the named subdir in the list of dirs
+    :param dirs: The names of configured dynamic dirs
+    :param subdir: The name of the subdir to check for in the list of dynamic dirs
+    :return An extended list of dirs that includes the found subdirs
+    """
+    ret = []
+    for dir_ in dirs:
+        check = os.path.join(dir_, subdir)
+        if check in ret:
+            continue
+        if os.path.isdir(check):
+            ret.append(check)
+    return ret
+
+
 def parse_config(
     config_file: pathlib.Path,
 ) -> tuple[dict[str, object], dict[str, object], set[str]]:
@@ -101,9 +118,9 @@ def parse_config(
         file_contents = f.read()
         try:
             pop_config = yaml.safe_load(file_contents) or {}
-        except:
+        except Exception as e:
             msg = "Unsupported file format"
-            raise ValueError(msg)
+            raise ValueError(msg) from e
 
     # Gather dynamic namespace paths for this import
     for name, paths in pop_config.get("dyne", {}).items():

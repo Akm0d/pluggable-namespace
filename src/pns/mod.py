@@ -9,6 +9,7 @@ from types import ModuleType
 import importlib.util
 import importlib.machinery
 
+# TODO create an "internal" dyne that we can use to extend the loadedmod with features dynamically
 VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
@@ -112,9 +113,9 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            contracted_func = pns.contract.create_contracted(
+            contracted_func = pns.contract.create(
                 hub=loaded._,
-                contracts=loaded.contracts,
+                contracts=loaded.contract,
                 func=func,
                 ref=loaded.__ref__,
                 name=name,

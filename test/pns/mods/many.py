@@ -1,5 +1,5 @@
 __virtualname__ = "all"
-__contracts__ = "all"
+_contracts__ = "all"
 __func_alias__ = {
     "list_": "list",
     "dict_": "dict",
