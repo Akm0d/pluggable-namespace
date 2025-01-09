@@ -52,7 +52,7 @@ async def test_nest(hub):
     Test the ability to nest the subs in a deeper namespace
     """
     await hub.pop.sub.add(pypath=["test.pns.mods"])
-    await hub.pop.sub.add(pypath=["test.pnsmods.nest"], sub=hub.mods)
+    await hub.pop.sub.add(pypath=["test.pns.mods.nest"], sub=hub.mods)
     assert await hub.mods.nest.basic.ret_true()
 
 

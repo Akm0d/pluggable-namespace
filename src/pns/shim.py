@@ -4,6 +4,7 @@ A module that facilitates the creation of the hub
 
 import pns.hub
 import pns.data
+import pns.shell
 
 
 async def pop_hub():
@@ -56,7 +57,7 @@ async def loaded_hub(
 
     # Add the ability to shell out from the hub
     if shell:
-        hub._nest["sh"] = pns.hub.CMD(hub, parent=hub)
+        hub._nest["sh"] = pns.shell.CMD(hub, parent=hub)
 
     if load_all_dynes:
         await load_all(hub, load_all_subdirs)

@@ -172,19 +172,21 @@ class Namespace(SimpleNamespace):
         """
         return bool(self._nest) or bool(self._mod)
 
-    def _add_child(self, name: str, pypath: list[str] = (), static:list[str] = ()):
+    def _add_child(self, name: str, pypath: list[str] = (), static:list[str] = (), cls = None):
         """Add a new child to the parent"""
+        if cls is None:
+            cls = Namespace
         current = self
         parts = name.split(".")
         for part in parts[:-1]:  # Iterate over all parts except the last one
             if part not in current._nest:
-                current._nest[part] = Namespace(part, root=self._, parent=self)
+                current._nest[part] = cls(part, root=self._, parent=self)
 
             current = current._nest[part]
 
         # Only in the last iteration, use pypath and static
         last_part = parts[-1]
-        current._nest[last_part] = Namespace(
+        current._nest[last_part] = cls(
             last_part, root=self._root or self, parent=self, pypath=pypath, static=static
         )
         return current._nest[last_part]

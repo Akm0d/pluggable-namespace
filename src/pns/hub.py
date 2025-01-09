@@ -31,10 +31,9 @@ class Sub(Namespace):
             root (Hub): The root Hub instance that this Sub is part of.
         """
         super().__init__(name, parent=parent, root=root, **kwargs)
-        self.hub = root or parent
 
 
-    async def add_sub(self, name: str, recurse: bool = True, pypath:list[str] = (), static:list[str] = ()):
+    async def add_sub(self, name: str, recurse: bool = True, **kwargs):
         """
         Adds a sub-component or module to this Sub.
 
@@ -48,20 +47,7 @@ class Sub(Namespace):
             # TODO also call the sub's init.__virtual__ function and act based on the result
             return
 
-        current = self
-        parts = name.split(".")
-        for part in parts[:-1]: # Iterate over all parts except the last one
-            if part not in current._nest:
-                current._nest[part] = Sub(part, root=self._, parent=self)
-
-            current = current._nest[part]
-
-        # Only in the last iteration, use pypath and static
-        last_part = parts[-1]
-        current._nest[last_part] = Sub(
-            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
-        )
-        sub = current._nest[last_part]
+        sub = self._add_child(name, cls=Sub, **kwargs)
 
         # Propagate the parent's recursive contracts
         sub._rcontracts = self._rcontracts
@@ -95,9 +81,6 @@ class Hub(Sub):
         hub.lib._nest = sys.modules
         hub._dynamic = hub.lib.pns.dir.dynamic()
 
-        # Make sure the logging functions are available as early as possible
-        # NOTE This is how to add a dyne
-        hub._add_child(name="log", static=hub._dynamic.dyne.log.paths)
 
     @classmethod
     async def new(cls):
@@ -105,6 +88,9 @@ class Hub(Sub):
         Initialize a hub with async capabilities
         """
         hub = cls()
+        # Make sure the logging functions are available as early as possible
+        # NOTE This is how to add a dyne
+        await hub.add_sub(name="log", static=hub._dynamic.dyne.log.paths)
         # Load all the modules on hub.log
         await hub.log._load_all()
         await hub.log.debug("Initialized the hub")
@@ -127,173 +113,3 @@ class Hub(Sub):
 
     def __repr__(hub):
         return "Hub()"
-
-
-class CMD(Sub):
-    """
-    A class representing a shell command execution interface that allows accessing
-    shell commands through a namespace-like structure on a Hub object.
-    """
-
-    def __init__(self, hub: Hub, command: list[str] | str = None, parent=None):
-        """
-        Initialize the CMD interface.
-
-        Args:
-            hub: The hub to which this CMD interface is attached.
-            command (list[str] or str, optional): The initial command or command parts.
-        """
-        if not command:
-            command = []
-        if isinstance(command, str):
-            command = [command]
-        self.command = command
-        super().__init__(name="sh", parent=parent, root=hub)
-
-    def __getattr__(self, name):
-        """
-        Allows accessing additional command parts via attribute access.
-
-        Args:
-            name (str): The next part of the command to add.
-
-        Returns:
-            CMD: A new CMD instance with the extended command.
-        """
-        return CMD(self._, self.command + [name], parent=self)
-
-    def __getitem__(self, item):
-        """
-        Allows accessing additional command parts via item access.
-
-        Args:
-            item (str): The next part of the command to add.
-
-        Returns:
-            CMD: A new CMD instance with the extended command.
-        """
-        return getattr(self, item)
-
-    def __bool__(self):
-        """
-        Determines if the command is available on the host system.
-
-        Returns:
-            bool: True if the command is available, False otherwise.
-        """
-        return bool(self.hub.lib.shutil.which(self.command[0]))
-
-    def __str__(self):
-        """
-        Provides a string representing the path of the executable command.
-
-        Returns:
-            str: The path to the executable, or None if it's not available.
-        """
-        return self.hub.lib.shutil.which(self.command[0])
-
-    async def _execute_command(self, *args, **kwargs):
-        """
-        Executes the command asynchronously with provided arguments.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Returns:
-            Process: An asyncio subprocess process object.
-        """
-        cmd = self.command[0]
-        proc = await self._.lib.asyncio.create_subprocess_exec(
-            cmd,
-            *args,
-            stdout=self._.lib.asyncio.subprocess.PIPE,
-            stderr=self._.lib.asyncio.subprocess.PIPE,
-            **kwargs,
-        )
-        return proc
-
-    async def __call__(self, *args, **kwargs):
-        """
-        Execute the command and return the standard output.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Returns:
-            str: Standard output of the executed command.
-        """
-        return await self.stdout(*args, **kwargs)
-
-    async def __aiter__(self):
-        """
-        Allows iteration over the lines of the command's standard output.
-
-        Yields:
-            str: A line of output from the command.
-        """
-        async for line in self.lines():
-            yield line
-
-    async def lines(self, *args, **kwargs):
-        """
-        Executes the command and yields each line of standard output.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Yields:
-            str: A line of output from the command.
-        """
-        proc = await self._execute_command(*args, **kwargs)
-        while True:
-            line = await proc.stdout.readline()
-            if not line:
-                break
-            yield line.decode("utf-8").strip()
-
-    async def json(self, *args, **kwargs):
-        """
-        Executes the command and parses the standard output as JSON.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Returns:
-            dict: Parsed JSON output.
-        """
-        stdout = await self.__call__(*args, **kwargs)
-        return self.hub.lib.json.loads(stdout)
-
-    async def stderr(self, *args, **kwargs):
-        """
-        Executes the command and returns the standard error output.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Returns:
-            str: Standard error of the executed command.
-        """
-        proc = await self._execute_command(*args, **kwargs)
-        _, stderr = await proc.communicate()
-        return stderr.decode("utf-8")
-
-    async def stdout(self, *args, **kwargs):
-        """
-        Executes the command and returns the standard output.
-
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
-
-        Returns:
-            str: Standard output of the executed command.
-        """
-        proc = await self._execute_command(*args, **kwargs)
-        stdout, _ = await proc.communicate()
-        return stdout.decode("utf-8")
