@@ -73,7 +73,7 @@ class Sub(DynamicNamespace):
         # Only in the last iteration, use pypath and static
         last_part = parts[-1]
         sub = Sub(
-            last_part, root=self.__ or self, parent=self, pypath=pypath, static=static
+            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
         )
 
         # Propagate the parent's recursive contracts
@@ -139,10 +139,6 @@ class Hub(Sub):
         # Remove the entry from the call stack
         last_mod = self._last_ref.rsplit(".", maxsplit=1)[0]
         return self.lib.pns.ref.last(self, last_mod)
-
-    @property
-    def __dict__(self):
-        return self._nest
 
     def __repr__(hub):
         return "Hub()"

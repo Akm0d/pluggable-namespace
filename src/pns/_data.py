@@ -25,7 +25,7 @@ class Namespace(SimpleNamespace):
     ):
         self.__name__ = name
         self.__ = parent
-        self.__root = root
+        self._root = root
         # Aliases for this namespace
         self._alias = set()
         # Namespaces underneath this namespace
@@ -33,7 +33,7 @@ class Namespace(SimpleNamespace):
 
     @property
     def _(self):
-        return self.__root
+        return self._root
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""

@@ -28,8 +28,12 @@ class LoadedMod(pns.data.Namespace):
         self._class = {}
 
     @property
-    def _attr(self):
+    def _nest(self):
         return {**self._class, **self._var, **self._func}
+
+    @_nest.setter
+    def _nest(self, value):
+        ...
 
 
 def load(path: str):
@@ -137,7 +141,6 @@ async def populate(loaded, mod: ModuleType, contracts: list[str]):
             # It's a variable
             loaded._var[name] = obj
 
-    loaded._nest.update(loaded._attr)
     return loaded
 
 

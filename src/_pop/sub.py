@@ -17,11 +17,6 @@ async def add(
     contracts_pypath: list[str] = (),
     contracts_static: list[str] = (),
     recursive_contracts_static: list[str] = (),
-    omit_start: tuple[str] = ("_",),
-    omit_end: tuple[str] = (),
-    omit_func: bool = False,
-    omit_class: bool = False,
-    omit_vars: bool = False,
     python_import: str = None,
 ):
     """
@@ -33,11 +28,6 @@ async def add(
     :param contracts_pypath: Load additional contract paths
     :param contracts_static: Load additional contract paths from a specific directory
     :param recursive_contracts_static: Load additional recursive contract paths from a specific directory
-    :param omit_start: Allows you to pass in a tuple of characters that would omit the loading of any object
-    :param omit_end:Allows you to pass in a tuple of characters that would omit the loading of an object
-    :param omit_func: bool: Don't load any functions
-    :param omit_class: bool: Don't load any classes
-    :param omit_vars: bool: Don't load any vars
     :param python_import: Load a module from python onto the sub
     """
     if python_import:
@@ -48,7 +38,7 @@ async def add(
         subname = subname if subname else hub.lib.os.path.basename(static)
     if dyne_name:
         subname = subname if subname else dyne_name
-    root: pns.hub.Sub = sub or hub
+    root: pns.hub.Sub = sub if sub is not None else hub
     # The dynamic namespace is already on the hub
     if dyne_name in root._nest:
         return
@@ -63,31 +53,27 @@ async def add(
         new_sub = await root.add_sub(subname, pypath=pypath, static=static)
         await new_sub._load_all()
 
-    root._nest[subname]._omit_start = omit_start
-    root._nest[subname]._omit_end = omit_end
-    root._nest[subname]._omit_func = omit_func
-    root._nest[subname]._omit_class = omit_class
-    root._nest[subname]._omit_vars = omit_vars
-    root._nest[subname]._omit_vars = omit_vars
     root._nest[subname]._contracts = (contracts_pypath or []) + (contracts_static or [])
     root._nest[subname]._rcontracts = recursive_contracts_static or []
 
 SPECIAL = ["contracts", "rcontracts"]
-async def load_subdirs(hub, sub, *, recurse: bool = False):
+OMIT_START = ["_", "."]
+
+async def load_subdirs(hub: pns.hub.Hub, sub: pns.hub.Sub, *, recurse: bool = False):
     """
     Given a sub, load all subdirectories found under the sub into a lower namespace
     :param hub: The redistributed pns central hub
     :param sub: The pns object that contains the loaded module data
     :param recurse: Recursively iterate over nested subs
     """
-    if not sub._virtual:
+    if not sub._active:
         return
     roots = hub.lib.collections.defaultdict(list)
     for dir_ in sub._dir:
         if not dir_.exists():
             continue
         for fn in dir_.iterdir():
-            if fn.name[0] in sub._omit_start or fn.name[-1] in sub._omit_end:
+            if fn.name[0] in OMIT_START:
                 continue
             if fn.name in SPECIAL:
                 continue
@@ -96,18 +82,10 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
                 continue
             roots[fn.name].append(str(full))
     for name, sub_dirs in roots.items():
-        # Skip hidden directories
-        if name.startswith("."):
-            continue
         await hub.pop.sub.add(
             subname=name,
             sub=sub,
             static=sub_dirs,
-            omit_start=sub._omit_start,
-            omit_end=sub._omit_end,
-            omit_func=sub._omit_func,
-            omit_class=sub._omit_class,
-            omit_vars=sub._omit_vars,
         )
         if recurse:
             if isinstance(getattr(sub, name), pns.hub.Sub):

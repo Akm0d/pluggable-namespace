@@ -7,6 +7,10 @@ INIT = "__init__"
 SUB_ALIAS = "__sub_alias__"
 
 class DynamicNamespace(pns.data.Namespace):
+    """
+    A namespace that can dynamically load modules from a directory.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._mod = {}
@@ -24,11 +28,11 @@ class DynamicNamespace(pns.data.Namespace):
 
             raise
 
-    async def _load_all(self, *, recurse:bool = True):
+    async def _load_all(self):
         for _, name, _ in pkgutil.iter_modules(self._dir):
-            await self._load_mod(name, recurse=recurse)
+            await self._load_mod(name)
 
-    async def _load_mod(self, name: str, *, recurse:bool = True):
+    async def _load_mod(self, name: str):
         for path in self._dir:
             mod = pns.mod.load_from_path(name, path)
             if mod:

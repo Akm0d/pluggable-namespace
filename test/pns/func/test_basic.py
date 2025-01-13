@@ -58,7 +58,7 @@ async def test_nest(hub):
 
 async def test_func_attrs(hub):
     await hub.pop.sub.add(pypath=["test.pns.mods"])
-    assert "bar" in hub.mods.test.attr.__dict__
+    assert "bar" in hub.mods.test.attr.func.__dict__
     assert hub.mods.test.attr.func.bar is True
     assert hub.mods.test.attr.func.func is not hub.mods.test.attr.func
 
