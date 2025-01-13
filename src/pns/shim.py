@@ -70,7 +70,7 @@ async def load_all(hub, load_all_subdirs: bool):
     for dyne in hub._dynamic.dyne:
         if dyne in hub._nest:
             continue
-        hub._add_child(name=dyne, static=hub._dynamic.dyne[dyne].paths)
+        await hub.add_sub(name=dyne, static=hub._dynamic.dyne[dyne].paths)
         await hub[dyne]._load_all()
         if not load_all_subdirs:
             continue

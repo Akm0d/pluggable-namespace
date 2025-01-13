@@ -3,7 +3,7 @@ import sys
 import asyncio
 import inspect
 import pns.contract
-import pns.hub
+import pns.data
 from types import ModuleType
 
 import importlib.util
@@ -14,8 +14,13 @@ VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
 FUNC_ALIAS = "__func_alias__"
+OMIT_FUNC=False
+OMIT_CLASS=False
+OMIT_VARS=False
+OMIT_START=("_",)
+OMIT_END=()
 
-class LoadedMod(pns.hub.Namespace):
+class LoadedMod(pns.data.Namespace):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._var = {}
@@ -44,16 +49,18 @@ def load(path: str):
     return ret
 
 
-async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
+async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: list[str]) -> LoadedMod:
+    loaded = LoadedMod(name=name, parent=sub, root=hub)
+    if hasattr(mod, VIRTUAL_NAME):
+        loaded._alias.add(getattr(mod, VIRTUAL_NAME))
+
     # Execute the __virtual__ function if present
     if hasattr(mod, VIRTUAL):
         virtual = pns.contract.Contracted(
-            hub,
-            contracts=[],
-            func=getattr(mod, VIRTUAL),
-            ref=f"{sub.__ref__}.{name}",
-            parent=mod,
             name=VIRTUAL,
+            func=getattr(mod, VIRTUAL),
+            parent=loaded,
+            root=hub,
         )
         ret = virtual()
         if asyncio.iscoroutine(ret):
@@ -70,14 +77,12 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
             error = ret[1]
 
         if error:
+            del loaded
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {error}")
 
-    loaded = LoadedMod(name=name, parent=sub, root=hub)
-    if hasattr(mod, VIRTUAL_NAME):
-        loaded._alias.add(getattr(mod, VIRTUAL_NAME))
-    return await populate(loaded, mod)
+    return await populate(loaded, mod, contracts)
 
-async def populate(loaded, mod: ModuleType):
+async def populate(loaded, mod: ModuleType, contracts: list[str]):
     """
     Add functions, classes, and variables to the hub considering function aliases
     """
@@ -94,7 +99,7 @@ async def populate(loaded, mod: ModuleType):
     # Iterate over all attributes in the module
     for attr in getattr(mod, "__load__", dir(mod)):
         # Avoid omitted names
-        if attr.startswith(loaded._omit_start) or attr.endswith(loaded._omit_end):
+        if attr.startswith(OMIT_START) or attr.endswith(OMIT_END):
             continue
 
         orig_name = attr
@@ -104,7 +109,7 @@ async def populate(loaded, mod: ModuleType):
 
         if inspect.isfunction(obj):
             # TODO save dunder methods in the module and attach them to the loadedmod object
-            if loaded._omit_func:
+            if OMIT_FUNC:
                 continue
             # It's a function, potentially make it async
             if not asyncio.iscoroutinefunction(obj):
@@ -113,24 +118,21 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            contracted_func = pns.contract.create(
-                hub=loaded._,
-                contracts=loaded.contract,
+            contracted_func = pns.contract.Contracted(
                 func=func,
-                ref=loaded.__ref__,
                 name=name,
                 parent=loaded,
-                implicit_hub=("hub" in func.__code__.co_varnames),
+                root=loaded._,
             )
 
             loaded._func[name] = contracted_func
         elif inspect.isclass(obj):
             # It's a class
-            if loaded._omit_class:
+            if OMIT_CLASS:
                 continue
             loaded._class[name] = obj
         else:
-            if loaded._omit_vars:
+            if OMIT_VARS:
                 continue
             # It's a variable
             loaded._var[name] = obj

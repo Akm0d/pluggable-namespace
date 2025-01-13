@@ -83,7 +83,7 @@ async def load_subdirs(hub, sub, *, recurse: bool = False):
     if not sub._virtual:
         return
     roots = hub.lib.collections.defaultdict(list)
-    for dir_ in sub._dirs:
+    for dir_ in sub._dir:
         if not dir_.exists():
             continue
         for fn in dir_.iterdir():

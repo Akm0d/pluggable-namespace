@@ -1,14 +1,21 @@
 import sys
+
+import pns.dir
+import pns.data
+import pns.contract
 from ._debug import DEBUG_PNS_GETATTR
 
+CONTRACTS_DIR = "contract"
+RECURSIVE_CONTRACTS_DIR = "rcontract"
+
+
 if DEBUG_PNS_GETATTR:
-    from pns._hub import Namespace
+    from pns._hub import DynamicNamespace
 else:
-    from pns._chub import Namespace # type: ignore
+    from pns._chub import DynamicNamespace # type: ignore
 
 
-
-class Sub(Namespace):
+class Sub(DynamicNamespace):
     """
     Represents a sub-component or module that can be dynamically added to a Hub.
 
@@ -19,9 +26,7 @@ class Sub(Namespace):
         hub: Reference to the root Hub instance.
         contracts: A list of contract definitions associated with this Sub.
     """
-
-
-    def __init__(self, name: str, parent: Namespace, root: "Hub", **kwargs):
+    def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub", pypath:list[str] =(), static: list[str] = ()):
         """
         Initializes a Sub instance.
 
@@ -30,10 +35,21 @@ class Sub(Namespace):
             parent (data.Namespace): The parent namespace of this Sub.
             root (Hub): The root Hub instance that this Sub is part of.
         """
-        super().__init__(name, parent=parent, root=root, **kwargs)
+        super().__init__(name, parent=parent, root=root)
+        # Modules loaded onto this namespace
+        self._dir = pns.dir.walk(pypath, static)
+        # Find contracts within the dirs
+        self._contract = []
+        self._contract.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
+        self._rcontract = []
+        self._rcontract.extend(pns.dir.inline(self._dir, RECURSIVE_CONTRACTS_DIR))
+
+    @property
+    def contract(self):
+        return self._contract + self._rcontract
 
 
-    async def add_sub(self, name: str, recurse: bool = True, **kwargs):
+    async def add_sub(self, name: str, recurse: bool = True, pypath:list[str] = (), static: list[str] = ()):
         """
         Adds a sub-component or module to this Sub.
 
@@ -43,14 +59,27 @@ class Sub(Namespace):
         """
         if name in self._nest:
             return
-        if not self._virtual:
+        if not self._active:
             # TODO also call the sub's init.__virtual__ function and act based on the result
             return
 
-        sub = self._add_child(name, cls=Sub, **kwargs)
+        current = self
+        parts = name.split(".")
+        # Iterate over all parts except the last one
+        for part in parts[:-1]:
+            if part not in current._nest:
+                current = current._add_child(part, cls=Sub)
+
+        # Only in the last iteration, use pypath and static
+        last_part = parts[-1]
+        sub = Sub(
+            last_part, root=self.__ or self, parent=self, pypath=pypath, static=static
+        )
 
         # Propagate the parent's recursive contracts
         sub._rcontract = self._rcontract
+
+        current._nest[last_part] = sub
 
         return sub
 
@@ -110,6 +139,10 @@ class Hub(Sub):
         # Remove the entry from the call stack
         last_mod = self._last_ref.rsplit(".", maxsplit=1)[0]
         return self.lib.pns.ref.last(self, last_mod)
+
+    @property
+    def __dict__(self):
+        return self._nest
 
     def __repr__(hub):
         return "Hub()"
