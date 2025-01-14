@@ -6,6 +6,7 @@ import pns.contract
 import pns.data
 import os.path
 from types import ModuleType
+from collections.abc import Callable
 
 import importlib.util
 import importlib.machinery
@@ -90,7 +91,7 @@ async def prep(
     return await populate(loaded, mod, contracts)
 
 
-async def populate(loaded, mod: ModuleType, contracts: list[str]):
+async def populate(loaded, mod: ModuleType):
     """
     Add functions, classes, and variables to the hub considering function aliases
     """
@@ -125,11 +126,13 @@ async def populate(loaded, mod: ModuleType, contracts: list[str]):
             else:
                 func = obj
 
+            loaded_contracts = load_contracts(sub=loaded.__)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
                 parent=loaded,
                 root=loaded._,
+                contracts=loaded_contracts,
             )
 
             loaded._func[name] = contracted_func
@@ -184,3 +187,17 @@ def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py"):
     sys.modules[module_key] = module
     spec.loader.exec_module(module)
     return module
+
+
+def load_contracts(sub: "pns.hub.Sub") -> list[Callable]:
+    hub = sub._
+    contract_functions = []
+
+    current = sub
+    dirs = set()
+    while current != hub:
+        dirs.update(current.contract)
+        current = sub.__
+
+    # Load the contract modules from the directories and get a list of their functions
+    return contract_functions

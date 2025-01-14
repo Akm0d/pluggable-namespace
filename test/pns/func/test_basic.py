@@ -69,9 +69,9 @@ async def test_module_level_direct_call(hub):
 
 async def test_contract(hub):
     await hub.pop.sub.add(
-        locations=["test.pns.mods"], contracts_locations=["test.pns.contracts"]
+        locations=["test.pns.mods"], contract_locations=["test.pns.contract"]
     )
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         await hub.mods.test.ping(4)
 
 
@@ -89,7 +89,7 @@ async def test_no_contract(hub):
 
 async def test_contract_manipulate(hub):
     await hub.pop.sub.add(
-        locations=["test.pns.mods"], contracts_locations=["test.pns.contracts"]
+        locations=["test.pns.mods"], contract_locations=["test.pns.contract"]
     )
     assert "override" in await hub.mods.all.list()
     assert "post called" in await hub.mods.all.list()
@@ -111,7 +111,7 @@ async def test_private_function_cross_access(hub):
 async def test_private_function_cross_access_with_contracts(hub):
     hub.opts = "OPTS!"
     await hub.pop.sub.add(
-        locations=["test.pns.mods"], contracts_locations=["test.pns.contracts"]
+        locations=["test.pns.mods"], contract_locations=["test.pns.contracts"]
     )
     # Let's make sure that the private function is not accessible through the sub
     with pytest.raises(AttributeError):
@@ -124,7 +124,7 @@ async def test_private_function_cross_access_with_contracts(hub):
 async def test_cross_in_virtual(hub):
     hub.opts = "OPTS!"
     await hub.pop.sub.add(
-        locations=["test.pns.mods"], contracts_locations=["test.pns.contracts"]
+        locations=["test.pns.mods"], contract_locations=["test.pns.contract"]
     )
     assert await hub.mods.virt.present() is True
 

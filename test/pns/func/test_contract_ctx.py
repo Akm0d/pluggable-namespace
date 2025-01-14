@@ -2,7 +2,7 @@ async def test_contract_context(hub):
     await hub.pop.sub.add(
         locations=["test.pnsmods.contract_ctx"],
         subname="mods",
-        contracts_locations=["test.pns.contracts"],
+        contract_locations=["test.pns.contracts"],
     )
     assert await hub.mods.ctx.test() == "contract executed"
     # Multiple calls have the same outcome
@@ -14,7 +14,7 @@ async def test_contract_context_update_call(hub):
     await hub.pop.sub.add(
         locations=["test.pnsmods.contract_ctx"],
         subname="mods",
-        contracts_locations=["test.pns.contracts"],
+        contract_locations=["test.pns.contracts"],
     )
     assert await hub.mods.ctx_update.test_call(True) == "contract executed"
     # Multiple calls have the same outcome
@@ -26,7 +26,7 @@ async def test_contract_context_update_direct(hub):
     await hub.pop.sub.add(
         locations=["test.pnsmods.contract_ctx"],
         subname="mods",
-        contracts_locations=["test.pns.contracts"],
+        contract_locations=["test.pns.contracts"],
     )
     assert await hub.mods.ctx_update.test_direct(True) is False
     assert await hub.mods.ctx_update.test_direct(True) is False

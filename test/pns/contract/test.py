@@ -15,9 +15,9 @@ async def functions(hub):
 async def pre_ping(hub, ctx):
     """ """
     if len(ctx.args) != 1:
-        raise Exception("ping does not take args!")
+        raise ValueError("ping does not take args!")
     if ctx.kwargs:
-        raise Exception("ping does not take kwargs!")
+        raise ValueError("ping does not take kwargs!")
 
 
 async def call_ping(hub, ctx):
@@ -30,4 +30,4 @@ async def post_ping(hub, ctx):
     """ """
     print("Calling Post!")
     if not isinstance(ctx.ret, dict):
-        raise Exception("MUST BE DICT!!")
+        raise ValueError("MUST BE DICT!!")
