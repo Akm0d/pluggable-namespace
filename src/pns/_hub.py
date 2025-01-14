@@ -12,8 +12,9 @@ class DynamicNamespace(pns.data.Namespace):
     A namespace that can dynamically load modules from a directory.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, locations: list[str] = (), *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._dir = pns.dir.walk(locations)
         self._mod = {}
 
     def __getattr__(self, name: str):
@@ -42,7 +43,7 @@ class DynamicNamespace(pns.data.Namespace):
             mod = pns.mod.load(name)
 
         try:
-            loaded_mod = await pns.mod.prep(self._, self, name, mod, self.contract)
+            loaded_mod = await pns.mod.prep(self._, self, name, mod)
         except NotImplementedError:
             return
 

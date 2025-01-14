@@ -55,9 +55,7 @@ def load(path: str):
     return ret
 
 
-async def prep(
-    hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: list[str]
-) -> LoadedMod:
+async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
     loaded = LoadedMod(name=name, parent=sub, root=hub)
     if hasattr(mod, VIRTUAL_NAME):
         loaded._alias.add(getattr(mod, VIRTUAL_NAME))
@@ -88,7 +86,7 @@ async def prep(
             del loaded
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {error}")
 
-    return await populate(loaded, mod, contracts)
+    return await populate(loaded, mod)
 
 
 async def populate(loaded, mod: ModuleType):
@@ -126,7 +124,7 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            loaded_contracts = load_contracts(sub=loaded.__)
+            loaded_contracts = []
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
@@ -187,17 +185,3 @@ def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py"):
     sys.modules[module_key] = module
     spec.loader.exec_module(module)
     return module
-
-
-def load_contracts(sub: "pns.hub.Sub") -> list[Callable]:
-    hub = sub._
-    contract_functions = []
-
-    current = sub
-    dirs = set()
-    while current != hub:
-        dirs.update(current.contract)
-        current = sub.__
-
-    # Load the contract modules from the directories and get a list of their functions
-    return contract_functions
