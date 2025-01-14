@@ -6,7 +6,6 @@ import pns.contract
 import pns.data
 import os.path
 from types import ModuleType
-from collections.abc import Callable
 
 import importlib.util
 import importlib.machinery
@@ -124,7 +123,7 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            loaded_contracts = []
+            loaded_contracts = pns.contract.recurse(loaded)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
