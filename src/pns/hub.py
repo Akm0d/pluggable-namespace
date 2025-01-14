@@ -52,7 +52,7 @@ class Sub(DynamicNamespace):
     def contract(self):
         return self._contract_dir
 
-    async def add_sub(self, name: str, locations: list[str] = ()):
+    async def add_sub(self, name: str, **kwargs):
         """
         Adds a sub-component or module to this Sub.
 
@@ -74,7 +74,7 @@ class Sub(DynamicNamespace):
 
         # Only in the last iteration, use locations
         last_part = parts[-1]
-        sub = Sub(last_part, root=self._root or self, parent=self, locations=locations)
+        sub = Sub(last_part, root=self._root or self, parent=self, **kwargs)
 
         current._nest[last_part] = sub
 

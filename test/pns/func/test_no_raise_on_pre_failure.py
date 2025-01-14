@@ -3,7 +3,7 @@ import pytest
 
 @pytest.fixture(scope="function")
 async def hub(hub):
-    await hub.pop.sub.add(dyne_name="cn")
+    await hub.pop.sub.add(name="cn")
     return hub
 
 

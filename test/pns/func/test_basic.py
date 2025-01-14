@@ -139,13 +139,13 @@ async def test_non_module_functions_are_not_loaded(hub):
     Verify that the assigned module name inside of the python sys.modules
     is unique
     """
-    await hub.pop.sub.add(dyne_name="dyne1")
+    await hub.pop.sub.add(name="dyne1")
     mname = await hub.dyne3.init.mod_name()
     assert not mname.startswith(".")
 
 
 async def test_dyne(hub):
-    await hub.pop.sub.add(dyne_name="dyne1")
+    await hub.pop.sub.add(name="dyne1")
     assert hub.dyne1.INIT
     assert hub.dyne2.INIT
     assert hub.dyne3.INIT
@@ -158,14 +158,14 @@ async def test_dyne(hub):
 
 
 async def test_sub_virtual(hub):
-    await hub.pop.sub.add(dyne_name="dyne4")
+    await hub.pop.sub.add(name="dyne4")
     await hub.pns.sub.load_subdirs(hub.dyne4)
     assert "nest" in hub.dyne4._subs
     assert "nest" not in hub.dyne4._loaded
 
 
 async def test_dyne_nest(hub):
-    await hub.pop.sub.add(dyne_name="dn1")
+    await hub.pop.sub.add(name="dn1")
     await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
     assert await hub.dn1.nest.dn1.ping()
     assert await hub.dn1.nest.dn2.ping()
@@ -175,18 +175,18 @@ async def test_dyne_nest(hub):
 
 
 async def test_existing_dyne(hub):
-    await hub.pop.sub.add(dyne_name="dn1")
-    await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
-    assert "nest" in hub.dn1._subs
-    assert "nest" not in hub.dn1._loaded
+    await hub.pop.sub.add(name="dn1")
+    await hub.pop.sub.load_subdirs(hub.dn1, recurse=True)
+    assert "nest" in hub.dn1._nest
+    assert "nest" not in hub.dn1._mod
     # Add the same dyne again without recursing it and verify that the recursive elements are still there
-    await hub.pop.sub.add(dyne_name="dn1")
-    assert "nest" in hub.dn1._subs
-    assert "nest" not in hub.dn1._loaded
+    await hub.pop.sub.add(name="dn1")
+    assert "nest" in hub.dn1._nest
+    assert "nest" not in hub.dn1._mod
 
 
 async def test_dyne_extend(hub):
-    await hub.pop.sub.add(dyne_name="dn1")
+    await hub.pop.sub.add(name="dn1")
     await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
     assert await hub.dn1.nest.over.in_dn1()
     assert await hub.dn1.nest.over.in_dn2()
@@ -194,7 +194,7 @@ async def test_dyne_extend(hub):
 
 
 async def test_dyne_overwrite(hub):
-    await hub.pop.sub.add(dyne_name="dn1")
+    await hub.pop.sub.add(name="dn1")
     await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
     # Assure that the first instance of a function does not get overwritten
     assert await hub.dn1.nest.over.source() == "dn1"
@@ -225,7 +225,7 @@ async def test_contract_signature_fail(hub):
 
 
 async def test_reload(hub):
-    await hub.pop.sub.add(dyne_name="dn1")
+    await hub.pop.sub.add(name="dn1")
     assert await hub.pns.sub.reload("dn1")
 
 

@@ -17,7 +17,7 @@ def opts():
 async def test_trace(hub, opts):
     message = "message"
     opts["log_level"] = "trace"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.trace(message)
     with open(opts["log_file"]) as fh:
@@ -28,7 +28,7 @@ async def test_trace(hub, opts):
 async def test_debug(hub, opts):
     message = "message"
     opts["log_level"] = "debug"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.debug(message)
     with open(opts["log_file"]) as fh:
@@ -39,7 +39,7 @@ async def test_debug(hub, opts):
 async def test_info(hub, opts):
     message = "message"
     opts["log_level"] = "info"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.info(message)
     with open(opts["log_file"]) as fh:
@@ -50,7 +50,7 @@ async def test_info(hub, opts):
 async def test_error(hub, opts):
     message = "message"
     opts["log_level"] = "error"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.error(message)
     with open(opts["log_file"]) as fh:
@@ -61,7 +61,7 @@ async def test_error(hub, opts):
 async def test_warning(hub, opts):
     message = "message"
     opts["log_level"] = "warning"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.warning(message)
     with open(opts["log_file"]) as fh:
@@ -72,7 +72,7 @@ async def test_warning(hub, opts):
 async def test_critical(hub, opts):
     message = "message"
     opts["log_level"] = "critical"
-    await hub.pop.sub.add(dyne_name="log")
+    await hub.pop.sub.add(name="log")
     await hub.log.init.setup(**opts)
     await hub.log.critical(message)
     with open(opts["log_file"]) as fh:
