@@ -4,6 +4,7 @@ Control and add subsystems to the running daemon hub
 
 import pns.hub
 import pns.data
+import pathlib
 
 
 async def add(
@@ -11,8 +12,8 @@ async def add(
     name: str = None,
     *,
     sub: pns.hub.Sub = None,
-    locations: list[str] = (),
-    contract_locations: list[str] = (),
+    locations: list[pathlib.Path] = (),
+    contract_locations: list[pathlib.Path] = (),
 ):
     """
     Add a new subsystem to the hub

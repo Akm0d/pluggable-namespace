@@ -19,22 +19,30 @@ class Context:
 
 class ContractType(enum.Enum):
     SIG = "sig"
-    PRE = "pre"
+    PRE = "pre'"
     CALL = "call"
     POST = "post"
-    RECURSIVE = "r"
+    R_SIG = "r_sig"
+    R_PRE = "r_pre"
+    R_CALL = "r_call"
+    R_POST = "r_post"
+
+    @property
+    def recursive(self) -> bool:
+        return self.value.startswith("r_")
 
     @classmethod
-    def new(cls, func: Callable):
+    def from_func(cls, func: Callable):
         """
-        Inspect the function name and assign it the appropriate contract type
+        Inspect the function name and assign it the appropriate contract type.
+        If it starts with 'r_', we set the .recursive flag to True for that type.
         """
         name = func.__name__
-        for contract_type in cls:
-            if name == contract_type.value or name.startswith(
-                contract_type.value + "_"
-            ):
-                return contract_type
+
+        # Try to match the remaining portion
+        for ctype in cls:
+            if ctype.modname == name or name.startswith(ctype.modname + "_"):
+                return ctype
 
 
 class Contracted(pns.data.Namespace):
@@ -56,7 +64,7 @@ class Contracted(pns.data.Namespace):
         """
         Add a contract to the function
         """
-        contract_type = ContractType.new(function)
+        contract_type = ContractType.from_func(function)
         if contract_type:
             self.contracts[contract_type].append(function)
 
