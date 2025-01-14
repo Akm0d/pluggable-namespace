@@ -16,7 +16,7 @@ async def pop_hub():
     hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
-    await hub.add_sub("pop", pypath=["_pop"])
+    await hub.add_sub("pop", locations=["_pop"])
 
     return hub
 
@@ -39,11 +39,11 @@ async def loaded_hub(
     hub = await pns.hub.Hub.new()
 
     # Add essential POP modules
-    await hub.add_sub("pop", pypath=pop_mods)
+    await hub.add_sub("pop", locations=pop_mods)
     await hub.pop._load_all()
 
     # Load the config
-    await hub.add_sub(name="config", static=hub._dynamic.dyne.config.paths)
+    await hub.add_sub(name="config", locations=hub._dynamic.dyne.config.paths)
     if load_config:
         await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
@@ -70,7 +70,7 @@ async def load_all(hub, load_all_subdirs: bool):
     for dyne in hub._dynamic.dyne:
         if dyne in hub._nest:
             continue
-        await hub.add_sub(name=dyne, static=hub._dynamic.dyne[dyne].paths)
+        await hub.add_sub(name=dyne, locations=hub._dynamic.dyne[dyne].paths)
         await hub[dyne]._load_all()
         if not load_all_subdirs:
             continue

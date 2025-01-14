@@ -6,13 +6,11 @@ import pns.contract
 from ._debug import DEBUG_PNS_GETATTR
 
 CONTRACTS_DIR = "contract"
-RECURSIVE_CONTRACTS_DIR = "rcontract"
-
 
 if DEBUG_PNS_GETATTR:
     from pns._hub import DynamicNamespace
 else:
-    from pns._chub import DynamicNamespace # type: ignore
+    from pns._chub import DynamicNamespace  # type: ignore
 
 
 class Sub(DynamicNamespace):
@@ -26,7 +24,15 @@ class Sub(DynamicNamespace):
         hub: Reference to the root Hub instance.
         contracts: A list of contract definitions associated with this Sub.
     """
-    def __init__(self, name: str, parent: pns.data.Namespace, root: "Hub", pypath:list[str] =(), static: list[str] = ()):
+
+    def __init__(
+        self,
+        name: str,
+        parent: "Sub",
+        root: "Hub",
+        locations: list[str] = (),
+        contract_locations: list[str] = (),
+    ):
         """
         Initializes a Sub instance.
 
@@ -37,25 +43,21 @@ class Sub(DynamicNamespace):
         """
         super().__init__(name, parent=parent, root=root)
         # Modules loaded onto this namespace
-        self._dir = pns.dir.walk(pypath, static)
+        self._dir = pns.dir.walk(locations)
         # Find contracts within the dirs
-        self._contract = []
-        self._contract.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
-        self._rcontract = []
-        self._rcontract.extend(pns.dir.inline(self._dir, RECURSIVE_CONTRACTS_DIR))
+        self._contract_dir = pns.dir.walk(contract_locations)
+        self._contract_dir.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
 
     @property
     def contract(self):
-        return self._contract + self._rcontract
+        return self._contract_dir
 
-
-    async def add_sub(self, name: str, recurse: bool = True, pypath:list[str] = (), static: list[str] = ()):
+    async def add_sub(self, name: str, locations: list[str] = ()):
         """
         Adds a sub-component or module to this Sub.
 
         Args:
             name (str): The name of the sub-component to add.
-            recurse (bool): If True, recursively loads submodules. Defaults to True.
         """
         if name in self._nest:
             return
@@ -70,18 +72,14 @@ class Sub(DynamicNamespace):
             if part not in current._nest:
                 current = current._add_child(part, cls=Sub)
 
-        # Only in the last iteration, use pypath and static
+        # Only in the last iteration, use locations
         last_part = parts[-1]
-        sub = Sub(
-            last_part, root=self._root or self, parent=self, pypath=pypath, static=static
-        )
-
-        # Propagate the parent's recursive contracts
-        sub._rcontract = self._rcontract
+        sub = Sub(last_part, root=self._root or self, parent=self, locations=locations)
 
         current._nest[last_part] = sub
 
         return sub
+
 
 class Hub(Sub):
     """
@@ -96,9 +94,9 @@ class Hub(Sub):
         _dynamic: A dynamic configuration or state connected to the directory structure.
     """
 
-    _last_ref = None
-    _last_call = None
-    _dynamic = None
+    _last_ref: str = None
+    _last_call: str = None
+    _dynamic: dict = None
 
     def __init__(hub):
         """
@@ -110,7 +108,6 @@ class Hub(Sub):
         hub.lib._nest = sys.modules
         hub._dynamic = hub.lib.pns.dir.dynamic()
 
-
     @classmethod
     async def new(cls):
         """
@@ -119,7 +116,7 @@ class Hub(Sub):
         hub = cls()
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
-        await hub.add_sub(name="log", static=hub._dynamic.dyne.log.paths)
+        await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
         # Load all the modules on hub.log
         await hub.log._load_all()
         await hub.log.debug("Initialized the hub")

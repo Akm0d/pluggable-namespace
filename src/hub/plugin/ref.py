@@ -1,4 +1,5 @@
-DEFAULT_OUTPUTTER  = "yaml"
+DEFAULT_OUTPUTTER = "yaml"
+
 
 async def resolve(hub, ref: object, *args, **kwargs) -> object:
     """

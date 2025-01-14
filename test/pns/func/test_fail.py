@@ -13,7 +13,7 @@ async def _test_calling_load_error_raises_pns_error(hub):
     access a functions which should be accessible on the module, a
     PnsError is raised.
     """
-    await hub.pop.sub.add(pypath=["test.pns.mods"], stop_on_failures=True)
+    await hub.pop.sub.add(locations=["test.pns.mods"], stop_on_failures=True)
     with pytest.raises(pns.exc.PnsError, match="Failed to load python module"):
         await hub.mods.bad_import.func()
 
@@ -24,13 +24,13 @@ async def test_verror_does_not_overload_loaded_mod(hub):
     will explicitly not load. This makes sure load errors to not shadow good mod loads
     """
     await hub.pop.sub.add(
-        pypath=["test.pnsmods.same_vname"],
+        locations=["test.pnsmods.same_vname"],
         subname="mods",
     )
     assert await hub.mods.vname.func() == "wha? Yep!"
 
 
 async def test_module_doesnt_exist(hub):
-    await hub.pop.sub.add(pypath=["test.pns.mods"])
+    await hub.pop.sub.add(locations=["test.pns.mods"])
     with pytest.raises(AttributeError, match="'mods' has no attribute 'doesntexist'"):
         await hub.mods.doesntexist

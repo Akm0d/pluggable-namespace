@@ -10,14 +10,10 @@ async def add(
     hub: pns.hub.Hub,
     dyne_name: str = None,
     *,
-    pypath: list[str] = (),
     subname: str = None,
-    sub:pns.hub.Sub=None,
-    static: list[str] = (),
-    contracts_pypath: list[str] = (),
-    contracts_static: list[str] = (),
-    recursive_contracts_static: list[str] = (),
-    python_import: str = None,
+    sub: pns.hub.Sub = None,
+    locations: list[str] = (),
+    contract_locations: list[str] = (),
 ):
     """
     Add a new subsystem to the hub
@@ -25,39 +21,32 @@ async def add(
     :param dyne_name: The dynamic name to use to look up paths to find plugins -- linked to conf.yaml
     :param subname: The name that the sub is going to take on the hub. Defaults to the dyne name
     :param sub: The sub to use as the root to add to
-    :param contracts_pypath: Load additional contract paths
-    :param contracts_static: Load additional contract paths from a specific directory
-    :param recursive_contracts_static: Load additional recursive contract paths from a specific directory
-    :param python_import: Load a module from python onto the sub
+    :param locations: Load additional directories
+    :param contract_locations: Load additional contract paths
     """
-    if python_import:
-        subname = subname if subname else python_import.split(".")[0]
-    if pypath:
-        subname = subname if subname else pypath[0].split(".")[-1]
-    elif static:
-        subname = subname if subname else hub.lib.os.path.basename(static)
-    if dyne_name:
-        subname = subname if subname else dyne_name
+    static = pns.dir.walk(locations)
+    if not subname:
+        if dyne_name:
+            subname = dyne_name
+        elif static:
+            subname = static[0].stem
+
     root: pns.hub.Sub = sub if sub is not None else hub
+
     # The dynamic namespace is already on the hub
     if dyne_name in root._nest:
         return
 
-    if python_import:
-        new_sub = hub.lib.importlib.import_module(python_import)
-        root._nest[subname] = new_sub
-    elif dyne_name:
-        new_sub =await hub.add_sub(name=subname, static=hub._dynamic.dyne[subname].paths)
-        await new_sub._load_all()
-    else:
-        new_sub = await root.add_sub(subname, pypath=pypath, static=static)
-        await new_sub._load_all()
+    if dyne_name:
+        static += hub._dynamic.dyne[dyne_name].paths
 
-    root._nest[subname]._contracts = (contracts_pypath or []) + (contracts_static or [])
-    root._nest[subname]._rcontracts = recursive_contracts_static or []
+    new_sub = await root.add_sub(subname, locations=static)
+    await new_sub._load_all()
+
 
 SPECIAL = ["contracts", "rcontracts"]
 OMIT_START = ["_", "."]
+
 
 async def load_subdirs(hub: pns.hub.Hub, sub: pns.hub.Sub, *, recurse: bool = False):
     """
@@ -85,7 +74,7 @@ async def load_subdirs(hub: pns.hub.Hub, sub: pns.hub.Sub, *, recurse: bool = Fa
         await hub.pop.sub.add(
             subname=name,
             sub=sub,
-            static=sub_dirs,
+            locations=sub_dirs,
         )
         if recurse:
             if isinstance(getattr(sub, name), pns.hub.Sub):

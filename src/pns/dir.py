@@ -13,24 +13,33 @@ import yaml
 import pns.data
 
 
-def walk(pypath: list[str], static: list[str]) -> list[pathlib.Path]:
+def walk(locations: list[str]) -> list[pathlib.Path]:
     """
-    Return the directories to look for modules in, pypath specifies files
-    relative to an installed python package, static is for static dirs
-    :param pypath: One or many python paths which will be imported
-    :param static: Directories that can be explicitly passed
+    Given a list of locations, return a list of directory paths.
+    Each location can be:
+        - A filesystem directory (we'll add it directly).
+        - A Python import path (we'll import and grab its __path__).
+    Anything else (or unimportable) is ignored.
     """
     ret = set()
-    for p in pypath:
-        path = str(p)
-        try:
-            mod = importlib.import_module(path)
-        except ModuleNotFoundError:
-            continue
-        for m_path in mod.__path__:
-            # If we are inside of an executable the path will be different
-            ret.add(pathlib.Path(m_path))
-    ret.update(pathlib.Path(dir_) for dir_ in static)
+
+    for location in locations:
+        path_candidate = pathlib.Path(location)
+
+        if path_candidate.is_dir():
+            # It's an actual directory on the filesystem
+            ret.add(path_candidate)
+        else:
+            # Not an existing directory, assume it's a Python module/package
+            try:
+                mod = importlib.import_module(location)
+                # Many packages store their base directories in __path__
+                for m_path in mod.__path__:
+                    ret.add(pathlib.Path(m_path))
+            except (ModuleNotFoundError, AttributeError):
+                # Either doesn't exist as a module or doesn't have __path__
+                pass
+
     return sorted(ret)
 
 

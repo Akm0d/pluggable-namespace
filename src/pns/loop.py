@@ -6,6 +6,7 @@ import functools
 from typing import Any
 from collections.abc import Callable
 
+
 def run(coroutine):
     """
     Run an asynchronous coroutine from synchronous code.
@@ -30,8 +31,9 @@ def run(coroutine):
         return future.result()
 
 
-
-def make_async(sync_func: Callable[..., Any], *args, **kwargs) -> Callable[..., asyncio.Future]:
+def make_async(
+    sync_func: Callable[..., Any], *args, **kwargs
+) -> Callable[..., asyncio.Future]:
     """
     Convert a synchronous function into an asynchronous function.
 

@@ -4,6 +4,7 @@ import asyncio
 import inspect
 import pns.contract
 import pns.data
+import os.path
 from types import ModuleType
 
 import importlib.util
@@ -14,11 +15,12 @@ VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
 FUNC_ALIAS = "__func_alias__"
-OMIT_FUNC=False
-OMIT_CLASS=False
-OMIT_VARS=False
-OMIT_START=("_",)
-OMIT_END=()
+OMIT_FUNC = False
+OMIT_CLASS = False
+OMIT_VARS = False
+OMIT_START = ("_",)
+OMIT_END = ()
+
 
 class LoadedMod(pns.data.Namespace):
     def __init__(self, **kwargs):
@@ -32,8 +34,7 @@ class LoadedMod(pns.data.Namespace):
         return {**self._class, **self._var, **self._func}
 
     @_nest.setter
-    def _nest(self, value):
-        ...
+    def _nest(self, value): ...
 
 
 def load(path: str):
@@ -53,7 +54,9 @@ def load(path: str):
     return ret
 
 
-async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: list[str]) -> LoadedMod:
+async def prep(
+    hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: list[str]
+) -> LoadedMod:
     loaded = LoadedMod(name=name, parent=sub, root=hub)
     if hasattr(mod, VIRTUAL_NAME):
         loaded._alias.add(getattr(mod, VIRTUAL_NAME))
@@ -86,6 +89,7 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: lis
 
     return await populate(loaded, mod, contracts)
 
+
 async def populate(loaded, mod: ModuleType, contracts: list[str]):
     """
     Add functions, classes, and variables to the hub considering function aliases
@@ -98,7 +102,6 @@ async def populate(loaded, mod: ModuleType, contracts: list[str]):
         __func_alias__ = __func_alias__(loaded._)
         if asyncio.iscoroutine(__func_alias__):
             __func_alias__ = await __func_alias__
-
 
     # Iterate over all attributes in the module
     for attr in getattr(mod, "__load__", dir(mod)):
@@ -144,7 +147,7 @@ async def populate(loaded, mod: ModuleType, contracts: list[str]):
     return loaded
 
 
-def load_from_path(modname: str, path: str, ext: str = ".py"):
+def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py"):
     """
     Attempt to load the Python module named `modname` from the specified `path`.
     :param modname: The name of the module to load.
@@ -152,7 +155,7 @@ def load_from_path(modname: str, path: str, ext: str = ".py"):
     :return: The loaded module if successful, or None if not found.
     """
     # Convert the given path to a Path object and resolve the module file path
-    module_path = pathlib.Path(path) / (modname.replace('.', '/') + ext)
+    module_path = path / (modname.replace(".", "/") + ext)
 
     if not module_path.is_file():
         return None
@@ -160,7 +163,11 @@ def load_from_path(modname: str, path: str, ext: str = ".py"):
     # Using the absolute path for the module
     module_abs_path = module_path.resolve()
     # Create a unique module key with its full path
-    module_key = str(module_abs_path)
+    module_key = (
+        str(module_abs_path.parent).replace(os.path.sep, ".").lstrip(".")
+        + "."
+        + modname
+    )
 
     # If this unique module path is already in sys.modules, return it
     if module_key in sys.modules:
@@ -173,12 +180,7 @@ def load_from_path(modname: str, path: str, ext: str = ".py"):
 
     # Load the module
     module = importlib.util.module_from_spec(spec)
-    try:
-        # Store the module in sys.modules with the unique key
-        sys.modules[module_key] = module
-        spec.loader.exec_module(module)
-        return module
-    except Exception:
-        # Remove it from sys.modules in case of failure
-        sys.modules.pop(module_key, None)
-        return None
+    # Store the module in sys.modules with the unique key
+    sys.modules[module_key] = module
+    spec.loader.exec_module(module)
+    return module

@@ -22,7 +22,8 @@ class Namespace(SimpleNamespace):
         name: str,
         parent: "Namespace" = None,
         root: "Namespace" = None,
-        *args, **kwargs
+        *args,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.__name__ = name
@@ -49,7 +50,6 @@ class Namespace(SimpleNamespace):
 
         # Finally, fall back on the default attribute access
         return self.__getattribute__(name)
-
 
     def __getitem__(self, name: str):
         """
@@ -147,7 +147,7 @@ class Namespace(SimpleNamespace):
         """
         return bool(self._nest) and self._active
 
-    def _add_child(self, name: str, cls = None):
+    def _add_child(self, name: str, cls=None):
         """Add a new child to the parent"""
         if cls is None:
             cls = Namespace
@@ -177,6 +177,7 @@ class Namespace(SimpleNamespace):
 
     def __repr__(self):
         return f"{self.__class__.__name__.split('.')[-1]}({self.__ref__})"
+
 
 def update(dest, upd, recursive_update: bool = True, merge_lists: bool = False):
     """

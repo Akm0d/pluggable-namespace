@@ -23,7 +23,6 @@ def path(hub, ref) -> list[object]:
     return ret
 
 
-
 def find(hub, ref: str) -> object:
     """
     Take a string that represents an attribute nested underneath the hub.

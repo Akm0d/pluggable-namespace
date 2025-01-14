@@ -6,6 +6,7 @@ import pkgutil
 INIT = "__init__"
 SUB_ALIAS = "__sub_alias__"
 
+
 class DynamicNamespace(pns.data.Namespace):
     """
     A namespace that can dynamically load modules from a directory.
@@ -15,7 +16,7 @@ class DynamicNamespace(pns.data.Namespace):
         super().__init__(*args, **kwargs)
         self._mod = {}
 
-    def __getattr__(self, name:str):
+    def __getattr__(self, name: str):
         try:
             return super().__getattr__(name)
         except AttributeError:
@@ -55,13 +56,9 @@ class DynamicNamespace(pns.data.Namespace):
             func = getattr(mod, INIT)
             if asyncio.iscoroutinefunction(func):
                 init = pns.contract.Contracted(
-                    name=INIT,
-                    func=func,
-                    parent=loaded_mod,
-                    root=self._
+                    name=INIT, func=func, parent=loaded_mod, root=self._
                 )
                 await init()
-
 
     def __iter__(self):
         yield from self._nest

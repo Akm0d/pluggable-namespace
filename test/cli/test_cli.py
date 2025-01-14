@@ -14,18 +14,14 @@ async def test_parameters_key_value_pair(hub):
 
 
 async def test_parameters_key_value_with_space(hub):
-    opts = hub.lib.pns.data.NamespaceDict(
-        {"cli": {"args": ["--key", "value"]}}
-    )
+    opts = hub.lib.pns.data.NamespaceDict({"cli": {"args": ["--key", "value"]}})
     args, kwargs = await hub.cli.cli.parameters(opts)
     assert args == []
     assert kwargs == {"key": "value"}
 
 
 async def test_parameters_multiple_flags(hub):
-    opts = hub.lib.pns.data.NamespaceDict(
-        {"cli": {"args": ["--arg1", "--arg2"]}}
-    )
+    opts = hub.lib.pns.data.NamespaceDict({"cli": {"args": ["--arg1", "--arg2"]}})
     args, kwargs = await hub.cli.cli.parameters(opts)
     assert args == []
     assert kwargs == {"arg1": True, "arg2": True}

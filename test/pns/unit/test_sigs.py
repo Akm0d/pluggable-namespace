@@ -1,6 +1,5 @@
-#from pns.verify import sig
-def sig():
-    ...
+# from pns.verify import sig
+def sig(): ...
 
 
 async def test_sig_default_values():
