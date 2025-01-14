@@ -29,13 +29,15 @@ class ContractType(enum.Enum):
 
     @property
     def recursive(self) -> bool:
+        """
+        Recursive contracts apply to every Namespace underneath the one where they are defined
+        """
         return self.value.startswith("r_")
 
     @classmethod
     def from_func(cls, func: Callable):
         """
         Inspect the function name and assign it the appropriate contract type.
-        If it starts with 'r_', we set the .recursive flag to True for that type.
         """
         name = func.__name__
 
