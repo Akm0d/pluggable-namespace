@@ -2,7 +2,7 @@
 minimum_pre_commit_version: 2.10.1
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-merge-conflict
         description: Check for files that contain merge conflict strings.
@@ -31,7 +31,7 @@ repos:
 
   # ----- Formatting ---------------------------------------------------------------------------->
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         name: Rewrite Code to be Py3.11+
@@ -61,7 +61,7 @@ repos:
 
   # ----- Security -------------------------------------------------------------------------------------------------->
   - repo: https://github.com/PyCQA/bandit
-    rev: "1.8.0"
+    rev: "1.8.2"
     hooks:
       - id: bandit
         name: Run bandit

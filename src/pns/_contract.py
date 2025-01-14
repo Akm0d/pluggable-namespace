@@ -43,7 +43,7 @@ class ContractType(enum.Enum):
 
         # Try to match the remaining portion
         for ctype in cls:
-            if ctype.modname == name or name.startswith(ctype.modname + "_"):
+            if ctype.value == name or name.startswith(ctype.value + "_"):
                 return ctype
 
 
@@ -54,21 +54,15 @@ class Contracted(pns.data.Namespace):
     """
 
     def __init__(
-        self, name: str, func: Callable, contracts: list[Callable] = (), **kwargs
+        self,
+        name: str,
+        func: Callable,
+        contracts: dict[ContractType, list[Callable]] = None,
+        **kwargs,
     ):
         super().__init__(name, **kwargs)
         self.func = func
-        self.contracts = defaultdict(list)
-        for contract in contracts:
-            self.add_contract(contract)
-
-    def add_contract(self, function: callable):
-        """
-        Add a contract to the function
-        """
-        contract_type = ContractType.from_func(function)
-        if contract_type:
-            self.contracts[contract_type].append(function)
+        self.contracts = contracts or defaultdict(list)
 
     async def __call__(self, *args, **kwargs):
         """
@@ -118,4 +112,3 @@ class CallStack:
         self.hub._last_call = self.last_call
         self.last_ref = None
         self.last_call = self
-

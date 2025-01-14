@@ -1,4 +1,5 @@
 import pathlib
+from collections import defaultdict
 import sys
 import asyncio
 import inspect
@@ -123,7 +124,8 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            loaded_contracts = pns.contract.recurse(loaded)
+            # loaded_contracts = pns.contract.recurse(loaded)
+            loaded_contracts = defaultdict(list)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
