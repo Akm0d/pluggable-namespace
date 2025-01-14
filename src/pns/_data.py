@@ -22,7 +22,9 @@ class Namespace(SimpleNamespace):
         name: str,
         parent: "Namespace" = None,
         root: "Namespace" = None,
+        *args, **kwargs
     ):
+        super().__init__(*args, **kwargs)
         self.__name__ = name
         self.__ = parent
         self._root = root
