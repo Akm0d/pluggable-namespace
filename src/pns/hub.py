@@ -44,7 +44,7 @@ class Sub(DynamicNamespace):
         super().__init__(name=name, root=root, **kwargs)
         self._contract_dir = pns.dir.walk(contract_locations)
         self._contract_dir.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
-        self.contract = defaultdict(list)
+        self.contract = None
 
     async def add_sub(self, name: str, **kwargs):
         """
@@ -69,17 +69,29 @@ class Sub(DynamicNamespace):
 
         # Only in the last iteration, use locations
         last_part = parts[-1]
-        sub = Sub(last_part, root=self._root or self, parent=self, **kwargs)
 
-        contract_mod = DynamicNamespace(
-            name="contract", parent=sub, root=self._root, locations=sub._contract_dir
-        )
-        await contract_mod._load_all()
-        sub.contract = pns.contract.load(contract_mod)
+        sub = Sub(last_part, root=self._root or self, parent=self, **kwargs)
+        await sub.load_contracts()
 
         current._nest[last_part] = sub
 
         return sub
+
+    async def load_contracts(self):
+        if not self._contract_dir:
+            return
+
+        if self.contract:
+            return
+
+        contract_sub = Sub(
+            name=CONTRACTS_DIR,
+            parent=self,
+            root=self._root,
+            locations=self._contract_dir,
+        )
+        await contract_sub._load_all()
+        self.contract = contract_sub
 
 
 class Hub(Sub):

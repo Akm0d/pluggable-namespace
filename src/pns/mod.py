@@ -124,8 +124,7 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            # loaded_contracts = pns.contract.recurse(loaded)
-            matched_contracts = pns.contract.match(loaded, func)
+            matched_contracts = {}
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
