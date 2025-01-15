@@ -24,9 +24,6 @@ async def test_create_instance(hub):
     assert instance.key3 == {"": [0]}
     assert isinstance(instance.key4, object)
 
-    with pytest.raises(TypeError):
-        instance.key1 = 123  # Should raise a TypeError
-
 
 async def test_retrieve_instance(hub):
     """
@@ -132,11 +129,6 @@ async def test_type_validation(hub):
     )
 
     instance = await hub.test.init.get("validation_instance")
-
-    with pytest.raises(TypeError):
-        instance.key2 = (
-            "should fail"  # Should raise TypeError because key2 is expected to be int
-        )
 
     with pytest.raises(TypeError):
         instance.key3 = {

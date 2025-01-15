@@ -4,6 +4,10 @@ from collections.abc import Iterable
 
 
 class NamespaceDict(dict[str, object]):
+
+    def __setattr__(self, name, value):
+        return self.__setitem__(name, value)
+
     def __getattr__(self, key: str):
         try:
             val = self[key]
