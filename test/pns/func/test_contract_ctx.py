@@ -1,6 +1,6 @@
 async def test_contract_context(hub):
     await hub.pop.sub.add(
-        locations=["test.pnsmods.contract_ctx"],
+        locations=["test.pns.mods.contract_ctx"],
         subname="mods",
         contract_locations=["test.pns.contracts"],
     )
@@ -12,7 +12,7 @@ async def test_contract_context(hub):
 async def test_contract_context_update_call(hub):
     # if a pre modifies args, make sure they persist when called via 'call' function
     await hub.pop.sub.add(
-        locations=["test.pnsmods.contract_ctx"],
+        locations=["test.pns.mods.contract_ctx"],
         subname="mods",
         contract_locations=["test.pns.contracts"],
     )
@@ -24,7 +24,7 @@ async def test_contract_context_update_call(hub):
 async def test_contract_context_update_direct(hub):
     # if a pre modifies args, make sure they persist when called directly
     await hub.pop.sub.add(
-        locations=["test.pnsmods.contract_ctx"],
+        locations=["test.pns.mods.contract_ctx"],
         subname="mods",
         contract_locations=["test.pns.contracts"],
     )

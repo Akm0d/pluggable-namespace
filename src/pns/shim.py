@@ -75,7 +75,7 @@ async def load_all(hub, load_all_subdirs: bool):
         if not load_all_subdirs:
             continue
         continue
-        await hub.pns.sub.load_subdirs(hub._nest[dyne], recurse=True)
+        await hub.pop.sub.load_subdirs(hub._nest[dyne], recurse=True)
 
 
 async def salt_loader():

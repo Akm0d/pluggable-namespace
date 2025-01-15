@@ -29,6 +29,7 @@ def recurse(loaded_mod: "pns.mod.LoadedMod") -> dict[ContractType, list[Callable
     """
     Recurse the parents of the loaded_mod and collect the contracts and recursive contracts
     """
+    contracts = defaultdict(list)
     current = loaded_mod.__
 
     while current is not None:

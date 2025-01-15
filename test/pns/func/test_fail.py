@@ -24,7 +24,7 @@ async def test_verror_does_not_overload_loaded_mod(hub):
     will explicitly not load. This makes sure load errors to not shadow good mod loads
     """
     await hub.pop.sub.add(
-        locations=["test.pnsmods.same_vname"],
+        locations=["test.pns.mods.same_vname"],
         subname="mods",
     )
     assert await hub.mods.vname.func() == "wha? Yep!"

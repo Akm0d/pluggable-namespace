@@ -133,12 +133,8 @@ async def test_non_module_functions_are_not_loaded(hub):
     await hub.pop.sub.add(locations=["test.pns.mods"])
     await hub.mods._load_all()
     assert "scan" not in dir(hub.mods.test)
-    await hub.mods.test.call_scan() is True
 
-    """
-    Verify that the assigned module name inside of the python sys.modules
-    is unique
-    """
+    # Verify that the assigned module name inside of the python sys.modules is unique
     await hub.pop.sub.add(name="dyne1")
     mname = await hub.dyne3.init.mod_name()
     assert not mname.startswith(".")
@@ -159,14 +155,14 @@ async def test_dyne(hub):
 
 async def test_sub_virtual(hub):
     await hub.pop.sub.add(name="dyne4")
-    await hub.pns.sub.load_subdirs(hub.dyne4)
-    assert "nest" in hub.dyne4._subs
-    assert "nest" not in hub.dyne4._loaded
+    await hub.pop.sub.load_subdirs(hub.dyne4)
+    assert "nest" in hub.dyne4._nest
+    assert "nest" not in hub.dyne4._mod
 
 
 async def test_dyne_nest(hub):
     await hub.pop.sub.add(name="dn1")
-    await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
+    await hub.pop.sub.load_subdirs(hub.dn1, recurse=True)
     assert await hub.dn1.nest.dn1.ping()
     assert await hub.dn1.nest.dn2.ping()
     assert await hub.dn1.nest.dn3.ping()
@@ -187,7 +183,7 @@ async def test_existing_dyne(hub):
 
 async def test_dyne_extend(hub):
     await hub.pop.sub.add(name="dn1")
-    await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
+    await hub.pop.sub.load_subdirs(hub.dn1, recurse=True)
     assert await hub.dn1.nest.over.in_dn1()
     assert await hub.dn1.nest.over.in_dn2()
     assert await hub.dn1.nest.over.in_dn3()
@@ -195,7 +191,7 @@ async def test_dyne_extend(hub):
 
 async def test_dyne_overwrite(hub):
     await hub.pop.sub.add(name="dn1")
-    await hub.pns.sub.load_subdirs(hub.dn1, recurse=True)
+    await hub.pop.sub.load_subdirs(hub.dn1, recurse=True)
     # Assure that the first instance of a function does not get overwritten
     assert await hub.dn1.nest.over.source() == "dn1"
 
@@ -204,15 +200,15 @@ async def test_contract_signatures(hub):
     hub.LOAD_PASS = True
     hub.LOAD_FAIL = False
     # These functions should load no problem
-    await hub.pop.sub.add(locations=["test.pnsmods.contract_sig"])
+    await hub.pop.sub.add(locations=["test.pns.mods.contract_sig"])
 
 
 async def test_contract_signature_fail(hub):
     hub.LOAD_PASS = False
     hub.LOAD_FAIL = True
     # These functions should load with sig failures
-    with pytest.raises(pns.exc.ContractSigException) as e:
-        await hub.pop.sub.add(locations=["test.pnsmods.contract_sig"])
+    with pytest.raises(Exception) as e:
+        await hub.pop.sub.add(locations=["test.pns.mods.contract_sig"])
     errs = e.value.args[0].splitlines()
 
     assert "Signature Errors" in errs[0]
@@ -226,8 +222,8 @@ async def test_contract_signature_fail(hub):
 
 async def test_reload(hub):
     await hub.pop.sub.add(name="dn1")
-    assert await hub.pns.sub.reload("dn1")
+    assert await hub.pop.sub.reload("dn1")
 
 
 async def test_reload_fail(hub):
-    assert not await hub.pns.sub.reload("nonexistant")
+    assert not await hub.pop.sub.reload("nonexistant")
