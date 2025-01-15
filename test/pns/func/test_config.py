@@ -6,7 +6,7 @@ async def test_load_with_config_file(hub, tmp_path):
     config = {"test_cli": {"option": {"default": "default"}}}
     config_file = tmp_path / "config.yaml"
     config_file.write_text("test_cli:\n  option: file_value\n")
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=cli,
         cli_config=cli_config,
         config=config,
@@ -24,7 +24,7 @@ async def test_load_with_subcommands(hub):
     subcommands = {
         "test_cli": {"subcommand": {"description": "Subcommand description"}}
     }
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=cli,
         cli_config=cli_config,
         subcommands=subcommands,
@@ -40,7 +40,7 @@ async def test_prioritize_with_env_vars(hub):
     cli_opts = {}
     config = {"test_cli": {"option": {"os": "TEST_OPTION", "default": "default"}}}
     hub.lib.os.environ["TEST_OPTION"] = "env_value"
-    OPT = await hub.config.prioritize(
+    OPT = await hub.config.init.prioritize(
         cli=cli, cli_opts=cli_opts, config=config, config_file_data={}, global_clis=[]
     )
     assert OPT["test_cli"]["option"] == "env_value"
@@ -65,7 +65,7 @@ async def test_load_with_cli(hub):
 
     hub.lib.os.environ.pop("TEST_OPTION", None)
     # Test the default
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=cli,
         cli_config=cli_config,
         config=config,
@@ -77,7 +77,7 @@ async def test_load_with_cli(hub):
 
     # Test that os vars overrides default
     hub.lib.os.environ["TEST_OPTION"] = "os"
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=cli,
         cli_config=cli_config,
         config=config,
@@ -88,7 +88,7 @@ async def test_load_with_cli(hub):
     assert OPT[cli]["option"] == "os"
 
     # Test that cli supersedes all
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=cli,
         cli_config=cli_config,
         config=config,
@@ -105,8 +105,8 @@ async def test_parse_cli(hub):
     active_cli = {"option": {"subcommands": ["__global__"]}}
     subcommands = {"subcommand": {}}
     parser_args = ("--option", "cli_value", "subcommand", "--option", "sub_cli_value")
-    main_parser = await hub.config.parser(cli)
-    subparsers, arguments = await hub.config.parse_cli(
+    main_parser = await hub.config.init.parser(cli)
+    subparsers, arguments = await hub.config.init.parse_cli(
         main_parser, active_cli=active_cli, subcommands=subcommands
     )
     cli_parser = await hub.config.subcommands.create_parsers(
@@ -123,7 +123,7 @@ async def test_prioritize(hub):
     cli_opts = {"option": "cli_value"}
     config = {"test_cli": {"option": {"default": "config_value"}}}
     config_file_data = {"test_cli": {"option": "file_value"}}
-    OPT = await hub.config.prioritize(
+    OPT = await hub.config.init.prioritize(
         cli=cli,
         cli_opts=cli_opts,
         config=config,
@@ -150,8 +150,8 @@ async def test_display_priority(hub):
         "no_priority_value",  # No priority positional argument
     )
 
-    main_parser = await hub.config.parser(cli)
-    subparsers, arguments = await hub.config.parse_cli(
+    main_parser = await hub.config.init.parser(cli)
+    subparsers, arguments = await hub.config.init.parse_cli(
         main_parser, active_cli=active_cli
     )
     cli_parser = await hub.config.subcommands.create_parsers(
@@ -175,7 +175,7 @@ async def test_source(hub):
         source_cli: {"option": {"default": "value", "choices": ["--opt"]}},
     }
 
-    OPT = await hub.config.load(
+    OPT = await hub.config.init.load(
         cli=main_cli,
         cli_config=config,
         subcommands={},

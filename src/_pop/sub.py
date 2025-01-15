@@ -80,14 +80,16 @@ async def load_subdirs(hub: pns.hub.Hub, sub: pns.hub.Sub, *, recurse: bool = Fa
                 await hub.pop.sub.load_subdirs(getattr(sub, name), recurse=recurse)
 
 
-async def reload(hub: pns.hub.Hub, name:str) -> bool:
+async def reload(hub: pns.hub.Hub, name: str) -> bool:
     try:
         locations = hub._nest[name]._dir
         contract_locations = hub._nest[name]._contract_dir
     except KeyError as e:
         await hub.log.debug(f"{e.__class__.__name__}: Error reloading sub {name}: {e}")
         return False
-    
+
     hub._nest.pop(name)
-    await hub.pop.sub.add(name=name, locations=locations, contract_locations=contract_locations)
+    await hub.pop.sub.add(
+        name=name, locations=locations, contract_locations=contract_locations
+    )
     return True

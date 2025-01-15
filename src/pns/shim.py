@@ -44,12 +44,13 @@ async def loaded_hub(
 
     # Load the config
     await hub.add_sub(name="config", locations=hub._dynamic.dyne.config.paths)
+    await hub.config._load_all()
+
     if load_config:
-        await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
-        hub.OPT = pns.data.NamespaceDict(opt)
+        hub.OPT = opt
     else:
-        hub.OPT = pns.data.NamespaceDict()
+        hub.OPT = {}
 
     # Setup the logger
     if load_config and logs:

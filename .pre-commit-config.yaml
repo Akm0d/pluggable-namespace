@@ -51,11 +51,11 @@ repos:
         args: [--report-level=warning]
         additional_dependencies: [sphinx]
 
-  - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: v0.16.6
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 24.10.0
     hooks:
-      - id: cython-lint
-      - id: double-quote-cython-strings
+      - id: black
+        language_version: python3.11
 
   # <---- Formatting -----------------------------------------------------------------------------
 

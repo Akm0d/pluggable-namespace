@@ -51,7 +51,7 @@ async def load(
         active_cli.update(full_config.get(gn, {}).copy())
 
     if subcommands is None:
-        subcommands = hub.dynamic.config.subcommands
+        subcommands = hub._dynamic.config.subcommands
     else:
         active_subcommands = subcommands
     if cli:
@@ -119,7 +119,7 @@ async def load(
         global_clis=global_clis,
     )
 
-    return opt
+    return hub.lib.pns.data.NamespaceDict(opt)
 
 
 async def parse(
