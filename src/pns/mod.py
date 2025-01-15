@@ -125,13 +125,13 @@ async def populate(loaded, mod: ModuleType):
                 func = obj
 
             # loaded_contracts = pns.contract.recurse(loaded)
-            loaded_contracts = defaultdict(list)
+            matched_contracts = pns.contract.match(loaded, func)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
                 parent=loaded,
                 root=loaded._,
-                contracts=loaded_contracts,
+                contracts=matched_contracts,
             )
 
             loaded._func[name] = contracted_func

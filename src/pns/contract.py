@@ -1,6 +1,7 @@
 from ._debug import DEBUG_PNS_GETATTR
 from collections.abc import Callable
 from collections import defaultdict
+import pns.data
 
 if DEBUG_PNS_GETATTR:
     from pns._contract import Contracted, ContractType
@@ -25,13 +26,46 @@ def load(loaded_mod: "pns.mod.LoadedMod") -> dict[ContractType, list[Callable]]:
     return contracts
 
 
+def match(loaded: "pns.mod.Loaded", func: Callable) -> dict[ContractType, list[Callable]]:
+    """
+    Recurse the parents of the loaded_mod and collect the contracts and recursive contracts.
+    Match them to the current function name and ref
+    """
+    contracts = defaultdict(list)
+    name = func.__name__
+    explicit_contracts = getattr(loaded, CONTRACTS, ())
+    
+    # Move up the tree until we are on the nearest Sub
+    # We will match with the current sub's contracts and it's parents recursive contracts
+    current = loaded
+    while not hasattr(current, "contract"):
+        if not isinstance(current, pns.data.Namespace):
+            return contracts
+        current = current.__
+    
+    while current is not None:
+        for contract_type, sub_contracts in current.contract.items():
+            # Add the sub's contracts to this functions contracts if it meets the appropriate criteria
+            for sub_contract in sub_contracts:
+                # Contracts in an "init" module are universal
+                sub_name, mod_ref = sub_contract.__ref__.split(".contract.", maxsplit=1)
+                # TODO , it's also ok if the contract is in the loaed mod's __contracts__
+                mod_name, contract_func_name = mod_ref.split(".", maxsplit=1)
+                if sub_contract.__.__name__ not in ("init", loaded.__name__):
+                    continue
+                # Contracts with no function name beyond their type are universal
+                if sub_contract.__name__ not in  (contract_type.value, f"{contract_type.value}_{name}"):
+                    continue
+                contracts[contract_type].append(sub_contract)
+        current = current.__
+        
+    return contracts
+
+
 def recurse(loaded_mod: "pns.mod.LoadedMod") -> dict[ContractType, list[Callable]]:
     """
     Recurse the parents of the loaded_mod and collect the contracts and recursive contracts
     """
-    contracts = defaultdict(list)
-    current = loaded_mod.__
-
     while current is not None:
 
         # TODO iterate over the parent subs and add their recursive contracts to this one
