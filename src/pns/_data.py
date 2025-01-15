@@ -180,7 +180,10 @@ def get_alias(name: str, collection: dict[str, object]) -> Namespace:
     Iterate over a dictionary of Namespace objects and return the one that matches the name or alias.
     """
     for check, ns in collection.items():
-        if name == check and getattr(ns, "_active", True):
+        if name == check:
+            if isinstance(ns, Namespace):
+                if not ns._active:
+                    continue
             return ns
         elif not isinstance(ns, Namespace):
             continue

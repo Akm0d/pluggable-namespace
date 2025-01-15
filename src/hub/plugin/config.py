@@ -23,7 +23,7 @@ async def override(hub, cli: str, opts: dict):
             continue
 
     # There is a user defined-cli, let it parse the remaining args it's own way
-    hub._opt = await hub.pns.config.load(
+    hub.OPT = await hub.config.init.load(
         # Pass all remaining args onto the new parser
         cli=cli,
         parser_args=tuple(opts.cli.args),
