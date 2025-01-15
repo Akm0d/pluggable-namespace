@@ -8,7 +8,8 @@ import pytest
 
 @pytest.fixture(name="hub")
 async def testing_hub():
-    hub = await pns.shim.loaded_hub()
+    with mock.patch("sys.argv", ["test"]):
+        hub = await pns.shim.loaded_hub()
     yield hub
 
 

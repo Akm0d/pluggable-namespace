@@ -16,7 +16,7 @@ async def render(hub, data, renderer: str):
 async def parse_subs(hub, subs: list, pipe: str = None) -> dict:
     ret = {}
     for sub in subs:
-        for sdir in hub[sub]._dirs:
+        for sdir in hub[sub]._dir:
             sdir_path = hub.lib.pathlib.Path(sdir)
             for fn in sdir_path.iterdir():
                 if fn.suffix == ".sls":

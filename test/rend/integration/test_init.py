@@ -16,7 +16,6 @@ async def test_rend_parse_jinja_exc(hub, FDIR):
     test rend.init.parse when RendererException
     raised with jinja renderer
     """
-
     fn_ = os.path.join(FDIR, "test_exc.jinja2")
     with pytest.raises(hub.exc.rend.RenderError) as exc:
         await hub.rend.init.parse(fn_, "jinja")
