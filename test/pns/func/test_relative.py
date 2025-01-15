@@ -4,7 +4,7 @@ Test relative paths like _ and __
 
 
 async def test_hub_parent(hub):
-    assert hub.__ is hub
+    assert hub.__ is None
 
 
 async def test_sub_parent_hub(hub):
@@ -18,7 +18,7 @@ async def test_sub_parent_sub(hub):
 
 
 async def test_mod_parent(hub):
-    assert hub.pop.sub.__ is hub.pns
+    assert hub.pop.sub.__ is hub.pop
 
 
 async def test_contracted_parent(hub):

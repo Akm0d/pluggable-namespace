@@ -21,24 +21,15 @@ class DynamicNamespace(pns.data.Namespace):
         try:
             return super().__getattr__(name)
         except AttributeError:
-            for check, ns in self._mod.items():
-                if name == check and getattr(ns, "_active", True):
-                    return ns
-                elif not isinstance(ns, pns.data.Namespace):
-                    continue
-                if name in ns._alias and ns._active:
-                    return ns
+            item = pns.data.get_alias(name, self._mod)
 
             # If attribute not found, attempt to load the module dynamically
-            pns.loop.run(self._load_mod(name))
+            if not item:
+                pns.loop.run(self._load_mod(name))
+                item = pns.data.get_alias(name, self._mod)
 
-            for check, ns in self._mod.items():
-                if name == check and getattr(ns, "_active", True):
-                    return ns
-                elif not isinstance(ns, pns.data.Namespace):
-                    continue
-                if name in ns._alias and ns._active:
-                    return ns
+            if item:
+                return item
 
             raise
 
