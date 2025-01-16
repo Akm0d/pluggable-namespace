@@ -55,9 +55,8 @@ def load(path: str):
 
 
 async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
-    loaded = LoadedMod(name=name, parent=sub, root=hub)
-    if hasattr(mod, VIRTUAL_NAME):
-        loaded._alias.add(getattr(mod, VIRTUAL_NAME))
+    modname = getattr(mod, VIRTUAL_NAME, name)
+    loaded = LoadedMod(name=modname, parent=sub, root=hub)
 
     # Execute the __virtual__ function if present
     if hasattr(mod, VIRTUAL):

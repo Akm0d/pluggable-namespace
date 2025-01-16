@@ -34,35 +34,45 @@ class DynamicNamespace(pns.data.Namespace):
             raise
 
     async def _load_all(self):
-        for _, name, _ in pkgutil.iter_modules(self._dir):
-            await self._load_mod(name)
+        for d in self._dir:
+            for _, name, _ in pkgutil.iter_modules([d]):
+                await self._load_mod(name, [d])
 
-    async def _load_mod(self, name: str):
-        for path in self._dir:
+    async def _load_mod(self, name: str, dirs: list[str] = None):
+        if not dirs:
+            dirs = self._dir
+
+        for path in dirs:
             mod = pns.mod.load_from_path(name, path)
-            if mod:
-                break
-        else:
-            mod = pns.mod.load(name)
 
-        try:
-            loaded_mod = await pns.mod.prep(self._, self, name, mod)
-        except NotImplementedError:
-            return
+            try:
+                loaded_mod = await pns.mod.prep(self._, self, name, mod)
+            except NotImplementedError:
+                continue
 
-        self._mod[name] = loaded_mod
+            # Account for a name change with a virtualname
+            name = loaded_mod.__name__
+            if name not in self._mod:
+                self._mod[name] = loaded_mod
+            else:
+                # Merge the two modules
+                old_mod = self._mod.pop(name)
+                loaded_mod._var.update(old_mod._var)
+                loaded_mod._func.update(old_mod._func)
+                loaded_mod._class.update(old_mod._class)
+                self._mod[name] = loaded_mod
 
-        if hasattr(mod, SUB_ALIAS):
-            self._alias.update(getattr(mod, SUB_ALIAS))
+            if hasattr(mod, SUB_ALIAS):
+                self._alias.update(getattr(mod, SUB_ALIAS))
 
-        # Execute the __init__ function if present
-        if hasattr(mod, INIT):
-            func = getattr(mod, INIT)
-            if asyncio.iscoroutinefunction(func):
-                init = pns.contract.Contracted(
-                    name=INIT, func=func, parent=loaded_mod, root=self._
-                )
-                await init()
+            # Execute the __init__ function if present
+            if hasattr(mod, INIT):
+                func = getattr(mod, INIT)
+                if asyncio.iscoroutinefunction(func):
+                    init = pns.contract.Contracted(
+                        name=INIT, func=func, parent=loaded_mod, root=self._
+                    )
+                    await init()
 
     def __iter__(self):
         yield from self._nest
