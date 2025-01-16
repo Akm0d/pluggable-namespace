@@ -89,7 +89,7 @@ class Sub(DynamicNamespace):
             root=self._root,
             locations=self._contract_dir,
         )
-        await contract_sub._load_all()
+        await contract_sub._load_all(merge=False)
         self.contract = contract_sub
 
 

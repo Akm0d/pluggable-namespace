@@ -33,12 +33,14 @@ class DynamicNamespace(pns.data.Namespace):
 
             raise
 
-    async def _load_all(self):
+    async def _load_all(self, *, merge: bool = True):
         for d in self._dir:
             for _, name, _ in pkgutil.iter_modules([d]):
-                await self._load_mod(name, [d])
+                await self._load_mod(name, [d], merge=merge)
 
-    async def _load_mod(self, name: str, dirs: list[str] = None):
+    async def _load_mod(
+        self, name: str, dirs: list[str] = None, *, merge: bool = False
+    ):
         if not dirs:
             dirs = self._dir
 
@@ -56,13 +58,17 @@ class DynamicNamespace(pns.data.Namespace):
             name = loaded_mod.__name__
             if name not in self._mod:
                 self._mod[name] = loaded_mod
-            else:
+            elif merge:
                 # Merge the two modules
                 old_mod = self._mod.pop(name)
                 loaded_mod._var.update(old_mod._var)
                 loaded_mod._func.update(old_mod._func)
                 loaded_mod._class.update(old_mod._class)
                 self._mod[name] = loaded_mod
+            else:
+                # Add the second module
+                loaded_mod._alias.add(name)
+                self._mod[str(path)] = loaded_mod
 
             if hasattr(mod, SUB_ALIAS):
                 self._alias.update(getattr(mod, SUB_ALIAS))

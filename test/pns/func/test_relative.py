@@ -8,7 +8,7 @@ async def test_hub_parent(hub):
 
 
 async def test_sub_parent_hub(hub):
-    assert hub.pns.__ is hub
+    assert hub.pop.__ is hub
 
 
 async def test_sub_parent_sub(hub):

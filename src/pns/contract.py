@@ -34,7 +34,10 @@ def match(loaded: "pns.mod.Loaded", name: str) -> dict[ContractType, list[Callab
     while current is not None:
         contract_mods = {} if not current.contract else current.contract._mod
         for contract_mod_name, contract_mod in contract_mods.items():
-            if contract_mod_name not in matching_mods:
+            if not (
+                (contract_mod_name in matching_mods)
+                or (contract_mod._alias & matching_mods)
+            ):
                 continue
 
             for func_name, contract_func in contract_mod._func.items():
