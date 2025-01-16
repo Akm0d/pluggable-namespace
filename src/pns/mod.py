@@ -103,7 +103,7 @@ async def populate(loaded, mod: ModuleType):
             __func_alias__ = await __func_alias__
 
     # Iterate over all attributes in the module
-    for attr in getattr(mod, "__load__", dir(mod)):
+    for attr in getattr(mod, "__load__", mod.__dict__.keys()):
         # Avoid omitted names
         if attr.startswith(OMIT_START) or attr.endswith(OMIT_END):
             continue

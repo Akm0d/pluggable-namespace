@@ -8,12 +8,12 @@ async def pre(hub, ctx):
         raise ValueError("No can haz kwargs!")
 
 
-async def call(hub, ctx):
-    return await ctx.func(*ctx.args, **ctx.kwargs)
-
-
 async def call_list(hub, ctx):
     return ["override"]
+
+
+async def call(hub, ctx):
+    return await ctx.func(*ctx.args, **ctx.kwargs)
 
 
 async def post(hub, ctx):
