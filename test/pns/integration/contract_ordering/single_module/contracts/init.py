@@ -5,7 +5,7 @@ async def pre(hub, ctx):
 
 async def post(hub, ctx):
     print("init-post")
-    ctx.ret.append("init-post")
+    ctx.return_value.append("init-post")
 
 
 async def call(hub, ctx):
@@ -22,7 +22,7 @@ async def pre_test_fn(hub, ctx):
 
 async def post_test_fn(hub, ctx):
     print("init-post-test-fn")
-    ctx.ret.append("init-post-test-fn")
+    ctx.return_value.append("init-post-test-fn")
 
 
 async def call_test_fn(hub, ctx):

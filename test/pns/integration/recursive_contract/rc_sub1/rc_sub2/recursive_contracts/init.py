@@ -5,7 +5,7 @@ async def pre_test_call(hub, ctx):
 
 async def post_test_call(hub, ctx):
     print("rc_sub2-recursive-post")
-    ctx.ret.append("rc_sub2-recursive-post")
+    ctx.return_value.append("rc_sub2-recursive-post")
 
 
 async def call(hub, ctx):

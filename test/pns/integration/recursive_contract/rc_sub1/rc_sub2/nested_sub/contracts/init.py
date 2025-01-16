@@ -5,7 +5,7 @@ async def pre(hub, ctx):
 
 async def post(hub, ctx):
     print("regular-post")
-    ctx.ret.append("regular-post")
+    ctx.return_value.append("regular-post")
 
 
 async def call(hub, ctx):

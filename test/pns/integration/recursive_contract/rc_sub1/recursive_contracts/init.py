@@ -5,7 +5,7 @@ async def pre(hub, ctx):
 
 async def post(hub, ctx):
     print("rc_sub1-recursive-post")
-    ctx.ret.append("rc_sub1-recursive-post")
+    ctx.return_value.append("rc_sub1-recursive-post")
 
 
 async def call(hub, ctx):

@@ -75,16 +75,25 @@ class Contracted(pns.data.Namespace):
             hub = self._
             ctx = Context(hub, self.func, *args, **kwargs)
 
-            for contract in self.contracts[ContractType.PRE]:
+            contracts = (
+                self.contracts[ContractType.PRE] + self.contracts[ContractType.R_PRE]
+            )
+            for contract in contracts:
                 await contract(ctx)
 
-            for contract in self.contracts[ContractType.CALL]:
+            contracts = (
+                self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
+            )
+            for contract in contracts:
                 ctx.return_value = await contract(ctx)
                 break
             else:
                 ctx.return_value = await ctx.func(*ctx.args, **ctx.kwargs)
 
-            for contract in reversed(self.contracts[ContractType.POST]):
+            contracts = (
+                self.contracts[ContractType.POST] + self.contracts[ContractType.R_POST]
+            )
+            for contract in reversed(contracts):
                 ctx.return_value = await contract(ctx)
 
             return ctx.return_value

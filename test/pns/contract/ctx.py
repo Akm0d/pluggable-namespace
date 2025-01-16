@@ -28,4 +28,4 @@ async def post_ping(hub, ctx):
             "'injected_data' was not found in contract post 'ctx.cache'"
         )
     assert ctx.cache["injected_data"] == 2
-    return ctx.ret
+    return ctx.return_value

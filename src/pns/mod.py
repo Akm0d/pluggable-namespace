@@ -1,5 +1,4 @@
 import pathlib
-from collections import defaultdict
 import sys
 import asyncio
 import inspect
@@ -89,18 +88,23 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
     return await populate(loaded, mod)
 
 
-async def populate(loaded, mod: ModuleType):
+# Alias builtin funciton names to their name + underscore
+BUILTIN_ALIAS = {f"{k}_": k for k in __builtins__}
+
+
+async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
     """
     Add functions, classes, and variables to the hub considering function aliases
     """
-    # TODO have an "implicit_alias" for functions that end in "_" and shadow builtins
-
     # Retrieve function aliases if any
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
     if inspect.isfunction(__func_alias__):
         __func_alias__ = __func_alias__(loaded._)
         if asyncio.iscoroutine(__func_alias__):
             __func_alias__ = await __func_alias__
+
+    if implicit_alias:
+        pns.data.update(__func_alias__, BUILTIN_ALIAS)
 
     # Iterate over all attributes in the module
     for attr in getattr(mod, "__load__", mod.__dict__.keys()):
