@@ -12,15 +12,12 @@ else:
 CONTRACTS = "__contracts__"
 
 
-def match(
-    loaded: "pns.mod.Loaded", func: Callable
-) -> dict[ContractType, list[Callable]]:
+def match(loaded: "pns.mod.Loaded", name: str) -> dict[ContractType, list[Callable]]:
     """
     Recurse the parents of the loaded_mod and collect the contracts and recursive contracts.
     Match them to the current function name and ref
     """
     contracts = defaultdict(list)
-    name = func.__name__
     explicit_contracts = getattr(loaded, CONTRACTS, ())
     # Contracts in an "init" module are universal
     matching_mods = {"init", loaded.__name__, *explicit_contracts}
@@ -40,8 +37,10 @@ def match(
             if contract_mod_name not in matching_mods:
                 continue
 
-            for func_name, func in contract_mod._func.items():
-                contract_type = ContractType.from_func(func)
+            for func_name, contract_func in contract_mod._func.items():
+                contract_type = ContractType.from_func(contract_func)
+                if not contract_type:
+                    continue
 
                 # After the first pass we only consider recursive contracts
                 if not first_pass and not contract_type.recursive:
@@ -55,7 +54,7 @@ def match(
                     continue
 
                 # Add the sub's contracts to this function's contracts if it meets the appropriate criteria
-                contracts[contract_type].append(func)
+                contracts[contract_type].append(contract_func)
 
         # Keep looking up the tree for recursive contracts
         first_pass = False

@@ -124,7 +124,8 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            matched_contracts = pns.contract.match(loaded, func)
+            # Make sure the aliased func name gets in there
+            matched_contracts = pns.contract.match(loaded, name)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,

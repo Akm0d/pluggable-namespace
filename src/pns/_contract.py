@@ -19,7 +19,7 @@ class Context:
 
 class ContractType(enum.Enum):
     SIG = "sig"
-    PRE = "pre'"
+    PRE = "pre"
     CALL = "call"
     POST = "post"
     R_SIG = "r_sig"
@@ -43,7 +43,7 @@ class ContractType(enum.Enum):
 
         # Try to match the remaining portion
         for ctype in cls:
-            if ctype.value == name or name.startswith(ctype.value + "_"):
+            if (ctype.value == name) or name.startswith(f"{ctype.value}_"):
                 return ctype
 
 
