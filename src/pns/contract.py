@@ -12,20 +12,6 @@ else:
 CONTRACTS = "__contracts__"
 
 
-def load(loaded_mod: "pns.mod.LoadedMod") -> dict[ContractType, list[Callable]]:
-    """
-    Find the contract functions in the module, classify them, and return them in a dictionary
-    """
-    contracts = defaultdict(list)
-    for mod in loaded_mod._mod.values():
-        for func in mod._func.values():
-            contract_type = ContractType.from_func(func)
-            if not contract_type:
-                continue
-            contracts[contract_type].append(func)
-    return contracts
-
-
 def match(
     loaded: "pns.mod.Loaded", func: Callable
 ) -> dict[ContractType, list[Callable]]:
@@ -36,6 +22,7 @@ def match(
     contracts = defaultdict(list)
     name = func.__name__
     explicit_contracts = getattr(loaded, CONTRACTS, ())
+    # Contracts in an "init" module are universal
     matching_mods = {"init", loaded.__name__, *explicit_contracts}
 
     # Move up the tree until we are on the nearest Sub
@@ -46,40 +33,32 @@ def match(
             return contracts
         current = current.__
 
+    first_pass = True
     while current is not None:
-        for contract_type, sub_contracts in current.contract.items():
-            # Add the sub's contracts to this functions contracts if it meets the appropriate criteria
-            for sub_contract in sub_contracts:
-                # Contracts in an "init" module are universal
-                sub_name, mod_ref = sub_contract.__ref__.split(".contract.", maxsplit=1)
-                mod_name, contract_func_name = mod_ref.split(".", maxsplit=1)
-                if sub_contract.__.__name__ not in matching_mods:
+        contract_mods = {} if not current.contract else current.contract._mod
+        for contract_mod_name, contract_mod in contract_mods.items():
+            if contract_mod_name not in matching_mods:
+                continue
+
+            for func_name, func in contract_mod._func.items():
+                contract_type = ContractType.from_func(func)
+
+                # After the first pass we only consider recursive contracts
+                if not first_pass and not contract_type.recursive:
                     continue
-                # Contracts with no function name beyond their type are universal
-                if sub_contract.__name__ not in (
+
+                if func_name not in (
+                    # Contracts with no function name beyond their type are universal
                     contract_type.value,
                     f"{contract_type.value}_{name}",
                 ):
                     continue
-                contracts[contract_type].append(sub_contract)
-        current = current.__
 
-    return contracts
+                # Add the sub's contracts to this function's contracts if it meets the appropriate criteria
+                contracts[contract_type].append(func)
 
-
-def recurse(loaded_mod: "pns.mod.LoadedMod") -> dict[ContractType, list[Callable]]:
-    """
-    Recurse the parents of the loaded_mod and collect the contracts and recursive contracts
-    """
-    while current is not None:
-
-        # TODO iterate over the parent subs and add their recursive contracts to this one
-        for func in current.contract.values():
-            contract_type = ContractType.from_func(func)
-            if not contract_type:
-                continue
-            contracts[contract_type].append(func)
-
+        # Keep looking up the tree for recursive contracts
+        first_pass = False
         current = current.__
 
     return contracts

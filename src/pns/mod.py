@@ -124,7 +124,7 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            matched_contracts = {}
+            matched_contracts = pns.contract.match(loaded, func)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,

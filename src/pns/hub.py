@@ -4,7 +4,6 @@ import pns.dir
 import pns.data
 import pns.contract
 from ._debug import DEBUG_PNS_GETATTR
-from collections import defaultdict
 
 CONTRACTS_DIR = "contract"
 
@@ -44,7 +43,7 @@ class Sub(DynamicNamespace):
         super().__init__(name=name, root=root, **kwargs)
         self._contract_dir = pns.dir.walk(contract_locations)
         self._contract_dir.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
-        self.contract = None
+        self.contract = {}
 
     async def add_sub(self, name: str, **kwargs):
         """
@@ -130,9 +129,7 @@ class Hub(Sub):
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
         await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
-        # Load all the modules on hub.log
-        await hub.log._load_all()
-        await hub.log.debug("Initialized the hub")
+        await hub.log._load_mod("init")
         return hub
 
     @property
