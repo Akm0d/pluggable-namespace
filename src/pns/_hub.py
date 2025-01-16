@@ -44,6 +44,8 @@ class DynamicNamespace(pns.data.Namespace):
 
         for path in dirs:
             mod = pns.mod.load_from_path(name, path)
+            if not mod:
+                raise AttributeError(f"Module {name} not found in {path}")
 
             try:
                 loaded_mod = await pns.mod.prep(self._, self, name, mod)

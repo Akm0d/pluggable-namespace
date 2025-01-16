@@ -15,5 +15,5 @@ async def test_verror_does_not_overload_loaded_mod(hub):
 
 async def test_module_doesnt_exist(hub):
     await hub.pop.sub.add(locations=["test.pns.mods"])
-    with pytest.raises(AttributeError, match=".* has no attribute 'doesntexist'"):
+    with pytest.raises(AttributeError):
         await hub.mods.doesntexist
