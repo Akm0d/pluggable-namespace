@@ -17,7 +17,7 @@ async def call_list(hub, ctx):
 
 
 async def post(hub, ctx):
-    ret = ctx.ret
+    ret = ctx.return_value
     if isinstance(ret, list):
         ret.append("post called")
     elif isinstance(ret, dict):

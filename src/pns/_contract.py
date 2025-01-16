@@ -12,8 +12,9 @@ class Context:
 
     def __init__(self, hub, __func__: Callable, *args, **kwargs):
         self.func = __func__
-        self.args = (hub, *args)
+        self.args = [hub, *args]
         self.kwargs = kwargs
+        self.cache = {}
         self.return_value = None
 
 
@@ -79,6 +80,7 @@ class Contracted(pns.data.Namespace):
 
             for contract in self.contracts[ContractType.CALL]:
                 ctx.return_value = await contract(ctx)
+                break
             else:
                 ctx.return_value = await ctx.func(*ctx.args, **ctx.kwargs)
 
