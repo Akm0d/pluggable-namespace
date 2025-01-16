@@ -184,6 +184,6 @@ async def test_source(hub):
     )
 
     # The option should not exist under the namespace of the main cli
-    assert "option" not in OPT[main_cli].keys()
+    assert "option" not in OPT.get(main_cli, {}).keys()
     # Ensure that the option exists under the namespace of the source app
     assert OPT[source_cli]["option"] == "override"
