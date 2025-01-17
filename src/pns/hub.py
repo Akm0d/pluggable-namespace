@@ -56,7 +56,6 @@ class Sub(DynamicNamespace):
             return
         # If the current sub is not active, then don't waste time adding more subs
         if not self._active:
-            # TODO also call the sub's init.__virtual__ function and act based on the result
             return
 
         current = self

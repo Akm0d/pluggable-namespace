@@ -77,10 +77,3 @@ async def load_all(hub, load_all_subdirs: bool):
             continue
         continue
         await hub.pop.sub.load_subdirs(hub._nest[dyne], recurse=True)
-
-
-async def salt_loader():
-    """
-    Create a hub compatible with salt
-    """
-    raise NotImplemented("TODO")

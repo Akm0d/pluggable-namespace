@@ -10,7 +10,6 @@ from types import ModuleType
 import importlib.util
 import importlib.machinery
 
-# TODO create an "internal" dyne that we can use to extend the loadedmod with features dynamically
 VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
@@ -117,7 +116,6 @@ async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
         obj = getattr(mod, orig_name)
 
         if inspect.isfunction(obj):
-            # TODO save dunder methods in the module and attach them to the loadedmod object
             if OMIT_FUNC:
                 continue
             # It's a function, potentially make it async
@@ -128,7 +126,7 @@ async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
                 func = obj
 
             # Make sure the aliased func name gets in there
-            matched_contracts = pns.contract.match(loaded, func, name)
+            matched_contracts = pns.contract.match(loaded, name)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
