@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pluggable-namespace"
-version = "1.0.1"
+version = "1.0.0"
 description = "Pluggable namespaces"
 readme = "README.rst"
 authors = [
@@ -22,43 +22,9 @@ dependencies = [
     "aiofiles",
     "aiologger",
     "argparse",
-    "msgpack",
     "PyYaml",
 ]
-
-[project.optional-dependencies]
-console = [
-    "aioconsole",
-    "aiomonitor",
-    "prompt-toolkit",
-]
-
-rend = [
-    "aio-yte",
-    "jinja2",
-    "toml",
-]
-
-seed = [
-    "copier",
-]
-
-test = [
-    "aio-yte",
-    "aioconsole",
-    "aiomonitor",
-    "copier",
-    "prompt-toolkit",
-    "pexpect",
-    "pytest",
-    "pytest-asyncio",
-    "toml",
-    "aionotify; platform_system != 'Darwin'",
-]
-
-watch= [
-    "aionotify; platform_system != 'Darwin'",
-]
+dynamic = ["optional-dependencies"]
 
 [project.scripts]
 hub = "hub.__main__:main"

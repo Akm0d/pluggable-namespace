@@ -11,8 +11,19 @@ extensions = [
 
 SETUP_DIRNAME = Path(__file__).parent
 
+requirement_extras = {}
+REQUIREMENTS = SETUP_DIRNAME / "requirement"
+assert REQUIREMENTS.exists()
+for req_file in REQUIREMENTS.glob("*.txt"):
+    with open(req_file) as f:
+        requirement_extras[req_file.stem] = sorted(
+            line for line in f.read().splitlines() if line.strip()
+        )
+
+requirement_extras["all"] = sum(requirement_extras.values(), [])
 
 setup(
+    extras_require=requirement_extras,
     ext_modules=cythonize(extensions),
     include_package_data=True,
 )
