@@ -128,7 +128,7 @@ async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
                 func = obj
 
             # Make sure the aliased func name gets in there
-            matched_contracts = pns.contract.match(loaded, name)
+            matched_contracts = pns.contract.match(loaded, func, name)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
@@ -149,6 +149,9 @@ async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
             # It's a variable
             loaded._var[name] = obj
 
+    # Make sure that the signature of functions in the module match the contracts
+    if __debug__:
+        pns.contract.verify_sig(loaded)
     return loaded
 
 

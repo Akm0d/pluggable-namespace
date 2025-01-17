@@ -1,6 +1,7 @@
 import asyncio
 import pns.data
 import pns.loop
+import pns.verify
 import pkgutil
 
 INIT = "__init__"

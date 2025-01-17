@@ -20,3 +20,6 @@ async def args_kwargs(
 
 
 async def async_func(hub): ...
+
+
+async def missing_func(hub): ...

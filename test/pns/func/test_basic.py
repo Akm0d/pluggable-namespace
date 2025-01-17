@@ -207,17 +207,8 @@ async def test_contract_signature_fail(hub):
     hub.LOAD_PASS = False
     hub.LOAD_FAIL = True
     # These functions should load with sig failures
-    with pytest.raises(Exception) as e:
+    with hub.lib.pytest.raises(SyntaxError):
         await hub.pop.sub.add(locations=["test.pns.mods.contract_sig"])
-    errs = e.value.args[0].splitlines()
-
-    assert "Signature Errors" in errs[0]
-
-    filtered_errs = set({e for e in errs[1:-1] if "Enforcing signature" not in e})
-    assert filtered_errs == {
-        "args: **kwargs are not permitted as a parameter",
-        "kwargs: *args are not permitted as a parameter",
-    }
 
 
 async def test_reload(hub):

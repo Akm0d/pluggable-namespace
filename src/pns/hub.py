@@ -43,7 +43,7 @@ class Sub(DynamicNamespace):
         super().__init__(name=name, root=root, **kwargs)
         self._contract_dir = pns.dir.walk(contract_locations)
         self._contract_dir.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
-        self.contract = {}
+        self.contract = None
 
     async def add_sub(self, name: str, **kwargs):
         """
