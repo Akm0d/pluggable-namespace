@@ -1,4 +1,4 @@
-class RendBaseError(Exception):
+class RendBaseError(ValueError):
     """
     Base Exception for the render system
     """

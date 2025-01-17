@@ -62,7 +62,9 @@ class CMD(pns.hub.Sub):
         Returns:
             str: The path to the executable, or None if it's not available.
         """
-        return self.hub.lib.shutil.which(self.command[0])
+        if self.command:
+            return self.hub.lib.shutil.which(self.command[0])
+        return self.__repr__()
 
     async def _execute_command(self, *args, **kwargs):
         """

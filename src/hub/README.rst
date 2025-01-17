@@ -1,28 +1,13 @@
-=======
-pns-cli
-=======
+=======================
+pluggable-namespace cli
+=======================
 
 A cli interface for pns that exposes a persistent hub on the command line.
 
 Getting Started
 ===============
 
-First off, set up your python environment to use a gitlab repository to gather packages:
-
-.. code-block:: toml
-
-    # ~/.pip/pip.conf
-    [global]
-    extra-index-url = https://__token__:<personal_access_token>@gitlab.com/api/v4/groups/<namespace>/-/packages/pypi/simple
-
-Now you can install ``pns-cli`` from pypi or gitlab repositories:
-
-.. code-block:: bash
-
-    pip3 install pns-cli
-
-
-You can now initialize pns from the cli:
+You can initialize a hub from the cli:
 
 .. code-block:: bash
 
@@ -40,12 +25,12 @@ Specify a namespace that should host the authoritative CLI by calling using --cl
 
     hub --cli=my_app my_sub.init.cli
 
-If you don't specify a --cli, unknown args will be forwarded as parameters to the reference you give:
-
+If you don't specify a --cli, unknown args will be forwarded as parameters to the namespace path you give.
+Try this one!
 
 .. code-block:: bash
 
-    hub pns.test.func arg1 arg2 --kwarg1=asdf --kwarg2 asdf
+    hub pop.test.func arg1 arg2 --kwarg1=asdf --kwarg2 asdf
 
 
 You can access anything that is on the hub, this is very useful for debugging.
@@ -54,7 +39,7 @@ Try this to see the subs that made it onto the hub:
 
 .. code-block:: bash
 
-    hub _subs
+    hub _nest
 
 You can do this to see everything that made it into hub.OPT:
 
@@ -68,15 +53,3 @@ Start an interactive python shell that includes a hub and allows async code to b
 
     hub -i
     #>>> await hub.lib.asyncio.sleep(0)
-
-
-Documentation
-=============
-
-Check out the docs for more information:
-
-https://pop.readthedocs.io
-
-There is a much more in depth tutorial here, followed by documents on how to
-think in Plugin Oriented Programming. Take your time to read it, it is not long
-and can change how you look at writing software!

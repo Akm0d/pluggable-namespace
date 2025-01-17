@@ -11,15 +11,8 @@ All of this is achieved using Python, one of the world's most popular and powerf
 
 Installation
 ============
-First, configure your Python environment to use a GitLab repository to source packages:
 
-.. code-block:: toml
-
-    # ~/.pip/pip.conf
-    [global]
-    extra-index-url = https://__token__:<personal_access_token>@gitlab.com/api/v4/groups/<namespace>/-/packages/pypi/simple
-
-You can now install ``pluggable-namespace`` from PyPI or GitLab repositories:
+You can install ``pluggable-namespace`` from PyPI:
 
 .. code-block:: bash
 
@@ -36,7 +29,7 @@ Creating a pluggable application can be accomplished with just a few lines of co
     asyncio.run(main())
 
     async def main():
-        hub = pns.shim.loaded_hub()
+        hub = await pns.shim.loaded_hub()
         await hub.my_sub.init.cli()
 
 Configuration
@@ -79,17 +72,6 @@ When building a pluggable-namespace app, all configuration settings are stored i
       - os
       - toml
 
-Create a pns config file:
-
-.. code-block:: yaml
-
-    # Default location is ~/.pns/config.yaml
-    # To change, set the PNS_CONFIG environment variable
-    pns_cli:
-      # Setting this will persist your hub on the CLI between calls
-      hub_state: ~/.pns/hub.pkl
-    log:
-      log_plugin: async
 
 From the example above, all arguments are loaded onto the namespace under hub.OPT.my_namespace. One ``config.yaml`` can add configuration options to multiple namespaces. They are merged in the order found in sys.path.
 
@@ -111,24 +93,3 @@ Add a config.yaml to that directory:
         - src
 
 Now, every Python file in ``/path/to/my/code/src/`` will be added to the hub under ``hub.namespace``.
-
-Testing
-=======
-Clone the repository:
-
-.. code-block:: bash
-
-    git clone https://gitlab.com/tac_tech/pluggable-namespace.git
-    cd pluggable-namespace
-
-Install ``pluggable-namespace`` with the testing extras:
-
-.. code-block:: bash
-
-    pip3 install .\[test\]
-
-Run the tests in your cloned fork of Pluggable Namespace:
-
-.. code-block:: bash
-
-    pytest tests
