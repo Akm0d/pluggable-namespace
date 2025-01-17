@@ -5,7 +5,7 @@ async def pre(hub, ctx):
 
 async def post(hub, ctx):
     print("recursive-init-post")
-    ctx.ret.append("recursive-init-post")
+    ctx.return_value.append("recursive-init-post")
 
 
 async def call(hub, ctx):
@@ -26,7 +26,7 @@ async def pre_test_fn(hub, ctx):
 
 async def post_test_fn(hub, ctx):
     print("recursive-init-post-test-fn")
-    ctx.ret.append("recursive-init-post-test-fn")
+    ctx.return_value.append("recursive-init-post-test-fn")
 
 
 async def call_test_fn(hub, ctx):

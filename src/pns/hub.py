@@ -28,10 +28,9 @@ class Sub(DynamicNamespace):
     def __init__(
         self,
         name: str,
-        parent: "Sub",
-        root: "Hub",
-        locations: list[str] = (),
+        root: "Hub" = None,
         contract_locations: list[str] = (),
+        **kwargs,
     ):
         """
         Initializes a Sub instance.
@@ -41,16 +40,10 @@ class Sub(DynamicNamespace):
             parent (data.Namespace): The parent namespace of this Sub.
             root (Hub): The root Hub instance that this Sub is part of.
         """
-        super().__init__(name, parent=parent, root=root)
-        # Modules loaded onto this namespace
-        self._dir = pns.dir.walk(locations)
-        # Find contracts within the dirs
+        super().__init__(name=name, root=root, **kwargs)
         self._contract_dir = pns.dir.walk(contract_locations)
         self._contract_dir.extend(pns.dir.inline(self._dir, CONTRACTS_DIR))
-
-    @property
-    def contract(self):
-        return self._contract_dir
+        self.contract = None
 
     async def add_sub(self, name: str, **kwargs):
         """
@@ -63,7 +56,6 @@ class Sub(DynamicNamespace):
             return
         # If the current sub is not active, then don't waste time adding more subs
         if not self._active:
-            # TODO also call the sub's init.__virtual__ function and act based on the result
             return
 
         current = self
@@ -75,11 +67,29 @@ class Sub(DynamicNamespace):
 
         # Only in the last iteration, use locations
         last_part = parts[-1]
+
         sub = Sub(last_part, root=self._root or self, parent=self, **kwargs)
+        await sub.load_contracts()
 
         current._nest[last_part] = sub
 
         return sub
+
+    async def load_contracts(self):
+        if not self._contract_dir:
+            return
+
+        if self.contract:
+            return
+
+        contract_sub = Sub(
+            name=CONTRACTS_DIR,
+            parent=self,
+            root=self._root,
+            locations=self._contract_dir,
+        )
+        await contract_sub._load_all(merge=False)
+        self.contract = contract_sub
 
 
 class Hub(Sub):
@@ -118,9 +128,7 @@ class Hub(Sub):
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
         await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
-        # Load all the modules on hub.log
-        await hub.log._load_all()
-        await hub.log.debug("Initialized the hub")
+        await hub.log._load_mod("init")
         return hub
 
     @property

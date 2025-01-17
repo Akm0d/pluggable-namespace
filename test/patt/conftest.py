@@ -9,7 +9,7 @@ import pns.shim
 
 @pytest.fixture(name="hub")
 async def integration_hub():
-    hub = await pns.shim.loaded_hub()
+    hub = await pns.shim.loaded_hub(load_config=False)
     yield hub
 
 

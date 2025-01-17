@@ -4,6 +4,10 @@ from collections.abc import Iterable
 
 
 class NamespaceDict(dict[str, object]):
+
+    def __setattr__(self, name, value):
+        return self.__setitem__(name, value)
+
     def __getattr__(self, key: str):
         try:
             val = self[key]
@@ -40,13 +44,9 @@ class Namespace(SimpleNamespace):
 
     def __getattr__(self, name: str):
         """Dynamic attribute access for children and module."""
-        for check, ns in self._nest.items():
-            if name == check and getattr(ns, "_active", True):
-                return ns
-            elif not isinstance(ns, Namespace):
-                continue
-            if name in ns._alias and ns._active:
-                return ns
+        item = get_alias(name, self._nest)
+        if item:
+            return item
 
         # Finally, fall back on the default attribute access
         return self.__getattribute__(name)
@@ -145,7 +145,7 @@ class Namespace(SimpleNamespace):
         """
         True if the namespace has leaves, else false
         """
-        return bool(self._nest) and self._active
+        return self._active
 
     def _add_child(self, name: str, cls=None):
         """Add a new child to the parent"""
@@ -177,6 +177,22 @@ class Namespace(SimpleNamespace):
 
     def __repr__(self):
         return f"{self.__class__.__name__.split('.')[-1]}({self.__ref__})"
+
+
+def get_alias(name: str, collection: dict[str, object]) -> Namespace:
+    """
+    Iterate over a dictionary of Namespace objects and return the one that matches the name or alias.
+    """
+    for check, ns in collection.items():
+        if name == check:
+            if isinstance(ns, Namespace):
+                if not ns._active:
+                    continue
+            return ns
+        elif not isinstance(ns, Namespace):
+            continue
+        if name in ns._alias and ns._active:
+            return ns
 
 
 def update(dest, upd, recursive_update: bool = True, merge_lists: bool = False):

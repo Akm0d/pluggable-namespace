@@ -29,5 +29,5 @@ async def call_ping(hub, ctx):
 async def post_ping(hub, ctx):
     """ """
     print("Calling Post!")
-    if not isinstance(ctx.ret, dict):
+    if not isinstance(ctx.return_value, dict):
         raise ValueError("MUST BE DICT!!")

@@ -1,3 +1,3 @@
 async def post(hub, ctx):
-    ctx.ret.append("contract1")
-    return ctx.ret
+    ctx.return_value.append("contract1")
+    return ctx.return_value

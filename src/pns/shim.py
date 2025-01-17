@@ -44,12 +44,13 @@ async def loaded_hub(
 
     # Load the config
     await hub.add_sub(name="config", locations=hub._dynamic.dyne.config.paths)
+    await hub.config._load_all()
+
     if load_config:
-        await hub.config._load_all()
         opt = await hub.config.init.load(cli=cli, **hub._dynamic.config)
-        hub.OPT = pns.data.NamespaceDict(opt)
+        hub.OPT = opt
     else:
-        hub.OPT = pns.data.NamespaceDict()
+        hub.OPT = {}
 
     # Setup the logger
     if load_config and logs:
@@ -75,11 +76,4 @@ async def load_all(hub, load_all_subdirs: bool):
         if not load_all_subdirs:
             continue
         continue
-        await hub.pns.sub.load_subdirs(hub._nest[dyne], recurse=True)
-
-
-async def salt_loader():
-    """
-    Create a hub compatible with salt
-    """
-    raise NotImplemented("TODO")
+        await hub.pop.sub.load_subdirs(hub._nest[dyne], recurse=True)

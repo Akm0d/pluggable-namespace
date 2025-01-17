@@ -2,7 +2,7 @@
 module used while testing mock hubs provided in 'testing'.
 """
 
-_contracts__ = ["testing"]
+__contracts__ = ["testing"]
 
 
 async def noparam(hub):

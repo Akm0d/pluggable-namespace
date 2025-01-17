@@ -4,3 +4,4 @@ async def pre(hub, ctx):
 
 async def post(hub, ctx):
     hub.POST = True
+    return ctx.return_value

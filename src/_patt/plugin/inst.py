@@ -245,7 +245,8 @@ def _get_base_sub(hub) -> str:
     Returns:
         str: The base sub name of the caller.
     """
-    return hub._last_call._last_call.ref.rsplit(".")[0]
+    ref = hub._last_call.last_call.last_ref or hub._last_call.last_ref
+    return ref.rsplit(".")[0]
 
 
 def _validate_type(hub, value, expected):

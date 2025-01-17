@@ -26,5 +26,5 @@ def test_find(hub):
     assert pns.ref.find(hub, "test.subtest.attr") == "value"
     assert pns.ref.find(hub, "test.subtest.dict_attr.key") == "dict_value"
     assert pns.ref.find(hub, "test.subtest.list_attr.0") == "list_value"
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         pns.ref.find(hub, "test.subtest.nonexistent")

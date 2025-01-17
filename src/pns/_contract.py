@@ -12,14 +12,15 @@ class Context:
 
     def __init__(self, hub, __func__: Callable, *args, **kwargs):
         self.func = __func__
-        self.args = (hub, *args)
+        self.args = [hub, *args]
         self.kwargs = kwargs
+        self.cache = {}
         self.return_value = None
 
 
 class ContractType(enum.Enum):
     SIG = "sig"
-    PRE = "pre'"
+    PRE = "pre"
     CALL = "call"
     POST = "post"
     R_SIG = "r_sig"
@@ -43,7 +44,7 @@ class ContractType(enum.Enum):
 
         # Try to match the remaining portion
         for ctype in cls:
-            if ctype.modname == name or name.startswith(ctype.modname + "_"):
+            if (ctype.value == name) or name.startswith(f"{ctype.value}_"):
                 return ctype
 
 
@@ -54,21 +55,15 @@ class Contracted(pns.data.Namespace):
     """
 
     def __init__(
-        self, name: str, func: Callable, contracts: list[Callable] = (), **kwargs
+        self,
+        name: str,
+        func: Callable,
+        contracts: dict[ContractType, list[Callable]] = None,
+        **kwargs,
     ):
         super().__init__(name, **kwargs)
         self.func = func
-        self.contracts = defaultdict(list)
-        for contract in contracts:
-            self.add_contract(contract)
-
-    def add_contract(self, function: callable):
-        """
-        Add a contract to the function
-        """
-        contract_type = ContractType.from_func(function)
-        if contract_type:
-            self.contracts[contract_type].append(function)
+        self.contracts = contracts or defaultdict(list)
 
     async def __call__(self, *args, **kwargs):
         """
@@ -80,15 +75,25 @@ class Contracted(pns.data.Namespace):
             hub = self._
             ctx = Context(hub, self.func, *args, **kwargs)
 
-            for contract in self.contracts[ContractType.PRE]:
+            contracts = (
+                self.contracts[ContractType.PRE] + self.contracts[ContractType.R_PRE]
+            )
+            for contract in contracts:
                 await contract(ctx)
 
-            for contract in self.contracts[ContractType.CALL]:
+            contracts = (
+                self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
+            )
+            for contract in contracts:
                 ctx.return_value = await contract(ctx)
+                break
             else:
                 ctx.return_value = await ctx.func(*ctx.args, **ctx.kwargs)
 
-            for contract in reversed(self.contracts[ContractType.POST]):
+            contracts = (
+                self.contracts[ContractType.POST] + self.contracts[ContractType.R_POST]
+            )
+            for contract in reversed(contracts):
                 ctx.return_value = await contract(ctx)
 
             return ctx.return_value

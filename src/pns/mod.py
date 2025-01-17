@@ -6,12 +6,10 @@ import pns.contract
 import pns.data
 import os.path
 from types import ModuleType
-from collections.abc import Callable
 
 import importlib.util
 import importlib.machinery
 
-# TODO create an "internal" dyne that we can use to extend the loadedmod with features dynamically
 VIRTUAL = "__virtual__"
 VIRTUAL_NAME = "__virtualname__"
 CONFIG = "conf.yaml"
@@ -55,12 +53,9 @@ def load(path: str):
     return ret
 
 
-async def prep(
-    hub, sub: pns.hub.Sub, name: str, mod: ModuleType, contracts: list[str]
-) -> LoadedMod:
-    loaded = LoadedMod(name=name, parent=sub, root=hub)
-    if hasattr(mod, VIRTUAL_NAME):
-        loaded._alias.add(getattr(mod, VIRTUAL_NAME))
+async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
+    modname = getattr(mod, VIRTUAL_NAME, name)
+    loaded = LoadedMod(name=modname, parent=sub, root=hub)
 
     # Execute the __virtual__ function if present
     if hasattr(mod, VIRTUAL):
@@ -88,15 +83,17 @@ async def prep(
             del loaded
             raise NotImplementedError(f"{sub.__ref__}.{name} virtual failed: {error}")
 
-    return await populate(loaded, mod, contracts)
+    return await populate(loaded, mod)
 
 
-async def populate(loaded, mod: ModuleType):
+# Alias builtin funciton names to their name + underscore
+BUILTIN_ALIAS = {f"{k}_": k for k in __builtins__}
+
+
+async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
     """
     Add functions, classes, and variables to the hub considering function aliases
     """
-    # TODO have an "implicit_alias" for functions that end in "_" and shadow builtins
-
     # Retrieve function aliases if any
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
     if inspect.isfunction(__func_alias__):
@@ -104,8 +101,11 @@ async def populate(loaded, mod: ModuleType):
         if asyncio.iscoroutine(__func_alias__):
             __func_alias__ = await __func_alias__
 
+    if implicit_alias:
+        pns.data.update(__func_alias__, BUILTIN_ALIAS)
+
     # Iterate over all attributes in the module
-    for attr in getattr(mod, "__load__", dir(mod)):
+    for attr in getattr(mod, "__load__", mod.__dict__.keys()):
         # Avoid omitted names
         if attr.startswith(OMIT_START) or attr.endswith(OMIT_END):
             continue
@@ -116,7 +116,6 @@ async def populate(loaded, mod: ModuleType):
         obj = getattr(mod, orig_name)
 
         if inspect.isfunction(obj):
-            # TODO save dunder methods in the module and attach them to the loadedmod object
             if OMIT_FUNC:
                 continue
             # It's a function, potentially make it async
@@ -126,13 +125,14 @@ async def populate(loaded, mod: ModuleType):
             else:
                 func = obj
 
-            loaded_contracts = load_contracts(sub=loaded.__)
+            # Make sure the aliased func name gets in there
+            matched_contracts = pns.contract.match(loaded, name)
             contracted_func = pns.contract.Contracted(
                 func=func,
                 name=name,
                 parent=loaded,
                 root=loaded._,
-                contracts=loaded_contracts,
+                contracts=matched_contracts,
             )
 
             loaded._func[name] = contracted_func
@@ -147,6 +147,9 @@ async def populate(loaded, mod: ModuleType):
             # It's a variable
             loaded._var[name] = obj
 
+    # Make sure that the signature of functions in the module match the contracts
+    if __debug__:
+        pns.contract.verify_sig(loaded)
     return loaded
 
 
@@ -187,17 +190,3 @@ def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py"):
     sys.modules[module_key] = module
     spec.loader.exec_module(module)
     return module
-
-
-def load_contracts(sub: "pns.hub.Sub") -> list[Callable]:
-    hub = sub._
-    contract_functions = []
-
-    current = sub
-    dirs = set()
-    while current != hub:
-        dirs.update(current.contract)
-        current = sub.__
-
-    # Load the contract modules from the directories and get a list of their functions
-    return contract_functions

@@ -1,5 +1,5 @@
 async def _hub(hub):
-    await hub.pop.sub.add(locations=["test.pnsintegration.contracted.mods"])
+    await hub.pop.sub.add(locations=["test.pns.integration.contracted.mods"])
     return hub
 
 

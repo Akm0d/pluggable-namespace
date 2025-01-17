@@ -22,4 +22,4 @@ async def call_test_call(hub, ctx):
 async def post(hub, ctx):
     """ """
     assert ctx.args == [hub, False]
-    return ctx.ret
+    return ctx.return_value

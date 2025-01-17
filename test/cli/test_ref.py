@@ -8,7 +8,7 @@ async def test_find(hub):
     assert result == "value"
 
     # Test finding a non-existent attribute
-    with hub.lib.pytest.raises(KeyError):
+    with hub.lib.pytest.raises(AttributeError):
         hub.lib.pns.ref.find(hub, "nonexistent.attribute")
 
 
@@ -44,6 +44,9 @@ async def test_output(hub, capsys):
     await hub.cli.ref.output("string")
     captured = capsys.readouterr()
     assert captured.out == "string\n"
+    with hub.lib.unittest.mock.patch("sys.argv", ["cli"]):
+        opt = await hub.config.init.load(cli="cli", **hub._dynamic.config)
+    hub.OPT = opt
 
     await hub.cli.ref.output({"key": "value"})
     captured = capsys.readouterr()

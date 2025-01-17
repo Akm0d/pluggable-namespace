@@ -19,7 +19,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
     """
     opts.pop("source", None)
 
-    # This is already handled in hub.config.load since it needs to happen before everything else.
+    # This is already handled in hub.config.init.load since it needs to happen before everything else.
 
     return {}
 
