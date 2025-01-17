@@ -1,5 +1,11 @@
 async def cli(hub):
-    template_dir = hub.template[hub.OPT.seed.src]._static[0]
+    for location in hub.template._dir:
+        template_dir = location / hub.OPT.seed.src
+        if template_dir.exists():
+            break
+    else:
+        await hub.log.error(f"Template directory '{hub.OPT.seed.src}' not found")
+
     await hub.log.info(f"Copying from {template_dir} to {hub.OPT.seed.dest}")
 
     data = {}
@@ -9,7 +15,7 @@ async def cli(hub):
 
     copier_partial = hub.lib.functools.partial(
         hub.lib.copier.run_copy,
-        src_path=template_dir,
+        src_path=str(template_dir),
         dst_path=hub.OPT.seed.dest,
         data=data,
         overwrite=hub.OPT.seed.overwrite,

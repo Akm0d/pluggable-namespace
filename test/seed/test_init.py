@@ -31,14 +31,14 @@ async def test_cli(hub):
 
     # Create a temporary directory
     with hub.lib.tempfile.TemporaryDirectory() as temp_dir:
-        template_dir = hub.template["plugin"]._static[0]
+        template_dir = hub.template._dir[0] / "plugin"
 
         # Prepare the CLI command
         command = [
             hub.lib.sys.executable,
             "-m",
             "hub",
-            "seed.cli",
+            "seed.init.cli",
             temp_dir,
             "name=name",
             "desc=desc",

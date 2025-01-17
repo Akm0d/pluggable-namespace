@@ -108,6 +108,7 @@ class Hub(Sub):
     _last_ref: str = None
     _last_call: str = None
     _dynamic: dict = None
+    _loop = None
 
     def __init__(hub):
         """
@@ -125,6 +126,7 @@ class Hub(Sub):
         Initialize a hub with async capabilities
         """
         hub = cls()
+        hub._loop = hub.lib.asyncio.get_event_loop()
         # Make sure the logging functions are available as early as possible
         # NOTE This is how to add a dyne
         await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
