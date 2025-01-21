@@ -4,14 +4,39 @@ stages:
   - build
   - release
 
-include:
-  - project: tac_tech/ci-templates
-    file: /defaults.yml
-  - project: tac_tech/ci-templates
-    file: /lint/pre-commit.yml
-  - project: tac_tech/ci-templates
-    file: /test/default.yml
-  - project: tac_tech/ci-templates
-    file: /build/default.yml
-  - project: tac_tech/ci-templates
-    file: /release/default.yml
+image: python:3.11
+
+pre-commit:
+  stage: lint
+  script:
+    - pip install pre-commit
+    - pre-commit run -av
+
+test:
+  stage: test
+  script:
+    - pip install pytest .[all]
+    - pytest
+
+build:
+  stage: build
+  script:
+    - apt-get update && apt-get install -y build-essential
+    - pip install setuptools wheel cython
+    - python setup.py sdist bdist_wheel
+  needs:
+    - lint
+    - test
+  artifacts:
+    paths:
+      - dist/*
+
+release:
+  stage: release
+  script:
+    - pip install twine
+    - twine upload dist/* --non-interactive --verbose
+  needs:
+    - build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
