@@ -1,5 +1,22 @@
+"""
+High-level contract management and verification functions for a pluggable namespace system.
+
+This module interfaces with underlying contract management functionalities to dynamically validate and apply
+contracts within the namespace architecture. It ensures that components adhere to defined interfaces and
+behavioral rules through contracts, enhancing modularity and consistency across system components.
+
+Functions:
+    - walk: Traverses loaded modules to identify and yield relevant contracts.
+    - match: Collects and organizes contracts applicable to specific functions or modules.
+    - verify_sig: Validates that function implementations conform to their specified contracts, particularly in terms of signatures.
+
+The contract enforcement mechanisms facilitated by this module are integral to maintaining a robust, secure,
+and compliant system architecture, ensuring that all components operate within predefined boundaries and conditions.
+"""
+
 from ._debug import DEBUG_PNS_GETATTR
 from collections import defaultdict
+from collections.abc import Generator
 import pns.data
 import pns.verify
 
@@ -12,15 +29,26 @@ else:
 CONTRACTS = "__contracts__"
 
 
-def walk(loaded: "pns.mod.LoadedMod"):
+def walk(
+    loaded: "pns.mod.LoadedMod",
+) -> Generator[tuple[ContractType, str, Contracted]]:
     """
-    Find all contracts relevant to the loaded_mod.
-        - Finding 'matching_mods' (init, loaded.__name__, and explicit_contracts)
-        - Ascending until we reach a sub that has 'contract'
-        - Iterating through contract modules
-        - Handling the 'first_pass' vs. 'recursive only' logic
-    Yields tuples of (contract_type, contract_func_name, contract_func)
-    for further filtering by the caller.
+    Traverses the hierarchy of namespaces to find and yield contracts applicable to the given module.
+
+    Starting from the specified module, this function ascends through the namespace hierarchy until it
+    finds a namespace with defined contracts. It then iterates over these contracts, yielding those that
+    match the module's name, aliases, or explicit contracts specified in the module.
+
+    Parameters:
+        loaded (pns.mod.LoadedMod): The module for which contracts need to be identified.
+
+    Yields:
+        tuple: A tuple containing the contract type, the contract function name, and the contract function object.
+        These are used for further processing or application to the module.
+
+    Notes:
+        - The function employs a 'first_pass' flag to differentiate initial contract gathering from recursive
+            checks which only yield contracts marked as recursive.
     """
     explicit_contracts = getattr(loaded, CONTRACTS, ())
     matching_mods = {"init", loaded.__name__, *explicit_contracts}
@@ -59,10 +87,19 @@ def walk(loaded: "pns.mod.LoadedMod"):
         current = current.__
 
 
-def match(loaded: "pns.mod.Loaded", name: str) -> dict[ContractType, list[callable]]:
+def match(loaded: "pns.mod.Loaded", name: str) -> dict[ContractType, list[Contracted]]:
     """
-    Recurse the parents of the loaded_mod and collect the contracts and recursive contracts.
-    Match them to the current function name and ref.
+    Collects and organizes contracts applicable to a specified function within a loaded module.
+
+    This function calls 'walk' to retrieve relevant contracts and then filters them based on the
+    function name, storing matches in a dictionary categorized by contract type.
+
+    Parameters:
+        loaded (pns.mod.Loaded): The loaded module containing the function.
+        name (str): The name of the function to match contracts against.
+
+    Returns:
+        dict: A dictionary mapping contract types to lists of callable contract functions.
     """
     contracts = defaultdict(list)
 
@@ -83,8 +120,17 @@ def verify_sig(
     loaded: "pns.mod.LoadedMod",
 ):
     """
-    Verify that all the sig contracts (SIG or R_SIG) actually correspond
-    to real functions in the loaded mod, and that their signatures match.
+    Verifies that all signature contracts (SIG or R_SIG) correspond to real functions in the loaded module
+    and checks if their signatures match.
+
+    This function ensures that each signature-enforcing contract has a corresponding function in the module
+    and that the function's signature aligns with the contract's requirements.
+
+    Parameters:
+        loaded (pns.mod.LoadedMod): The module whose functions are to be verified against signature contracts.
+
+    Raises:
+        SyntaxError: If any discrepancies are found between the contract signatures and the actual function signatures.
     """
     errors = []
 

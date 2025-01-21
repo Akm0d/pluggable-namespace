@@ -1,19 +1,67 @@
+"""
+This module introduces the CMD class, an extension of the pns.hub.Sub,
+designed to facilitate executing shell commands directly from a hub namespace.
+It dynamically creates methods corresponding to shell commands,
+allowing users to execute these commands as methods of the CMD instance.
+
+I.e.:
+    await hub.sh.ls()
+    await hub.sh.grep('pattern')
+
+
+Features:
+- Dynamic command execution: Allows calling any shell command as an attribute of the CMD instance.
+- Output handling: Methods to handle different outputs such as plain text, JSON, or error output.
+- Asynchronous execution: All commands are executed asynchronously, utilizing asyncio to manage subprocesses.
+
+The CMD class integrates deeply with the system's hub, making it easy to execute and manage shell commands from any part of the application using the namespace-oriented architecture.
+"""
+
 import pns.hub
+from collections.abc import AsyncGenerator
 
 
 class CMD(pns.hub.Sub):
     """
-    A class representing a shell command execution interface that allows accessing
-    shell commands through a namespace-like structure on a Hub object.
+    A class that facilitates the execution of shell commands from the hub namespace.
+
+    The CMD class dynamically generates methods corresponding to shell commands, allowing these commands to be called as if they were regular methods.
+    It supports passing arguments and handling output in various formats.
+
+    Attributes:
+        command (list[str]): The base command represented as a list of strings, ready to be executed.
+
+    Initialization Parameters:
+        hub (pns.hub.Hub): The global hub instance representing the root namespace.
+        command (list[str] | str, optional): The initial command or list of command segments. Defaults to an empty list.
+        parent (pns.hub.Sub, optional): The parent sub-namespace.
     """
 
     def __init__(self, hub: pns.hub.Hub, command: list[str] | str = None, parent=None):
         """
-        Initialize the CMD interface.
+        Initializes a CMD instance that allows for executing shell commands dynamically from the hub.
 
-        Args:
-            hub: The hub to which this CMD interface is attached.
-            command (list[str] or str, optional): The initial command or command parts.
+        This constructor prepares a CMD object to be accessible under the 'sh' namespace within the hub.
+        It sets up the initial state to handle dynamic access to command execution. Commands can be
+        executed by calling them as methods of this instance (e.g., hub.sh.ls()). If specific command
+        segments are provided during initialization, they form the base command that can be extended
+        dynamically through attribute access.
+
+        Parameters:
+            hub (pns.hub.Hub): The global hub instance representing the root namespace. This is where
+                the CMD instance will be integrated, allowing access to system commands via the hub.
+            command (list[str] | str, optional): The base command or an initial segment of the command.
+                If a string is provided, it is converted into a list. If nothing is provided, it initializes
+                to an empty list which will wait for dynamic method access to specify commands.
+            parent (pns.hub.Sub, optional): The parent namespace under which this CMD instance is nested.
+                Typically, this will be the hub itself when integrating the CMD as 'hub.sh'.
+
+        Examples:
+            To create an instance without any initial commands, which will be specified later dynamically:
+            >>> hub._nest["sh"] = CMD(hub, parent=hub)
+
+            To execute a command directly:
+            >>> await hub.sh.ls('-la')  # Executes 'ls -la' in the shell and returns the output.
         """
         if not command:
             command = []
@@ -24,43 +72,43 @@ class CMD(pns.hub.Sub):
 
     def __getattr__(self, name):
         """
-        Allows accessing additional command parts via attribute access.
+        Dynamically handles attribute access to support calling any shell command as a method.
 
-        Args:
-            name (str): The next part of the command to add.
+        Parameters:
+            name (str): The name of the command or subcommand to access.
 
         Returns:
-            CMD: A new CMD instance with the extended command.
+            CMD: A new CMD instance with the command appended to the existing command list.
         """
         return CMD(self._, self.command + [name], parent=self)
 
     def __getitem__(self, item):
         """
-        Allows accessing additional command parts via item access.
+        Allows for dictionary-like access to methods corresponding to shell commands.
 
-        Args:
-            item (str): The next part of the command to add.
+        Parameters:
+            item (str): The command or subcommand to access as if accessing a dictionary.
 
         Returns:
-            CMD: A new CMD instance with the extended command.
+            CMD: The corresponding CMD instance for the command.
         """
         return getattr(self, item)
 
     def __bool__(self):
         """
-        Determines if the command is available on the host system.
+        Evaluate the truthiness of this CMD instance, which checks if the command is executable.
 
         Returns:
-            bool: True if the command is available, False otherwise.
+            bool: True if the command can be found and executed on the system; otherwise, False.
         """
         return bool(self.hub.lib.shutil.which(self.command[0]))
 
     def __str__(self):
         """
-        Provides a string representing the path of the executable command.
+        Provides a human-readable representation of the CMD instance, primarily showing the executable path of the command.
 
         Returns:
-            str: The path to the executable, or None if it's not available.
+            str: The full path to the command if it exists, otherwise a string representation of the CMD object.
         """
         if self.command:
             return self.hub.lib.shutil.which(self.command[0])
@@ -68,14 +116,17 @@ class CMD(pns.hub.Sub):
 
     async def _execute_command(self, *args, **kwargs):
         """
-        Executes the command asynchronously with provided arguments.
+        Execute the shell command associated with this CMD instance asynchronously, handling both stdout and stderr.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Positional arguments passed to the command.
+            kwargs (dict): Keyword arguments that will be forwarded to `asyncio.create_subprocess_exec`.
 
         Returns:
-            Process: An asyncio subprocess process object.
+            asyncio.subprocess.Process: The process object representing the running command.
+
+        Raises:
+            OSError: If there is an issue starting the command.
         """
         cmd = self.command[0]
         proc = await self._.lib.asyncio.create_subprocess_exec(
@@ -89,37 +140,37 @@ class CMD(pns.hub.Sub):
 
     async def __call__(self, *args, **kwargs):
         """
-        Execute the command and return the standard output.
+        Executes the configured command with any additional arguments and keyword arguments.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Arguments to pass to the command.
+            kwargs (dict): Keyword arguments to control subprocess execution and handle its output.
 
         Returns:
-            str: Standard output of the executed command.
+            str: The standard output from the command execution.
         """
         return await self.stdout(*args, **kwargs)
 
-    async def __aiter__(self):
+    async def __aiter__(self) -> AsyncGenerator[str]:
         """
-        Allows iteration over the lines of the command's standard output.
+        Allows iterating over the lines of the command's output as if iterating over a file object.
 
         Yields:
-            str: A line of output from the command.
+            str: Each line of output from the command execution.
         """
         async for line in self.lines():
             yield line
 
-    async def lines(self, *args, **kwargs):
+    async def lines(self, *args, **kwargs) -> AsyncGenerator[str]:
         """
-        Executes the command and yields each line of standard output.
+        Asynchronously yields lines from the standard output of the command.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Additional arguments for the command.
+            kwargs (dict): Options for subprocess execution.
 
         Yields:
-            str: A line of output from the command.
+            str: Each line from the command's standard output, decoded and stripped of trailing newlines.
         """
         proc = await self._execute_command(*args, **kwargs)
         while True:
@@ -128,45 +179,45 @@ class CMD(pns.hub.Sub):
                 break
             yield line.decode("utf-8").strip()
 
-    async def json(self, *args, **kwargs):
+    async def json(self, *args, **kwargs) -> object:
         """
-        Executes the command and parses the standard output as JSON.
+        Execute the command and parse its output as JSON.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Arguments to pass to the command.
+            kwargs (dict): Options to pass to the subprocess execution.
 
         Returns:
-            dict: Parsed JSON output.
+            any: The JSON-decoded output of the command.
         """
         stdout = await self.__call__(*args, **kwargs)
         return self.hub.lib.json.loads(stdout)
 
-    async def stderr(self, *args, **kwargs):
+    async def stderr(self, *args, **kwargs) -> str:
         """
-        Executes the command and returns the standard error output.
+        Retrieves the standard error output of the command.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Arguments for the command.
+            kwargs (dict): Options for the subprocess execution.
 
         Returns:
-            str: Standard error of the executed command.
+            str: The standard error output from the command, decoded.
         """
         proc = await self._execute_command(*args, **kwargs)
         _, stderr = await proc.communicate()
         return stderr.decode("utf-8")
 
-    async def stdout(self, *args, **kwargs):
+    async def stdout(self, *args, **kwargs) -> str:
         """
-        Executes the command and returns the standard output.
+        Retrieves the standard output of the command.
 
-        Args:
-            *args: Positional arguments for the command.
-            **kwargs: Keyword arguments for the command.
+        Parameters:
+            args (tuple): Arguments for the command.
+            kwargs (dict): Options for the subprocess execution.
 
         Returns:
-            str: Standard output of the executed command.
+            str: The standard output from the command, decoded.
         """
         proc = await self._execute_command(*args, **kwargs)
         stdout, _ = await proc.communicate()

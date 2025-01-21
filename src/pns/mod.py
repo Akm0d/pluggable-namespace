@@ -1,3 +1,20 @@
+"""
+Module management functionalities for dynamically loading and populating modules within a pluggable namespace system.
+
+This module facilitates the dynamic loading, preparation, and integration of Python modules into a plugin-oriented architecture.
+It includes functions to load modules from specified paths, populate them with metadata, functions, classes, and variables,
+and apply any necessary transformations or contracts. The functionality provided by this module is essential for systems
+that rely on dynamic extension and customization through external modules or plugins.
+
+Key Components:
+- LoadedMod: A class that represents a dynamically loaded module, equipped with functionalities to populate itself with various
+    attributes from the actual Python module.
+- load: Function to load a module into sys.modules based on its Python path.
+- prep: Function to prepare a loaded module with necessary transformations and to evaluate its eligibility via virtual conditions.
+- populate: Function to populate a loaded module with its components while applying any necessary aliases or transformations.
+- load_from_path: Function to load a module from a specific filesystem path.
+"""
+
 import pathlib
 import sys
 import asyncio
@@ -22,6 +39,18 @@ OMIT_END = ()
 
 
 class LoadedMod(pns.data.Namespace):
+    """
+    Represents a dynamically loaded module within the namespace, encapsulating various module components.
+
+    This class extends pns.data.Namespace to provide structured access to module attributes like variables, functions,
+    and classes, categorizing them under respective dictionaries for easy access and manipulation.
+
+    Attributes:
+        _var (dict): Dictionary to hold module variables.
+        _func (dict): Dictionary to hold module functions.
+        _class (dict): Dictionary to hold module classes.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._var = {}
@@ -30,6 +59,7 @@ class LoadedMod(pns.data.Namespace):
 
     @property
     def _nest(self):
+        """Combines variables, functions, and classes into a single dictionary for unified access."""
         return {**self._class, **self._var, **self._func}
 
     @_nest.setter
@@ -37,7 +67,15 @@ class LoadedMod(pns.data.Namespace):
 
 
 def load(path: str):
-    """Load a module by name and file path into sys.modules."""
+    """
+    Load a module by its name and path into sys.modules, if not already loaded.
+
+    Parameters:
+        path (str): The module path or Python import path.
+
+    Returns:
+        ModuleType or None: The loaded module if successful; None if the module cannot be loaded.
+    """
     ret = None
     if path in sys.modules:
         return sys.modules[path]
@@ -54,6 +92,21 @@ def load(path: str):
 
 
 async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
+    """
+    Prepare a loaded module, applying virtual conditions and populating it with its components.
+
+    Parameters:
+        hub (pns.hub.Hub): The central hub of the system.
+        sub (pns.hub.Sub): The sub-namespace that the module belongs to.
+        name (str): The name of the module.
+        mod (ModuleType): The Python module to prepare.
+
+    Returns:
+        LoadedMod: The prepared and populated module.
+
+    Raises:
+        NotImplementedError: If the virtual condition check fails and the module is deemed ineligible.
+    """
     modname = getattr(mod, VIRTUAL_NAME, name)
     loaded = LoadedMod(name=modname, parent=sub, root=hub)
 
@@ -86,13 +139,28 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
     return await populate(loaded, mod)
 
 
-# Alias builtin funciton names to their name + underscore
+# Alias builtin function names to their name + underscore
 BUILTIN_ALIAS = {f"{k}_": k for k in __builtins__}
 
 
-async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
+async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
     """
-    Add functions, classes, and variables to the hub considering function aliases
+    Populate a LoadedMod instance with functions, classes, and variables from a given Python module,
+    applying aliases and converting synchronous functions to asynchronous when appropriate.
+
+    Parameters:
+        loaded (LoadedMod): The LoadedMod instance to populate.
+        mod (ModuleType): The module from which to load components.
+        implicit_alias (bool): Indicates whether to automatically apply built-in function aliases.
+
+    Returns:
+        LoadedMod: The updated LoadedMod instance with newly added components.
+
+    Details:
+        - Function aliases are applied based on `__func_alias__` or automatic rules.
+        - Functions are converted to asynchronous versions if they aren't already.
+        - Classes and variables are directly added unless omitted by configuration.
+        - Ensures that function signatures match any applicable contracts, throwing an error if they do not align.
     """
     # Retrieve function aliases if any
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
@@ -153,12 +221,22 @@ async def populate(loaded, mod: ModuleType, implicit_alias: bool = True):
     return loaded
 
 
-def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py"):
+def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py") -> ModuleType:
     """
-    Attempt to load the Python module named `modname` from the specified `path`.
-    :param modname: The name of the module to load.
-    :param path: The directory path to use as the anchor point to resolve the module.
-    :return: The loaded module if successful, or None if not found.
+    Load a Python module from a specified file path, ensuring that it is registered in `sys.modules`.
+
+    Parameters:
+        modname (str): The name of the module to load.
+        path (pathlib.Path): The directory path where the module file is expected to be.
+        ext (str): The file extension of the module, default is ".py".
+
+    Returns:
+        ModuleType or None: The loaded module if successful, or None if the module cannot be found or loaded.
+
+    Details:
+        - The function attempts to resolve the full path of the module file from the given directory.
+        - If the module is already loaded (present in `sys.modules`), it returns the existing module.
+        - Otherwise, it loads the module using the `importlib` utilities and adds it to `sys.modules`.
     """
     # Convert the given path to a Path object and resolve the module file path
     module_path = path / (modname.replace(".", "/") + ext)

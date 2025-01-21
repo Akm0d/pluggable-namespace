@@ -1,3 +1,23 @@
+"""
+Central management and dynamic module loading for pluggable-namespace applications.
+
+This module provides core functionality for dynamically managing namespaces and modules
+in a pluggable-namespace application architecture. By leveraging classes such as Hub and Sub,
+it facilitates a structured approach to adding and managing sub-components and modules at runtime,
+thereby enabling a flexible, scalable, and maintainable architecture.
+
+Key components:
+- Hub: Acts as the central node in the namespace hierarchy, functioning as a global 'self'
+    variable that is the entry point to the application's modular system.
+- Sub: Represents a sub-component or module within the Hub, capable of dynamically loading
+    further sub-components or modules.
+
+The module ensures that each component in the namespace can dynamically interact with others,
+adhering to a design that promotes loose coupling and high cohesion. Compiled with Cython for
+performance optimization, it includes conditional imports based on debug status to switch
+between development and production-ready code paths.
+"""
+
 import sys
 
 import pns.dir
@@ -8,21 +28,22 @@ from ._debug import DEBUG_PNS_GETATTR
 CONTRACTS_DIR = "contract"
 
 if DEBUG_PNS_GETATTR:
+    # Import the pure python version of DynamicNamespace
     from pns._hub import DynamicNamespace
 else:
+    # Import the cython-optimized version of DynamicNamespace
     from pns._chub import DynamicNamespace  # type: ignore
 
 
 class Sub(DynamicNamespace):
     """
     Represents a sub-component or module that can be dynamically added to a Hub.
-
     Each Sub can contain its own sub-components, allowing a hierarchical structure similar
     to a namespace or module path in a software architecture.
 
     Attributes:
-        hub: Reference to the root Hub instance.
-        contracts: A list of contract definitions associated with this Sub.
+        hub (Hub): Reference to the root Hub instance, facilitating access to global state and utilities.
+        contracts (list): A list of contract definitions associated with this Sub for managing interactions.
     """
 
     def __init__(
@@ -33,12 +54,12 @@ class Sub(DynamicNamespace):
         **kwargs,
     ):
         """
-        Initializes a Sub instance.
+        Initializes a Sub instance with specified parameters.
 
         Args:
             name (str): The name of the Sub component.
-            parent (data.Namespace): The parent namespace of this Sub.
-            root (Hub): The root Hub instance that this Sub is part of.
+            root (Hub, optional): The root Hub instance that this Sub is part of.
+            contract_locations (list[str]): Directories to search for contract definitions.
         """
         super().__init__(name=name, root=root, **kwargs)
         self._contract_dir = pns.dir.walk(contract_locations)
@@ -51,6 +72,9 @@ class Sub(DynamicNamespace):
 
         Args:
             name (str): The name of the sub-component to add.
+
+        Returns:
+            Sub: The newly added sub-component or None if the sub-component already exists.
         """
         if name in self._nest:
             return
@@ -76,6 +100,9 @@ class Sub(DynamicNamespace):
         return sub
 
     async def load_contracts(self):
+        """
+        Loads and initializes contract definitions for this Sub.
+        """
         if not self._contract_dir:
             return
 
@@ -94,15 +121,13 @@ class Sub(DynamicNamespace):
 
 class Hub(Sub):
     """
-    Represents the central hub of the modular system.
-
-    Inherits from Sub, but designed to be the root and primary interface for interacting with
-    the subsystem architecture.
+    Represents the central hub of the modular system. It is the root node of the dynamic namespace,
+    providing a primary interface for interacting with the entire subsystem architecture.
 
     Attributes:
-        _last_ref: The last reference accessed.
-        _last_call: The last call made through the hub.
-        _dynamic: A dynamic configuration or state connected to the directory structure.
+        _last_ref (str): The last reference accessed through the Hub, used for debugging and tracking.
+        _last_call (str): The last call made through the Hub, used for operational monitoring.
+        _dynamic (dict): A dynamic configuration or state connected to the directory structure.
     """
 
     _last_ref: str = None
@@ -112,7 +137,7 @@ class Hub(Sub):
 
     def __init__(hub):
         """
-        Initializes the hub, setting itself as its own root and setting up core namespaces.
+        Initializes the hub, setting itself as the root and setting up core namespaces.
         """
         super().__init__(name="hub", parent=None, root=None)
         # Add a place for sys modules to live
@@ -123,7 +148,10 @@ class Hub(Sub):
     @classmethod
     async def new(cls):
         """
-        Initialize a hub with async capabilities
+        Asynchronously initializes a Hub with capabilities for dynamic module management.
+
+        Returns:
+            Hub: A newly initialized Hub instance with asynchronous capabilities.
         """
         hub = cls()
         hub._loop = hub.lib.asyncio.get_event_loop()
@@ -149,4 +177,10 @@ class Hub(Sub):
         return self.lib.pns.ref.last(self, last_mod)
 
     def __repr__(hub):
+        """
+        Represents the Hub as a string for debugging and logging purposes.
+
+        Returns:
+            str: A simple string representation of the Hub.
+        """
         return "Hub()"
