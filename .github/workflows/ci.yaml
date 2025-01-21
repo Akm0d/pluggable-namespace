@@ -1,0 +1,70 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run -av
+
+  test:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    needs: pre-commit
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install pytest .[all]
+      - name: Run tests
+        run: pytest
+
+  build:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    needs: [pre-commit, test]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y build-essential
+      - name: Install Python packages
+        run: pip install setuptools wheel cython
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: dist/*
+
+  release:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: package
+          path: dist
+      - name: Install twine
+        run: pip install twine
+      - name: Upload package to PyPI
+        run: twine upload dist/* --non-interactive --verbose
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    if: github.ref == 'refs/heads/master'  # Ensuring this runs only on master branch
