@@ -24,12 +24,13 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "pluggable-namespace[console]",
     "pytest",
     "pytest-asyncio",
 ]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"{{name}}" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
