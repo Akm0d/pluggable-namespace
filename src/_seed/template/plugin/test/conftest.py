@@ -2,14 +2,14 @@ import pathlib
 import sys
 from unittest import mock
 
-import pns.hub
+import pns.shim
 import pytest
 
 
 @pytest.fixture(name="hub")
 async def integration_hub():
-    async with pns.hub.Hub() as hub:
-        yield hub
+    hub = await pns.shim.loaded_hub()
+    yield hub
 
 
 @pytest.fixture(autouse=True)
