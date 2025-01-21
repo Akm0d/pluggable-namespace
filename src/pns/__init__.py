@@ -4,7 +4,6 @@ import pns.data
 import pns.mod
 
 Contracted = pns.contract.Contracted
-Context = pns.contract.Context
 Hub = pns.hub.Hub
 Sub = pns.hub.Sub
 LoadedMod = pns.mod.LoadedMod
