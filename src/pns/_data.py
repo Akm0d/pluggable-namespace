@@ -229,7 +229,9 @@ class Namespace(SimpleNamespace):
         Yields:
             Namespace: Each nested namespace.
         """
-        yield from self._nest
+        for name, item in self._nest.items():
+            if getattr(item, "_active", True):
+                yield name
 
     def __len__(self):
         """

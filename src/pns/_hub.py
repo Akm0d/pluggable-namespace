@@ -168,7 +168,8 @@ class DynamicNamespace(pns.data.Namespace):
         Allows iteration over all nested namespaces and loaded modules.
 
         Yields:
-            object: Each nested namespace or loaded module.
+            object: Active loaded modules.
         """
-        yield from self._nest
-        yield from self._mod
+        for name, item in self._mod.items():
+            if getattr(item, "_active", True):
+                yield name

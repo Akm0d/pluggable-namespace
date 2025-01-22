@@ -32,6 +32,6 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
             except AttributeError:
                 return {}
 
-        opts["choices"] = list(finder)
+        opts["choices"] = sorted(finder)
 
     return {}
