@@ -10,6 +10,7 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
               subcommands:
               - my_subcommand
             my_global_opt:
+              subcommands:
               - __global__
 
         subcommands:
@@ -18,6 +19,9 @@ async def parse_opt(hub, opts: dict[str, object]) -> dict[str, object]:
     """
     subcommands = opts.pop("subcommands", ())
     return {"subcommands": subcommands}
+
+
+GLOBAL = "__global__"
 
 
 async def create_parsers(
@@ -56,12 +60,12 @@ async def create_parsers(
         target_group = await hub.config.group.merge(
             group_name, {None: groups}, None, main_parser
         )
-        if "__global__" in extra_subcommands or not extra_subcommands:
+        if GLOBAL in extra_subcommands or not extra_subcommands:
             target_group.add_argument(cli_name, *options, **opts)
 
         # Handle argument groups for subparsers
         for subcommand in extra_subcommands:
-            if subcommand == "__global__":
+            if subcommand == GLOBAL:
                 for subcmd, sparser in subparsers.items():
                     subparser_group = await hub.config.group.merge(
                         group_name, subparser_groups, subcmd, sparser

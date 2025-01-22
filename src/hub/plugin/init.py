@@ -1,3 +1,6 @@
+DEFAULT_CLI = "cli"
+
+
 async def run(hub):
     """
     Initialize the "hub" cli.
@@ -17,6 +20,10 @@ async def run(hub):
 
     # If no cli was defined, then use the first part of the ref that exists in the cli_config
     cli = opt.cli.cli
+    if cli:
+        hard_cli = True
+    else:
+        hard_cli = False
     if ref.strip(".") and not cli:
         finder = hub
         for part in ref.split("."):
@@ -26,15 +33,21 @@ async def run(hub):
                 finder, hub.lib.pns.hub.Sub
             ):
                 break
-            if part in hub._dynamic.config.cli_config and part != "cli":
+            if part in hub._dynamic.config.cli_config and part != DEFAULT_CLI:
                 cli = part
 
     call_help = False
-    if (opt.cli.cli != cli) and (
-        opt.cli.cli
-        or (
-            (cli in hub._dynamic.config.cli_config or cli in hub._dynamic.config.config)
-            and (cli not in opt.get("pns", {}).get("global_clis", ()))
+    if hard_cli or (
+        (opt.cli.cli != cli)
+        and (
+            opt.cli.cli
+            or (
+                (
+                    cli in hub._dynamic.config.cli_config
+                    or cli in hub._dynamic.config.config
+                )
+                and (cli not in opt.get("pns", {}).get("global_clis", ()))
+            )
         )
     ):
         await hub.log.debug(f"Loading cli: {cli}")
@@ -43,16 +56,16 @@ async def run(hub):
         args = []
         kwargs = {}
     else:
-        await hub.log.debug("Using pns-cli OPTs")
+        await hub.log.debug("Using defualt cli OPTs")
         # Treat all the extra args as parameters for the named ref
         args, kwargs = await hub.cli.cli.parameters(opt)
 
         call_help = kwargs.pop("help", False)
 
         if args:
-            await hub.log.debug(f"pns-CLI Args: {' '.join(args)}")
+            await hub.log.debug(f"default CLI Args: {' '.join(args)}")
         if kwargs:
-            await hub.log.debug(f"pns-CLI Kwargs: {' '.join(kwargs.keys())}")
+            await hub.log.debug(f"default CLI Kwargs: {' '.join(kwargs.keys())}")
 
     # Get the named reference from the hub
     finder = hub.lib.pns.ref.find(hub, ref)
