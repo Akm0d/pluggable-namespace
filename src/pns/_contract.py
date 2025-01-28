@@ -20,8 +20,10 @@ and need to interact seamlessly while adhering to strict operational protocols.
 
 import pns.data
 import enum
+import inspect
 from collections.abc import Callable
 from collections import defaultdict
+from collections.abc import AsyncGenerator
 
 
 class Context:
@@ -119,22 +121,52 @@ class Contracted(pns.data.Namespace):
         self.func = func
         self.contracts = contracts or defaultdict(list)
 
+    def __new__(cls, name: str, func: Callable, contracts=None, **kwargs):
+        """
+        Decide between different subclasses based on the function type
+        """
+        if inspect.isasyncgenfunction(func):
+            return super().__new__(ContractedGen)
+        else:
+            return super().__new__(Contracted)
+
+    async def __gen_ctx__(self, *args, **kwargs):
+        """
+        Create and prepare the function context, executing pre-call contracts.
+        """
+        hub = self._
+        ctx = Context(hub, self.func, *args, **kwargs)
+
+        # Pre contracts are used to validate/modify args and kwargs in the ctx
+        await self.__call_pre__(ctx)
+        return ctx
+
+    async def __call_pre__(self, ctx):
+        """
+        Execute all pre-call contracts.
+        """
+        pre_contracts = (
+            self.contracts[ContractType.PRE] + self.contracts[ContractType.R_PRE]
+        )
+        for pre_contract in pre_contracts:
+            await pre_contract(ctx)
+
+    async def __call_post__(self, ctx):
+        """
+        Execute all post-call contracts in reverse order.
+        """
+        post_contracts = (
+            self.contracts[ContractType.POST] + self.contracts[ContractType.R_POST]
+        )
+        for post_contract in reversed(post_contracts):
+            ctx.return_value = await post_contract(ctx)
+
     async def __call__(self, *args, **kwargs):
         """
-        Call the underlying function and execute its contracts in the following order:
-
-        pre -> call -> post
+        Handle the execution of the wrapped function.
         """
         async with CallStack(self):
-            hub = self._
-            ctx = Context(hub, self.func, *args, **kwargs)
-
-            pre_contracts = (
-                self.contracts[ContractType.PRE] + self.contracts[ContractType.R_PRE]
-            )
-            for pre_contract in pre_contracts:
-                await pre_contract(ctx)
-
+            ctx = await self.__gen_ctx__(*args, **kwargs)
             call_contracts = (
                 self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
             )
@@ -146,13 +178,39 @@ class Contracted(pns.data.Namespace):
                 # If there was no call contract, then call the function directly
                 ctx.return_value = await ctx.func(*ctx.args, **ctx.kwargs)
 
-            post_contracts = (
-                self.contracts[ContractType.POST] + self.contracts[ContractType.R_POST]
-            )
-            for post_contract in reversed(post_contracts):
-                ctx.return_value = await post_contract(ctx)
+            await self.__call_post__(ctx)
 
             return ctx.return_value
+
+
+class ContractedGen(Contracted):
+    """
+    Specialized subclass for async generator functions.
+    """
+
+    async def __call__(self, *args, **kwargs) -> AsyncGenerator:
+        """
+        Handle the wrapped function for async generator functions.
+        """
+        async with CallStack(self):
+            ctx = await self.__gen_ctx__(*args, **kwargs)
+
+            call_contracts = (
+                self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
+            )
+            for call_contract in call_contracts:
+                coro_gen = call_contract(ctx)
+                # Only call the first call contract
+                break
+            else:
+                # If there was no call contract, then call the function directly
+                coro_gen = ctx.func(*ctx.args, **ctx.kwargs)
+
+            async for result in coro_gen:
+                ctx.return_value = result
+                # Apply post contracts ot every value in the reuslt
+                await self.__call_post__(ctx)
+                yield ctx.return_value
 
 
 class CallStack:

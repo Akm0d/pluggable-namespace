@@ -101,7 +101,9 @@ class CMD(pns.hub.Sub):
         Returns:
             bool: True if the command can be found and executed on the system; otherwise, False.
         """
-        return bool(self.hub.lib.shutil.which(self.command[0]))
+        if self.command:
+            return bool(self.hub.lib.shutil.which(self.command[0]))
+        return True
 
     def __str__(self):
         """

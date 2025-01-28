@@ -129,7 +129,7 @@ async def prep(hub, sub: pns.hub.Sub, name: str, mod: ModuleType) -> LoadedMod:
             error = "Virtual returned False"
         elif isinstance(ret, str):
             error = ret
-        elif len(ret) > 1 and ret[0] is False:
+        elif ret and len(ret) > 1 and ret[0] is False:
             error = ret[1]
 
         if error:
