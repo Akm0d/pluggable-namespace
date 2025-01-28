@@ -41,8 +41,11 @@ class Context:
         return_value (any): The value returned by the function, which can be modified by post contracts.
     """
 
-    def __init__(self, hub, __func__: Callable, *args, **kwargs):
+    def __init__(
+        self, hub, __func__: Callable, __parent__: "Contracted", *args, **kwargs
+    ):
         self.func = __func__
+        self.__ = __parent__
         # Implicitly add the hub as the first argument of the Contracted call
         self.args = [hub, *args]
         self.kwargs = kwargs
@@ -135,7 +138,7 @@ class Contracted(pns.data.Namespace):
         Create and prepare the function context, executing pre-call contracts.
         """
         hub = self._
-        ctx = Context(hub, self.func, *args, **kwargs)
+        ctx = Context(hub, self.func, self, *args, **kwargs)
 
         # Pre contracts are used to validate/modify args and kwargs in the ctx
         await self.__call_pre__(ctx)
