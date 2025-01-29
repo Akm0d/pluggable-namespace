@@ -247,4 +247,4 @@ class CallStack:
         self.hub._last_ref = self.last_ref
         self.hub._last_call = self.last_call
         self.last_ref = None
-        self.last_call = self
+        self.last_call = None

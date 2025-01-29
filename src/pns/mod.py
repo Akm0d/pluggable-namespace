@@ -186,12 +186,7 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
         if inspect.isfunction(obj):
             if OMIT_FUNC:
                 continue
-            # It's a function, potentially make it async
-            if not asyncio.iscoroutinefunction(obj):
-                # Convert to async if not already
-                func = pns.loop.make_async(obj)
-            else:
-                func = obj
+            func = obj
 
             # Make sure the aliased func name gets in there
             matched_contracts = pns.contract.match(loaded, name)

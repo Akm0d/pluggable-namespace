@@ -18,6 +18,7 @@ performance optimization, it includes conditional imports based on debug status 
 between development and production-ready code paths.
 """
 
+import contextvars
 import sys
 
 import pns.dir
@@ -119,6 +120,10 @@ class Sub(DynamicNamespace):
         self.contract = contract_sub
 
 
+_LAST_REF = contextvars.ContextVar("_last_ref", default=None)
+_LAST_CALL = contextvars.ContextVar("_last_call", default=None)
+
+
 class Hub(Sub):
     """
     Represents the central hub of the modular system. It is the root node of the dynamic namespace,
@@ -130,8 +135,6 @@ class Hub(Sub):
         _dynamic (dict): A dynamic configuration or state connected to the directory structure.
     """
 
-    _last_ref: str = None
-    _last_call: str = None
     _dynamic: dict = None
     _loop = None
 
@@ -160,6 +163,34 @@ class Hub(Sub):
         await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
         await hub.log._load_mod("init")
         return hub
+
+    @property
+    def _last_ref(self):
+        """
+        Property to access the coroutine-local _last_ref value using the context variable.
+        """
+        return _LAST_REF.get()
+
+    @_last_ref.setter
+    def _last_ref(self, value):
+        """
+        Property setter to update the coroutine-local _last_ref value using the context variable.
+        """
+        _LAST_REF.set(value)
+
+    @property
+    def _last_call(self):
+        """
+        Property to access the coroutine-local _last_call value using the context variable.
+        """
+        return _LAST_CALL.get()
+
+    @_last_call.setter
+    def _last_call(self, value):
+        """
+        Property setter to update the coroutine-local _last_call value using the context variable.
+        """
+        _LAST_CALL.set(value)
 
     @property
     def _(self):
