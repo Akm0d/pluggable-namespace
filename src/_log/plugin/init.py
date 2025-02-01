@@ -1,3 +1,7 @@
+import asyncio
+import logging
+
+
 async def __init__(hub):
     hub.log.LOGGER = {}
     hub.log.HANDLER = []
@@ -74,11 +78,13 @@ async def setup(
         return
 
     # Create a handler that puts the main python log messages through aiologger via an asynchronous Queue
-    class _AsyncHandler(hub.lib.logging.Handler):
+    class _AsyncHandler(logging.Handler):
         def emit(self, record):
-            if hub.lib.asyncio._get_running_loop() is None:
-                return
-            hub._auto(hub.log.init.emit(record))
+            try:
+                loop = asyncio.get_running_loop()
+                asyncio.run_coroutine_threadsafe(emit(hub, record), loop)
+            except Exception:
+                ...
 
     async_handler = _AsyncHandler()
 
