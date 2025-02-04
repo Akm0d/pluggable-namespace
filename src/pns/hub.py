@@ -214,4 +214,4 @@ class Hub(Sub):
         Returns:
             str: A simple string representation of the Hub.
         """
-        return "Hub()"
+        return "hub"

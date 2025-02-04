@@ -30,6 +30,22 @@ async def func(hub, *args, **kwargs):
 class TestError(Exception): ...
 
 
+def nest(hub):
+    hub._.foo()
+
+
+def foo(hub):
+    hub._.bar()
+
+
+def bar(hub):
+    hub._.baz()
+
+
+def baz(hub):
+    raise TestError("")
+
+
 async def raise_(hub, message: str = ""):
     """
     Raises a custom exception with an optional message.

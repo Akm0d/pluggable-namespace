@@ -23,7 +23,7 @@ import enum
 import inspect
 from collections.abc import Callable
 from collections import defaultdict
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Generator
 
 
 class Context:
@@ -128,11 +128,69 @@ class Contracted(pns.data.Namespace):
         """
         Decide between different subclasses based on the function type
         """
-        if inspect.isasyncgenfunction(func):
+        if inspect.isgeneratorfunction(func):
             return super().__new__(ContractedGen)
+        elif inspect.isasyncgenfunction(func):
+            return super().__new__(AsyncContractedGen)
+        elif inspect.iscoroutinefunction(func):
+            return super().__new__(AsyncContracted)
         else:
             return super().__new__(Contracted)
 
+    def __gen_ctx__(self, *args, **kwargs):
+        """
+        Create and prepare the function context, executing pre-call contracts.
+        """
+        hub = self._
+        ctx = Context(hub, self.func, self, *args, **kwargs)
+
+        # Pre contracts are used to validate/modify args and kwargs in the ctx
+        self.__call_pre__(ctx)
+        return ctx
+
+    def __call_pre__(self, ctx):
+        """
+        Execute all pre-call contracts.
+        """
+        pre_contracts = (
+            self.contracts[ContractType.PRE] + self.contracts[ContractType.R_PRE]
+        )
+        for pre_contract in pre_contracts:
+            pre_contract(ctx)
+
+    def __call_post__(self, ctx):
+        """
+        Execute all post-call contracts in reverse order.
+        """
+        post_contracts = (
+            self.contracts[ContractType.POST] + self.contracts[ContractType.R_POST]
+        )
+        for post_contract in reversed(post_contracts):
+            ctx.return_value = post_contract(ctx)
+
+    def __call__(self, *args, **kwargs):
+        """
+        Handle the execution of the wrapped function.
+        """
+        ctx = self.__gen_ctx__(*args, **kwargs)
+        with CallStack(self, ctx):
+            call_contracts = (
+                self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
+            )
+            for call_contract in call_contracts:
+                ctx.return_value = call_contract(ctx)
+                # Only call the first call contract
+                break
+            else:
+                # If there was no call contract, then call the function directly
+                ctx.return_value = ctx.func(*ctx.args, **ctx.kwargs)
+
+            self.__call_post__(ctx)
+
+        return ctx.return_value
+
+
+class AsyncContracted(Contracted):
     async def __gen_ctx__(self, *args, **kwargs):
         """
         Create and prepare the function context, executing pre-call contracts.
@@ -168,8 +226,8 @@ class Contracted(pns.data.Namespace):
         """
         Handle the execution of the wrapped function.
         """
-        async with CallStack(self):
-            ctx = await self.__gen_ctx__(*args, **kwargs)
+        ctx = await self.__gen_ctx__(*args, **kwargs)
+        async with CallStack(self, ctx):
             call_contracts = (
                 self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
             )
@@ -183,10 +241,39 @@ class Contracted(pns.data.Namespace):
 
             await self.__call_post__(ctx)
 
-            return ctx.return_value
+        return ctx.return_value
 
 
 class ContractedGen(Contracted):
+    """
+    Specialized subclass for async generator functions.
+    """
+
+    def __call__(self, *args, **kwargs) -> Generator:
+        """
+        Handle the wrapped function for async generator functions.
+        """
+        ctx = self.__gen_ctx__(*args, **kwargs)
+        with CallStack(self, ctx):
+            call_contracts = (
+                self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
+            )
+            for call_contract in call_contracts:
+                coro_gen = call_contract(ctx)
+                # Only call the first call contract
+                break
+            else:
+                # If there was no call contract, then call the function directly
+                coro_gen = ctx.func(*ctx.args, **ctx.kwargs)
+
+            for result in coro_gen:
+                ctx.return_value = result
+                # Apply post contracts ot every value in the reuslt
+                self.__call_post__(ctx)
+                yield ctx.return_value
+
+
+class AsyncContractedGen(Contracted):
     """
     Specialized subclass for async generator functions.
     """
@@ -195,9 +282,8 @@ class ContractedGen(Contracted):
         """
         Handle the wrapped function for async generator functions.
         """
-        async with CallStack(self):
-            ctx = await self.__gen_ctx__(*args, **kwargs)
-
+        ctx = await self.__gen_ctx__(*args, **kwargs)
+        async with CallStack(self, ctx):
             call_contracts = (
                 self.contracts[ContractType.CALL] + self.contracts[ContractType.R_CALL]
             )
@@ -229,22 +315,55 @@ class CallStack:
         last_call (any): The last executed function call context.
     """
 
-    def __init__(self, contract: Contracted):
+    def __init__(self, contract: Contracted, ctx: Context):
+        self.ctx = ctx
         self.contract = contract
         self.hub = self.contract._
         self.last_ref = None
         self.last_call = None
 
-    async def __aenter__(self):
+    def __enter__(self):
         """Enters the function call context, setting up references to manage the call stack."""
         self.last_ref = self.hub._last_ref
         self.last_call = self.hub._last_call
         self.hub._last_ref = self.contract.__ref__
         self.hub._last_call = self
 
-    async def __aexit__(self, *args):
+    def __exit__(self, exc_type, exc_value, exc_tb):
         """Exits the function call context, restoring the previous function context."""
         self.hub._last_ref = self.last_ref
         self.hub._last_call = self.last_call
-        self.last_ref = None
-        self.last_call = None
+
+        if exc_type and self.last_ref:
+            args = [str(value) for value in self.ctx.args] + [
+                f"{key}={value}" for key, value in self.ctx.kwargs.items()
+            ]
+            hub = args[0]
+
+            message = f"{hub}.{self}({', '.join(args[1:])})"
+            if isinstance(self.contract, AsyncContracted):
+                message = f"await {message}"
+            elif isinstance(self.contract, AsyncContractedGen):
+                message = f"async for <> in {message}"
+            elif isinstance(self.contract, ContractedGen):
+                message = f"for <> in {message}"
+
+            print(message)
+
+    async def __aenter__(self):
+        """Enters the function call context, setting up references to manage the call stack."""
+        self.__enter__()
+
+    async def __aexit__(self, *args):
+        """Exits the function call context, restoring the previous function context."""
+        self.__exit__(*args)
+
+    def __str__(self):
+        return self.last_ref or ""
+
+    def __iter__(self):
+        yield self.hub._last_ref
+        last_call = self
+        while last_call:
+            yield str(last_call)
+            last_call = last_call.last_call
