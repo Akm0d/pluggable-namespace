@@ -273,7 +273,7 @@ class ContractedGen(Contracted):
                 yield ctx.return_value
 
 
-class AsyncContractedGen(Contracted):
+class AsyncContractedGen(AsyncContracted):
     """
     Specialized subclass for async generator functions.
     """
