@@ -32,6 +32,8 @@ async def pop_hub():
     # Add essential POP modules
     await hub.add_sub("pop", locations=["_pop"])
 
+    hub._last_ref = "pns.shim.pop_hub"
+
     return hub
 
 
@@ -92,6 +94,7 @@ async def loaded_hub(
     if load_all_dynes:
         await load_all(hub, load_all_subdirs)
 
+    hub._last_ref = "pns.shim.loaded_hub"
     return hub
 
 

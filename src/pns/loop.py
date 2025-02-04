@@ -18,8 +18,6 @@ modern asynchronous programming models, particularly in environments where both 
 import asyncio
 import functools
 import concurrent.futures as fut
-import asyncio
-import functools
 from typing import Any
 from collections.abc import Callable
 

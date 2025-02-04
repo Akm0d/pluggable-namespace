@@ -109,7 +109,7 @@ async def compute(hub):
                             param.name + "=", start_position=0
                         )
 
-                except (AttributeError, ValueError):
+                except Exception:
                     ...
 
     return _compute

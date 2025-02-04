@@ -19,6 +19,7 @@ The CMD class integrates deeply with the system's hub, making it easy to execute
 
 import pns.hub
 from collections.abc import AsyncGenerator
+import shutil
 
 
 class CMD(pns.hub.Sub):
@@ -102,7 +103,7 @@ class CMD(pns.hub.Sub):
             bool: True if the command can be found and executed on the system; otherwise, False.
         """
         if self.command:
-            return bool(self.hub.lib.shutil.which(self.command[0]))
+            return bool(shutil.which(self.command[0]))
         return True
 
     def __str__(self):
@@ -113,7 +114,7 @@ class CMD(pns.hub.Sub):
             str: The full path to the command if it exists, otherwise a string representation of the CMD object.
         """
         if self.command:
-            return self.hub.lib.shutil.which(self.command[0])
+            return shutil.which(self.command[0])
         return self.__repr__()
 
     async def _execute_command(self, *args, **kwargs):
@@ -139,6 +140,9 @@ class CMD(pns.hub.Sub):
             **kwargs,
         )
         return proc
+
+    def __contains__(self, item: str):
+        return bool(shutil.which(item))
 
     async def __call__(self, *args, **kwargs):
         """

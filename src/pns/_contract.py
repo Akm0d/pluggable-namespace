@@ -316,11 +316,11 @@ class CallStack:
     """
 
     def __init__(self, contract: Contracted, ctx: Context):
-        self.ctx = ctx
-        self.contract = contract
-        self.hub = self.contract._
         self.last_ref = None
         self.last_call = None
+        self.ctx = ctx
+        self.contract = contract
+        self.hub = contract._
 
     def __enter__(self):
         """Enters the function call context, setting up references to manage the call stack."""
@@ -328,38 +328,39 @@ class CallStack:
         self.last_call = self.hub._last_call
         self.hub._last_ref = self.contract.__ref__
         self.hub._last_call = self
+        return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         """Exits the function call context, restoring the previous function context."""
         self.hub._last_ref = self.last_ref
         self.hub._last_call = self.last_call
 
-        if exc_type and self.last_ref:
-            args = [str(value) for value in self.ctx.args] + [
-                f"{key}={value}" for key, value in self.ctx.kwargs.items()
-            ]
-            hub = args[0]
-
-            message = f"{hub}.{self}({', '.join(args[1:])})"
-            if isinstance(self.contract, AsyncContracted):
-                message = f"await {message}"
-            elif isinstance(self.contract, AsyncContractedGen):
-                message = f"async for <> in {message}"
-            elif isinstance(self.contract, ContractedGen):
-                message = f"for <> in {message}"
-
-            print(message)
+        if exc_type:
+            print(self, file=self.hub.lib.sys.stderr)
 
     async def __aenter__(self):
         """Enters the function call context, setting up references to manage the call stack."""
-        self.__enter__()
+        return self.__enter__()
 
     async def __aexit__(self, *args):
         """Exits the function call context, restoring the previous function context."""
         self.__exit__(*args)
 
     def __str__(self):
-        return self.last_ref or ""
+        args = [str(value) for value in self.ctx.args] + [
+            f"{key}={value}" for key, value in self.ctx.kwargs.items()
+        ]
+        hub = args[0]
+
+        code = f"{hub}.{self.last_ref}({', '.join(args[1:])})"
+        if isinstance(self.contract, AsyncContracted):
+            code = f"await {code}"
+        elif isinstance(self.contract, AsyncContractedGen):
+            code = f"async for <> in {code}"
+        elif isinstance(self.contract, ContractedGen):
+            code = f"for <> in {code}"
+        code = f"CallStack: {code}"
+        return code
 
     def __iter__(self):
         yield self.hub._last_ref
