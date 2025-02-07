@@ -175,8 +175,6 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
     # Iterate over all attributes in the module
     for attr in getattr(mod, "__load__", mod.__dict__.keys()):
         # Avoid omitted names
-        if attr.startswith(OMIT_START) or attr.endswith(OMIT_END):
-            continue
 
         orig_name = attr
         # Get the function alias if available
@@ -184,6 +182,8 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
         obj = getattr(mod, orig_name)
 
         if inspect.isfunction(obj):
+            if attr.startswith(OMIT_START) or attr.endswith(OMIT_END):
+                continue
             if OMIT_FUNC:
                 continue
             func = obj
