@@ -342,9 +342,12 @@ class CallStack:
         """Enters the function call context, setting up references to manage the call stack."""
         return self.__enter__()
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, exc_type, exc_value, exc_tb):
         """Exits the function call context, restoring the previous function context."""
-        self.__exit__(*args)
+        self.hub._last_ref = self.last_ref
+        self.hub._last_call = self.last_call
+        if exc_type:
+            await self.hub.log.trace(str(self))
 
     def __str__(self):
         args = [str(value) for value in self.ctx.args] + [
