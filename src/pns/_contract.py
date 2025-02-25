@@ -266,11 +266,12 @@ class ContractedGen(Contracted):
                 # If there was no call contract, then call the function directly
                 coro_gen = ctx.func(*ctx.args, **ctx.kwargs)
 
-            for result in coro_gen:
-                ctx.return_value = result
-                # Apply post contracts ot every value in the reuslt
+        for result in coro_gen:
+            ctx.return_value = result
+            # Apply post contracts to every value in the reuslt
+            with CallStack(self, ctx):
                 self.__call_post__(ctx)
-                yield ctx.return_value
+            yield ctx.return_value
 
 
 class AsyncContractedGen(AsyncContracted):
@@ -295,11 +296,12 @@ class AsyncContractedGen(AsyncContracted):
                 # If there was no call contract, then call the function directly
                 coro_gen = ctx.func(*ctx.args, **ctx.kwargs)
 
-            async for result in coro_gen:
-                ctx.return_value = result
-                # Apply post contracts ot every value in the reuslt
+        async for result in coro_gen:
+            ctx.return_value = result
+            # Apply post contracts to every value in the reuslt
+            async with CallStack(self, ctx):
                 await self.__call_post__(ctx)
-                yield ctx.return_value
+            yield ctx.return_value
 
 
 class CallStack:
