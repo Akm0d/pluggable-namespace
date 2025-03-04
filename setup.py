@@ -20,7 +20,7 @@ for req_file in REQUIREMENTS.glob("*.txt"):
             line for line in f.read().splitlines() if line.strip()
         )
 
-requirement_extras["all"] = sum(requirement_extras.values(), [])
+requirement_extras["full"] = sum(requirement_extras.values(), [])
 
 setup(
     extras_require=requirement_extras,
