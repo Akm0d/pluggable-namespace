@@ -1,3 +1,5 @@
 pexpect
 pytest
 pytest-asyncio
+setuptools
+wexpect; sys_platform == "win32"

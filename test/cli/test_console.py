@@ -1,6 +1,10 @@
 async def test_run(hub):
+    if "wexpect" in hub.lib:
+        expect = hub.lib.wexpect
+    else:
+        expect = hub.lib.pexpect
     # Start the interactive console in a subprocess
-    child = hub.lib.pexpect.spawn(
+    child = expect.spawn(
         f"{hub.lib.sys.executable} -m hub -i", encoding="utf-8", timeout=5
     )
 
