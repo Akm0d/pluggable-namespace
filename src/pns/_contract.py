@@ -195,7 +195,7 @@ class AsyncContracted(Contracted):
         """
         Create and prepare the function context, executing pre-call contracts.
         """
-        hub = self._
+        hub = self._root
         ctx = Context(hub, self.func, self, *args, **kwargs)
 
         # Pre contracts are used to validate/modify args and kwargs in the ctx
@@ -322,7 +322,7 @@ class CallStack:
         self.last_call = None
         self.ctx = ctx
         self.contract = contract
-        self.hub = contract._
+        self.hub = contract._root
 
     def __enter__(self):
         """Enters the function call context, setting up references to manage the call stack."""

@@ -1,5 +1,6 @@
 import asyncio
 import pns.shim
+import sys
 
 try:
     import aiomonitor
@@ -43,6 +44,9 @@ def main():
     """
     A synchronous main function is required for the "hub" script to work properly
     """
+
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
     asyncio.run(amain())
 
 

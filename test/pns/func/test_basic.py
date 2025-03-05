@@ -71,7 +71,7 @@ async def test_contract(hub):
     await hub.pop.sub.add(
         locations=["test.pns.mods"], contract_locations=["test.pns.contract"]
     )
-    with pytest.raises(ValueError):
+    with hub.lib.pytest.raises(ValueError):
         await hub.mods.test.ping(4)
 
 
