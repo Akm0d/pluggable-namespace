@@ -78,7 +78,6 @@ def dynamic():
         This dictionary includes three main namespaces:
             - 'dyne': Dynamic directories with specific paths and settings derived from the configuration files.
             - 'config': General configurations loaded from the configuration files.
-            - 'imports__': Python modules that are explicitly imported as per the configuration files.
 
     Usage:
         This function is typically called at application startup to initialize and configure the dynamic
@@ -110,7 +109,6 @@ def dynamic():
     ret = pns.data.NamespaceDict(
         dyne=pns.data.NamespaceDict(),
         config=pns.data.NamespaceDict(),
-        imports__=pns.data.NamespaceDict(),
     )
 
     # Iterate over namespaces in sys.path
@@ -122,13 +120,11 @@ def dynamic():
             # No configuration found, continue with the next directory
             continue
 
-        dynes, configs, imports = parse_config(config_yaml)
+        dynes, configs = parse_config(config_yaml)
         if dynes:
             pns.data.update(ret.dyne, dynes, merge_lists=True)
         if configs:
             pns.data.update(ret.config, configs, merge_lists=True)
-        if imports:
-            pns.data.update(ret.imports__, imports)
 
     return ret
 
@@ -156,7 +152,7 @@ def inline(dirs: list[str], subdir: str) -> list[str]:
 
 def parse_config(
     config_file: pathlib.Path,
-) -> tuple[dict[str, object], dict[str, object], set[str]]:
+) -> tuple[dict[str, object], dict[str, object]]:
     """
     Parse a YAML configuration file and extract configurations for dynamic directories, general settings, and imports.
 
@@ -167,7 +163,6 @@ def parse_config(
         tuple: A tuple containing three elements:
             - A dictionary of dynamic namespace configurations.
             - A NamespaceDict of general configurations.
-            - A NamespaceDict of Python import statements.
     """
     dyne = defaultdict(lambda: pns.data.NamespaceDict(paths=set()))
     config = pns.data.NamespaceDict(
@@ -178,7 +173,7 @@ def parse_config(
     imports = pns.data.NamespaceDict()
 
     if not config_file.is_file():
-        return dyne, config, imports
+        return dyne, config
 
     with config_file.open("rb") as f:
         file_contents = f.read()
@@ -221,4 +216,4 @@ def parse_config(
     for name in dyne:
         dyne[name]["paths"] = sorted(dyne[name]["paths"])
 
-    return dyne, config, imports
+    return dyne, config

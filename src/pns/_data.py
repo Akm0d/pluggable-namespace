@@ -268,7 +268,7 @@ class Namespace(SimpleNamespace):
         parts = name.split(".")
         for part in parts:
             if part not in current._nest:
-                current._nest[part] = cls(part, root=self._, parent=self)
+                current._nest[part] = cls(part, root=self._root or self, parent=self)
 
             current = current._nest[part]
 

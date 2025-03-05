@@ -16,6 +16,8 @@ dyne:
     - plugin
 
 import:
+  - aiofiles
+  - aiofiles.os
   - aiologger.handlers.files
   - argparse
   - asyncio

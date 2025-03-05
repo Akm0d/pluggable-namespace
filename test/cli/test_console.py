@@ -1,10 +1,8 @@
 async def test_run(hub):
-    if "wexpect" in hub.lib:
-        expect = hub.lib.wexpect
-    else:
-        expect = hub.lib.pexpect
+    if "nt" in hub.lib.os.name:
+        hub.lib.pytest.skip("Interactive console tests are not supported on Windows")
     # Start the interactive console in a subprocess
-    child = expect.spawn(
+    child = hub.lib.pexpect.spawn(
         f"{hub.lib.sys.executable} -m hub -i", encoding="utf-8", timeout=5
     )
 

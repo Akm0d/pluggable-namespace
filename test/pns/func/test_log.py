@@ -1,11 +1,9 @@
-import tempfile
-
 import pytest
 
 
 @pytest.fixture
-def opts():
-    with tempfile.NamedTemporaryFile(suffix=".log") as f:
+async def opts(hub):
+    async with hub.pop.file.temp(suffix=".log", delete=False) as f:
         yield dict(
             log_datefmt=r"%H:%M:%S",
             log_fmt_logfile=r"%(asctime)s,%(msecs)03d [%(name)-17s][%(levelname)-8s] %(message)s",

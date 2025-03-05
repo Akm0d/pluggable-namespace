@@ -10,6 +10,10 @@ to help new users understand how to interact with and extend the hub's capabilit
 __func_alias__ = {"raise_": "raise"}
 
 
+def ping(hub):
+    return True
+
+
 async def func(hub, *args, **kwargs):
     """
     A simple function that returns the arguments and keyword arguments passed to it.

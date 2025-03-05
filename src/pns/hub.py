@@ -143,6 +143,7 @@ class Hub(Sub):
         Initializes the hub, setting itself as the root and setting up core namespaces.
         """
         super().__init__(name="hub", parent=None, root=None)
+
         # Add a place for sys modules to live
         hub += "lib"
         hub.lib._nest = sys.modules
