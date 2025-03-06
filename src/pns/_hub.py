@@ -173,3 +173,6 @@ class DynamicNamespace(pns.data.Namespace):
         for name, item in self._mod.items():
             if getattr(item, "_active", True):
                 yield name
+        for name, item in self._nest.items():
+            if getattr(item, "_active", True):
+                yield name

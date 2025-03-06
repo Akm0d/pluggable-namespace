@@ -25,12 +25,13 @@ Creating a pluggable application can be accomplished with just a few lines of co
     import pns.shim
     import asyncio
 
-    loop = asyncio.get_event_loop()
-    asyncio.run(main())
 
     async def main():
         hub = await pns.shim.loaded_hub()
         await hub.my_sub.init.cli()
+
+    if __name__ == "__main__":
+        asyncio.run(main())
 
 Configuration
 =============
@@ -73,23 +74,44 @@ When building a pluggable-namespace app, all configuration settings are stored i
       - toml
 
 
-From the example above, all arguments are loaded onto the namespace under hub.OPT.my_namespace. One ``config.yaml`` can add configuration options to multiple namespaces. They are merged in the order found in sys.path.
+From the example above, all arguments are loaded onto the namespace under hub.OPT.my_namespace.
+One ``config.yaml`` can add configuration options to multiple namespaces.
+They are merged in the order found in sys.path.
 
 Extending Namespaces
 ====================
-Extending ``pluggable-namespace`` is straightforward with dynamic namespaces. Extend any dynamic namespace on the hub by adding a directory containing a "config.yaml" to PYTHONPATH.
+
+locally
+-------
+
+Extending ``pluggable-namespace`` is straightforward with dynamic namespaces.
+Extend any dynamic namespace on the hub by adding a directory containing a "config.yaml" to PYTHONPATH.
 
 .. code-block:: bash
 
-    export PYTHONPATH=$PYTHONPATH:/path/to/my/code
+    export PYTHONPATH=$PYTHONPATH:/path/to/project_root
 
 Add a config.yaml to that directory:
 
 .. code-block:: yaml
 
-    #/path/to/my/code/config.yaml
+    # project_root/config.yaml
     dyne:
       namespace:
-        - src
+        # This references the directory project_root/foo
+        - foo
 
-Now, every Python file in ``/path/to/my/code/src/`` will be added to the hub under ``hub.namespace``.
+Now, every Python file in ``project_root/foo`` will be added to the hub under ``hub.namespace``.
+
+
+With PyPI
+---------
+
+You can use the ``seed`` command to create all the boiler-plate code you need for a pluggable-namespace project.
+
+.. code-block:: bash
+
+    hub seed.init.cli /path/to/project_root name=my_project
+
+
+Now you can add all your code to /path/to/project_root/src/my_project

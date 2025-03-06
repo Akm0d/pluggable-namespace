@@ -12,7 +12,7 @@ config:
       default: false
       help: Don't copy the files for real
     src:
-      choices: templates
+      choices: template
       default: plugin
       help: The seed template to use
     args:

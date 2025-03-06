@@ -89,8 +89,6 @@ def dynamic():
         within the Python path are also scanned for `config.yaml` files to load additional configurations.
     """
     dirs = set()
-    if os.getcwd() not in sys.path:
-        sys.path.append(os.getcwd())
     for dir_ in sys.path:
         if not dir_:
             continue
@@ -116,7 +114,7 @@ def dynamic():
         # Prefer msgpack configuration if available
         config_yaml = dir_ / "config.yaml"
 
-        if not config_yaml:
+        if not config_yaml.is_file():
             # No configuration found, continue with the next directory
             continue
 

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "{{desc}}"
 readme = "README.rst"
 authors = [
-    {name = "Tyler Levy Conde", email = "yonstib@gmail.com"},
+    {name = "Tyler Levy Conde", email = "tyler.levy-conde@broadcom.com"},
 ]
 classifiers = [
     "Operating System :: OS Independent",
@@ -29,12 +29,15 @@ test = [
     "pytest-asyncio",
 ]
 
-[tool.setuptools]
-package-dir = {"{{name}}" = "src"}
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-namespaces = true
+namespaces = false
+
+[tool.setuptools.package-data]
+{{name}} = ["config.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = "test"
