@@ -15,7 +15,7 @@ pre-commit:
 test:
   stage: test
   script:
-    - pip install pytest .[all]
+    - pip install pytest .[full]
     - pytest
 
 build:
