@@ -18,7 +18,9 @@ You can install ``pluggable-namespace`` from PyPI:
 
     pip3 install pluggable-namespace
 
-Creating a pluggable application can be accomplished with just a few lines of code. The heart of every pluggable-namespace project is the creation of a hub, adding dynamic subsystems, and interacting with them through the hub's namespace.
+Creating a pluggable application can be accomplished with just a few lines of code.
+The heart of every pluggable-namespace project is the creation of a hub, adding dynamic subsystems,
+and interacting with them through the hub's namespace.
 
 .. code-block:: python
 
