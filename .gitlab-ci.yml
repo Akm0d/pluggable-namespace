@@ -27,7 +27,7 @@ build:
     DOCKER_DRIVER: overlay2
   script:
     - apk add --no-cache python3 py3-pip
-    - pip install install cibuildwheel
+    - pip install install cibuildwheel --break-system-packages
     - cibuildwheel --output-dir dist
   needs:
     - pre-commit
