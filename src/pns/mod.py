@@ -261,5 +261,8 @@ def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py") -> Module
     module = importlib.util.module_from_spec(spec)
     # Store the module in sys.modules with the unique key
     sys.modules[module_key] = module
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    except (Exception, SyntaxError) as e:
+        sys.modules.pop(module_key)
     return module

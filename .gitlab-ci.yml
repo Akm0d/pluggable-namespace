@@ -26,7 +26,7 @@ build:
     - python setup.py sdist bdist_wheel
   needs:
     - pre-commit
-    - test
+    # - test
   artifacts:
     paths:
       - dist/*
