@@ -42,8 +42,7 @@ release:
   stage: release
   script:
     - pip install twine
-    - twine upload dist/*.tar.gz --non-interactive --verbose
-    - twine upload dist/*.whl --non-interactive --verbose
+    - twine upload dist/* --non-interactive --verbose
   needs:
     - build
   rules:
