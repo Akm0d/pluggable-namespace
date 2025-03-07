@@ -20,10 +20,15 @@ test:
 
 build:
   stage: build
-  image: quay.io/pypa/manylinux2014_x86_64
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
   script:
-    - /opt/python/cp311-cp311/bin/pip install cibuildwheel
-    - /opt/python/cp311-cp311/bin/python -m cibuildwheel --output-dir dist
+    - apk add --no-cache python3 py3-pip
+    - pip install install cibuildwheel
+    - cibuildwheel --output-dir dist
   needs:
     - pre-commit
     # - test
@@ -35,7 +40,8 @@ release:
   stage: release
   script:
     - pip install twine
-    - twine upload dist/* --non-interactive --verbose
+    - twine upload dist/*.tar.gz --non-interactive --verbose
+    - twine upload dist/*.whl --non-interactive --verbose
   needs:
     - build
   rules:
