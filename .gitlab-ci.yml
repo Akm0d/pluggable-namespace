@@ -48,3 +48,5 @@ release:
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
     - if: $TWINE_PASSWORD
+    - if: $TWINE_USERNAME
+    - if: $CI_COMMIT_TAG
