@@ -306,9 +306,13 @@ class AsyncContractedGen(AsyncContracted):
 
 class CallStack:
     """
-    Manages the stack context for contracted functions, ensuring that the function's execution context is restored after a call.
+    Manages the stack context for contracted functions,
+    ensuring that the function's execution context is restored after a call.
 
-    This class is used to push and pop function contexts from a stack, maintaining a reference to the current and last executed function. This is particularly useful in systems where understanding the flow of function calls is necessary, such as in detailed debugging or logging.
+    This class is used to push and pop function contexts from a stack,
+    maintaining a reference to the current and last executed function.
+    This is particularly useful in systems where understanding the flow of function calls is necessary,
+    such as in detailed debugging or logging.
 
     Attributes:
         contract (Contracted): The contracted function currently being managed.
@@ -338,7 +342,7 @@ class CallStack:
         self.hub._last_call = self.last_call
 
         if exc_type:
-            print(self, file=self.hub.lib.sys.stderr)
+            self.hub.log.trace(str(self), exc_info=(exc_type, exc_value, exc_tb))
 
     async def __aenter__(self):
         """Enters the function call context, setting up references to manage the call stack."""
@@ -349,7 +353,7 @@ class CallStack:
         self.hub._last_ref = self.last_ref
         self.hub._last_call = self.last_call
         if exc_type:
-            await self.hub.log.trace(str(self))
+            await self.hub.log.trace(str(self), exc_info=(exc_type, exc_value, exc_tb))
 
     def __str__(self):
         args = [str(value) for value in self.ctx.args] + [

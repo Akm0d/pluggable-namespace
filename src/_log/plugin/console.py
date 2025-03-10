@@ -5,6 +5,12 @@ try:
 except ImportError:
     HAS_AIOFILES = False
 
+__virtualname__ = "basic"
+
+
+async def __virtual__(hub):
+    return "aiologger" in hub.lib, "aiologger is not installed"
+
 
 async def setup(
     hub,

@@ -54,7 +54,7 @@ async def add(
     new_sub = await root.add_sub(
         name, locations=static, contract_locations=contract_locations
     )
-    await new_sub._load_all()
+    await new_sub._load_all(hard_fail=True)
 
 
 SPECIAL = ["contracts", "rcontracts"]
@@ -120,7 +120,6 @@ async def reload(hub: pns.hub.Hub, name: str) -> bool:
         locations = hub._nest[name]._dir
         contract_locations = hub._nest[name]._contract_dir
     except KeyError as e:
-        await hub.log.debug(f"{e.__class__.__name__}: Error reloading sub {name}: {e}")
         return False
 
     hub._nest.pop(name)

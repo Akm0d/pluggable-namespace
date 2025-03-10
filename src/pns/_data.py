@@ -112,6 +112,7 @@ class Namespace(SimpleNamespace):
         self._alias = set()
         # Namespaces underneath this namespace
         self._nest = {}
+        self._mod = {}
 
     @property
     def _(self):

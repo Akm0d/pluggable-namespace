@@ -97,7 +97,7 @@ class DynamicNamespace(pns.data.Namespace):
 
             raise
 
-    async def _load_all(self, *, merge: bool = True):
+    async def _load_all(self, *, merge: bool = True, hard_fail: bool = False):
         """
         Asynchronously loads all modules from the specified directories.
 
@@ -106,7 +106,12 @@ class DynamicNamespace(pns.data.Namespace):
         """
         for d in self._dir:
             for _, name, _ in pkgutil.iter_modules([d]):
-                await self._load_mod(name, [d], merge=merge)
+                # When loading ALL modules, be forgiving
+                try:
+                    await self._load_mod(name, [d], merge=merge)
+                except Exception as e:
+                    if hard_fail:
+                        raise e
 
     async def _load_mod(
         self, name: str, dirs: list[str] = None, *, merge: bool = False

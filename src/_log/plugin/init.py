@@ -1,10 +1,12 @@
 import asyncio
 import logging
+import functools
 
 
 async def __init__(hub):
-    hub.log.LOGGER = {}
-    hub.log.HANDLER = []
+    hub.log.LOGGER = None
+    hub.log.HANDLER = None
+    hub.log.FORMATTER = None
     hub.log.INT_LEVEL = hub.lib.logging.INFO
     hub.log.QUEUE = hub.lib.asyncio.Queue()
 
@@ -19,43 +21,39 @@ async def __init__(hub):
     hub.log.fatal = hub.log.init.critical
 
 
-async def get_logger(hub, name: str):
-    """
-    Create a logger for the given ref with all the configured handlers
-    """
-    if name not in hub.log.LOGGER:
-        if hub.log.HANDLER:
-            logger = hub.lib.aiologger.Logger(name=name, level=hub.log.INT_LEVEL)
-            for handler in hub.log.HANDLER:
-                handler.level = hub.log.INT_LEVEL
-                logger.add_handler(handler)
-        else:
-            logger = hub.lib.aiologger.Logger.with_default_handlers(
-                name=name, level=hub.log.INT_LEVEL
-            )
-        logger.emit = hub.log.init.emit
+def __func_alias__(hub):
+    return {
+        name: functools.partial(log, hub, name)
+        for name in ("trace", "debug", "info", "warning", "error", "critical")
+    }
 
-        hub.log.LOGGER[name] = logger
 
-    return hub.log.LOGGER[name]
+def log(hub, level: str, *args, **kwargs):
+    """
+    Log a message with the given name and arguments.
+    """
+    if not hub.log.LOGGER:
+        return hub.lib.asyncio.sleep(0)
+    int_level = hub.lib.logging.getLevelName(level.upper())
+    hub.log.LOGGER.log(int_level, *args, extra={"hub": hub}, **kwargs)
+    # This makes the logging functions awaitable but it isn't necessary
+    return hub.lib.asyncio.sleep(0)
 
 
 async def setup(
-    hub, log_plugin: str = "init", *, log_level: str, log_file: str, **kwargs
+    hub,
+    log_plugin: str = "init",
+    *,
+    log_level: str,
+    log_fmt_console: str = None,
+    log_datefmt: str = None,
+    **kwargs,
 ):
     """
     Initialize the logger with the named plugin
     """
-    if not __debug__:
-        return
-
-    if hub.log.HANDLER:
-        # We already set up the logger
-        return
     # Set up trace logger
-    hub.lib.aiologger.levels.LEVEL_TO_NAME[5] = "TRACE"
     hub.lib.logging.addLevelName(5, "TRACE")
-
     log_level = log_level.split(" ")[-1].upper()
 
     # Convert log level to integer
@@ -64,104 +62,25 @@ async def setup(
     else:
         hub.log.INT_LEVEL = hub.lib.logging.getLevelName(log_level)
 
-    if log_plugin != "init":
-        # Create the log file
-        if log_file:
-            path = hub.lib.pathlib.Path(log_file).expanduser()
-            if not path.parent.exists():
-                path.parent.mkdir(parents=True, exist_ok=True)
-            path.touch(exist_ok=True)
-            log_file = str(path)
-        await hub.log[log_plugin].setup(log_file=log_file, **kwargs)
-
-    if not __debug__:
-        return
-
-    # Create a handler that puts the main python log messages through aiologger via an asynchronous Queue
-    class _AsyncHandler(logging.Handler):
-        def emit(self, record):
-            try:
-                loop = asyncio.get_running_loop()
-                asyncio.run_coroutine_threadsafe(emit(hub, record), loop)
-            except Exception:
-                ...
-
-    async_handler = _AsyncHandler()
-
-    # Replace all existing synchronous loggers with the aiologger
-    for logger in hub.lib.logging.root.manager.loggerDict.values():
-        if isinstance(logger, hub.lib.logging.Logger):
-            for handler in logger.handlers[:]:
-                logger.removeHandler(handler)
-                handler.close()
-            logger.addHandler(async_handler)
-            logger.setLevel(hub.log.INT_LEVEL)
+    hub.log.FORMATTER = logging.Formatter(fmt=log_fmt_console, datefmt=log_datefmt)
+    hub.log.HANDLER = QueueHandler(hub.log.QUEUE)
+    hub.log.HANDLER.setFormatter(hub.log.FORMATTER)
+    hub.log.LOGGER = logging.getLogger()
+    hub.log.LOGGER.setLevel(hub.log.INT_LEVEL)
+    hub.log.LOGGER.addHandler(hub.log.HANDLER)
 
 
-async def emit(hub, record):
-    if not __debug__:
-        return
-    logger_name = f"lib.{record.name}"
-    logger = await hub.log.init.get_logger(logger_name)
-    message = record.getMessage()
-    # Pass the log record to the appropriate aiologger instance
-    await logger._log(
-        # Round to the nearest level that is a multiple of 10
-        (record.levelno // 10) * 10,
-        message,
-        (),
-        extra={"lineno": record.lineno, "filepath": record.pathname},
-    )
+class QueueHandler(logging.Handler):
+    """A custom logging handler that puts log messages into a shared queue."""
 
+    def __init__(self, queue: asyncio.Queue):
+        super().__init__()
+        self.queue = queue
 
-def _get_caller_ref(hub) -> str:
-    ref = hub._last_call.last_ref or "hub"
-    return ref
-
-
-async def trace(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger._log(5, msg, args, **kwargs)
-
-
-async def debug(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger.debug(msg, *args, **kwargs)
-
-
-async def info(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger.info(msg, *args, **kwargs)
-
-
-async def warning(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger.warning(msg, *args, **kwargs)
-
-
-async def error(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger.error(msg, *args, **kwargs)
-
-
-async def critical(hub, msg: str, *args, **kwargs):
-    if not __debug__:
-        return
-    ref = _get_caller_ref(hub)
-    logger = await hub.log.init.get_logger(ref)
-    await logger.critical(msg, *args, **kwargs)
+    def emit(self, record):
+        """Put log record into the queue."""
+        if hasattr(record, "hub"):
+            hub = record.hub
+            ref = hub._last_ref or "hub"
+            record.name = ref
+        self.queue.put_nowait(record)

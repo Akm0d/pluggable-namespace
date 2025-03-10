@@ -165,9 +165,11 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
     # Retrieve function aliases if any
     __func_alias__ = getattr(mod, FUNC_ALIAS, {})
     if inspect.isfunction(__func_alias__):
-        __func_alias__ = __func_alias__(loaded._)
-        if asyncio.iscoroutine(__func_alias__):
-            __func_alias__ = await __func_alias__
+        funcs = __func_alias__(loaded._)
+        if asyncio.iscoroutine(funcs):
+            funcs = await funcs
+        loaded._func.update(funcs)
+        __func_alias__ = {}
 
     if implicit_alias:
         pns.data.update(__func_alias__, BUILTIN_ALIAS)
