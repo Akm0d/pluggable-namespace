@@ -20,7 +20,6 @@ requires-python = ">=3.11"
 dependencies = [
     "aioconsole",
     "aiofiles",
-    "aiologger",
     "argparse",
     "PyYaml",
 ]
