@@ -24,6 +24,7 @@ dependencies = [
     "PyYaml",
 ]
 dynamic = ["optional-dependencies", "version"]
+license= {"file" = "LICENSE.txt"}
 
 [project.scripts]
 hub = "hub.__main__:main"
