@@ -245,7 +245,7 @@ def _get_base_sub(hub) -> str:
     Returns:
         str: The base sub name of the caller.
     """
-    ref = hub._last_call.last_call.last_ref or hub._last_call.last_ref
+    ref = hub._last_call.last_ref or hub._last_ref
     return ref.rsplit(".")[0]
 
 

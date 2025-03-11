@@ -35,6 +35,8 @@ async def amain():
         ...
     finally:
         await hub.log.debug("Cleaning up")
+        # Let logging wrap up
+        await hub.log.init.close()
 
         # Clean up async generators
         await loop.shutdown_asyncgens()

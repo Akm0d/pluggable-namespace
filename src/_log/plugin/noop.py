@@ -1,4 +1,4 @@
-async def setup(hub, **kwargs):
+async def process(hub, msg: str):
     """
-    No logger
+    No logger, just consume the message
     """

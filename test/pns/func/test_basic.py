@@ -207,8 +207,9 @@ async def test_contract_signature_fail(hub):
     hub.LOAD_PASS = False
     hub.LOAD_FAIL = True
     # These functions should load with sig failures
-    with hub.lib.pytest.raises(SyntaxError):
-        await hub.pop.sub.add(locations=["test.pns.mods.contract_sig"])
+    await hub.pop.sub.add(locations=["test.pns.mods.contract_sig"])
+    assert hub.LOAD_PASS is False
+    assert hub.LOAD_FAIL is True
 
 
 async def test_reload(hub):

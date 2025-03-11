@@ -23,7 +23,7 @@ subcommands:
 
 dyne:
   test:
-    - src
+    - plugin
 
 import:
   - pexpect

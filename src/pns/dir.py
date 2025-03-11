@@ -102,6 +102,8 @@ def dynamic():
                     dirs.add(pathlib.Path((rfh.read()).strip()))
             elif full.is_dir():
                 dirs.add(full)
+            else:
+                ...
 
     # Set up the _dynamic return
     ret = pns.data.NamespaceDict(

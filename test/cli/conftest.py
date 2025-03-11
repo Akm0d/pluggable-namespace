@@ -9,13 +9,8 @@ import pytest
 import yaml
 
 
-@pytest.fixture(name="hub")
-async def testing_hub():
-    yield await pns.shim.loaded_hub(logs=True, load_config=False)
-
-
-@pytest.fixture(autouse=True)
-async def tpath():
+@pytest.fixture(autouse=True, scope="session")
+def tpath():
     tpath_dir = pathlib.Path(__file__).parent / "tpath"
 
     assert tpath_dir.exists()
@@ -23,7 +18,13 @@ async def tpath():
     new_path = [str(tpath_dir)] + sys.path
 
     with mock.patch("sys.path", new_path):
-        yield
+        yield new_path
+
+
+@pytest.fixture(name="hub")
+async def testing_hub():
+    hub = await pns.shim.loaded_hub(logs=True, load_config=False)
+    yield hub
 
 
 @pytest.fixture(autouse=True)

@@ -15,18 +15,12 @@ cli_config:
       help: The location of the log file
       subcommands:
       - __global__
-    log_fmt_console:
-      default: "[%(levelname)-8s] %(message)s"
-      os: PNS_LOG_FMT_CONSOLE
+    log_fmt:
+      default: "%(asctime)s,%(msecs)03d [%(name)-17s][%(levelname)-8s] %(message)s"
+      #default: "[%(levelname)-8s] %(message)s"
+      os: PNS_LOG_FMT
       group: Logging Options
       help: The log formatting used in the console
-      subcommands:
-      - __global__
-    log_fmt_logfile:
-      default: "%(asctime)s,%(msecs)03d [%(name)-17s][%(levelname)-8s] %(message)s"
-      os: PNS_LOG_FMT_LOGFILE
-      group: Logging Options
-      help: The log formatting used in the log file
       subcommands:
       - __global__
     log_level:
@@ -37,7 +31,7 @@ cli_config:
       subcommands:
       - __global__
     log_plugin:
-      default: basic
+      default: init
       choices: log._loaded
       group: Logging Options
       help: The log plugin to use

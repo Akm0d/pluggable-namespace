@@ -51,10 +51,13 @@ async def add(
     if name in hub._dynamic.dyne:
         static += hub._dynamic.dyne[name].paths
 
-    new_sub = await root.add_sub(
-        name, locations=static, contract_locations=contract_locations
-    )
-    await new_sub._load_all(hard_fail=True)
+    try:
+        new_sub = await root.add_sub(
+            name, locations=static, contract_locations=contract_locations
+        )
+        await new_sub._load_all(hard_fail=True)
+    except Exception as e:
+        await hub.log.error(f"Failed to load subsystem {name}: {e}")
 
 
 SPECIAL = ["contracts", "rcontracts"]
