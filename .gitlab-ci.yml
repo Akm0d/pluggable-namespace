@@ -33,7 +33,7 @@ build:
     - cibuildwheel --output-dir dist
   needs:
     - pre-commit
-    # - test
+    - test
   artifacts:
     paths:
       - dist/*
