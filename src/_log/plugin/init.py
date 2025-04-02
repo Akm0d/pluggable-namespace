@@ -43,12 +43,13 @@ def log(hub, level: str, *args, **kwargs):
     """
     Log a message with the given name and arguments.
     """
+    # This makes the logging functions awaitable but it isn't necessary
+    awaitable = hub.lib.asyncio.create_task(hub.lib.asyncio.sleep(0))
     if not hub.log.LOGGER:
-        return hub.lib.asyncio.sleep(0)
+        return awaitable
     int_level = hub.lib.logging.getLevelName(level.upper())
     hub.log.LOGGER.log(int_level, *args, extra={"hub": hub}, **kwargs)
-    # This makes the logging functions awaitable but it isn't necessary
-    return hub.lib.asyncio.sleep(0)
+    return awaitable
 
 
 class QueueHandler(logging.Handler):
