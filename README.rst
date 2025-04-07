@@ -1,13 +1,9 @@
-===================
 Pluggable Namespace
 ===================
-This project is designed to facilitate the creation and management of pluggable software architectures using namespaces. The concept of pluggable namespaces enables the development of software that is modular and easy to extend.
 
-Pluggable namespaces provide a framework for constructing applications composed entirely of interchangeable modules. This approach allows developers to scale their projects smoothly and integrate complex software components seamlessly.
-
-Using pluggable namespaces, developers can build software in smaller, maintainable components. These components can then be combined and deployed as a single entity, simplifying the deployment process.
-
-All of this is achieved using Python, one of the world's most popular and powerful programming languages.
+**Pluggable Namespace** is a lightweight, modular framework for building pluggable software architectures with namespaces.
+It empowers you to build applications that are easily extendable, with seamless integration of multiple modules.
+Whether you're creating quick one-off scripts or a fully-fledged modular application, this framework provides the flexibility you need.
 
 Installation
 ============
@@ -16,121 +12,152 @@ You can install ``pluggable-namespace`` from PyPI:
 
 .. code-block:: bash
 
-    pip3 install pluggable-namespace
+    pip install pluggable-namespace
 
 Quick Start
 ===========
-Creating a pluggable application can be accomplished with just a few lines of code.
-The heart of every pluggable-namespace project is the creation of a hub, adding dynamic subsystems,
-and interacting with them through the hub's namespace.
 
-However, you can use the hub simply by adding it to your function's headers on a single python file:
+With **Pluggable Namespace**, you can write a single Python file and start building immediately.
+
+Create a Python file called `my_file.py` with the following content:
 
 .. code-block:: python
 
+  def main(hub):
+      print("Hello World!")
 
-    # my_file.py
-
-    async def func(Hub):
-        print("Hello World!")
-
-    async def main(hub):
-        # Call a function in your python file from the hub!
-        await hub._.func()
-
-
-Then you can run your script from the cli with the hub:
+Then you can run your script from the CLI with the hub:
 
 .. code-block:: bash
 
     hub -f my_file.py my_file.main
 
+That's it! This will execute the `main` function in `my_file.py`, and you will see "Hello World!" printed to the console.
+This is the simplest way to get started with Pluggable Namespaces.
 
-This will execute the `main` function in `my_file.py`, and you will see "Hello World!" printed to the console.
-This is the simplest way to get started with pluggable namespaces.
 
+The Hub
+========
+
+The hub is the core of the pluggable namespace framework.
+It provides a unified interface to access all the modules and functions in your application.
+The hub is implicitly passed to every function in your application, allowing you to access all the modules and functions in your application.
+You can use the hub to access any module or function in your application, as well as any external modules you have imported.
+The hub is a singleton, meaning that there is only one instance of the hub in your application.
+You can access the hub from anywhere in your application, and it will always be the same instance.
 
 Configuration
 =============
+
 When building a pluggable-namespace app, all configuration settings are stored in a ``config.yaml`` file.
+
+Here’s an example of what a `config.yaml` might look like:
 
 .. code-block:: yaml
 
-    # Each configuration option for your module
+    # App configuration options for your namespaces that will show up under hub.OPT.my_namespace
     config:
       my_namespace:
         my_opt:
+          os: MY_OPT_ENVIRONMENT_VARIABLE_NAME
           default: True
-
-    # Options exposed on the CLI when your app controls the CLI
-    cli_config:
-      my_namespace:
-        my_opt:
-          help: Description of this option
-          subcommands:
-            - my_subcommand
-          group: My arg group
-
-    # Subcommands to expose for your project
-    subcommands:
-      my_namespace:
-        my_subcommand:
-          help: My subcommand
-
-    # Dynamic namespaces that your app merges onto and which folders extend those namespaces
-    dyne:
-      my_dyne:
-        - src_dir
 
     # Python imports that your app uses, to be added to hub.lib for your app
     import:
       - asyncio
-      - importlib
-      - importlib.resources
       - os
       - toml
 
-
-From the example above, all parsed arguments are loaded onto the namespace under hub.OPT.my_namespace.
-One ``config.yaml`` can add configuration options to multiple namespaces.
-They are merged in the order found in sys.path.
-
-If you have added files individually with ``hub -f`` then a ``config.yaml`` will be loaded from the directory of that file.
+The `config.yaml` file provides a way to manage configuration, subcommands, and imports for your app.
+It will be automatically loaded based on the location of your Python files when running the hub.
 
 Extending Namespaces
 ====================
 
-locally
+You can extend **Pluggable Namespace** locally or via PyPI.
+
+Locally
 -------
 
 Extending ``pluggable-namespace`` is straightforward with dynamic namespaces.
-Extend any dynamic namespace on the hub by adding a directory containing a "config.yaml" to PYTHONPATH.
+Extend any dynamic namespace on the hub by adding a directory containing a `config.yaml` to `PYTHONPATH`.
+
+For example:
+
+1. Add a `config.yaml` to a directory:
+
+.. code-block:: yaml
+
+    # /path/to/project_root/config.yaml
+    dyne:
+      namespace:
+        - foo
+
+2. Update your `PYTHONPATH`:
 
 .. code-block:: bash
 
     export PYTHONPATH=$PYTHONPATH:/path/to/project_root
 
-Add a config.yaml to that directory:
-
-.. code-block:: yaml
-
-    # project_root/config.yaml
-    dyne:
-      namespace:
-        # This references the directory project_root/foo
-        - foo
-
-Now, every Python file in ``project_root/foo`` will be added to the hub under ``hub.namespace``.
-
+Now, every Python file in `/path/to/project_root/foo` will be added to the hub under `hub.namespace`.
 
 With PyPI
 ---------
 
-You can use the ``seed`` command to create all the boiler-plate code you need for a pluggable-namespace project.
+To jump-start your project, you can use the `seed` command to generate all the necessary boilerplate code for a pluggable namespace application:
 
 .. code-block:: bash
 
     hub seed.init.cli /path/to/project_root name=my_project
 
+Then, add your Python code to `/path/to/project_root/src/my_project`.
+This will set up all the boilerplate code for your project in a way that will make it merge automatically onto the hub when installed from PyPi.
 
-Now you can add all your code to /path/to/project_root/src/my_project
+Example of Using the Hub
+========================
+
+After setting up your project, you can make use of the hub to call functions and access modules easily.
+
+Here’s a more complex example showing how you can use the hub to access functions, shell commands, and configuration options:
+
+.. code-block:: python
+
+    # my_file.py
+    async def func(Hub):
+        print("Hello World!")
+
+    async def main(hub):
+        # Call a function in your python file from the hub
+        await hub._.func()
+
+        # Access a python module
+        print(hub.lib.os.name)
+
+        # Shell out
+        await hub.sh.ls("-l")
+        await hub.sh["ls"]("-l")
+
+        # If you specified another file with "-f other_file.py" on the CLI, you can access its members like this
+        await hub["other_file"].func()
+
+        # Access a config option
+        print(hub.OPT.my_namespace.my_opt)
+
+Then you can run your script from the CLI with the hub:
+
+.. code-block:: bash
+
+    hub -f my_file.py my_file.main
+
+This will execute the `main` function, calling functions from other files, accessing Python modules, and using configuration options set in `config.yaml`.
+
+Summary
+=======
+
+**Pluggable Namespace** gives you the power to create modular, easily extendable applications without unnecessary complexity.
+
+1. **Start Simple**: Create one Python file with minimal boilerplate, add `hub` to your functions, and run it directly from the command line.
+2. **Add Flexibility**: Use `config.yaml` to scale your project with configuration settings, subcommands, and dynamic namespaces.
+3. **Extend Easily**: Whether you're extending locally or using PyPI, it's easy to integrate new modules and expand your app's functionality.
+
+For published packages that extend the hub, check out the detailed documentation for more advanced configurations and features.
