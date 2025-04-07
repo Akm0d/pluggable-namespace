@@ -122,6 +122,11 @@ Here’s a more complex example showing how you can use the hub to access functi
 
 .. code-block:: python
 
+    #!/usr/bin/env hub
+
+    # This tells the hub which function to use as an entrypoint when running the script
+    __main__ = "main"
+
     # my_file.py
     async def func(Hub):
         print("Hello World!")

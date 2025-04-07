@@ -140,7 +140,7 @@ class DynamicNamespace(pns.data.Namespace):
                 raise AttributeError(f"Module '{name}' not found in {path}")
 
             try:
-                loaded_mod = await pns.mod.prep(self._, self, name, mod)
+                loaded_mod = await pns.mod.prep(self._root or self, self, name, mod)
             except NotImplementedError:
                 continue
 

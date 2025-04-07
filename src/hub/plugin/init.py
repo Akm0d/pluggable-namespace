@@ -16,6 +16,18 @@ async def run(hub):
     # Grab OPT for cli, arguments it doesn't use will be passed onward to the next cli
     opt = hub.lib.pns.data.NamespaceDict(hub.OPT.copy())
     ref = opt.cli.ref
+
+    # If the ref was a file, then load it as a module and call its main function
+    path = hub.lib.pathlib.Path(ref)
+    if path.exists():
+        new_dirs = {path.parent.absolute()}
+        await hub._load_mod(path.stem, dirs=new_dirs, merge=True, ext=path.suffix)
+        hub._dynamic = hub.lib.pns.dir.dynamic(new_dirs)
+        main_ref = getattr(hub[path.stem], "__main__", "main")
+        ref = f"{path.stem}.{main_ref}"
+        opt = await hub.config.init.load(cli=DEFAULT_CLI, **hub._dynamic.config)
+        hub.OPT = opt
+
     await hub.log.debug(f"Using ref: hub.{ref}")
 
     # If no cli was defined, then use the first part of the ref that exists in the cli_config
