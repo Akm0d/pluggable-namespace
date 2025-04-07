@@ -67,8 +67,8 @@ jobs:
           sudo apt-get install -y python3 python3-virtualenv
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install cibuildwheel
-          cibuildwheel --output-dir dist
+          pip install --upgrade pip setuptools wheel
+          pip wheel . -w dist --no-deps
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v3

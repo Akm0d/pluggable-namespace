@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "dynamic_versioning"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,7 +23,8 @@ dependencies = [
     "argparse",
     "PyYaml",
 ]
-dynamic = ["optional-dependencies", "version"]
+version = "2.0.0"
+dynamic = ["optional-dependencies"]
 license= {"file" = "LICENSE.txt"}
 
 [project.scripts]
