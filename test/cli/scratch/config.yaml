@@ -1,0 +1,5 @@
+
+config:
+  test:
+    foo:
+      default: bar

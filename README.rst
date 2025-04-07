@@ -18,22 +18,37 @@ You can install ``pluggable-namespace`` from PyPI:
 
     pip3 install pluggable-namespace
 
+Quick Start
+===========
 Creating a pluggable application can be accomplished with just a few lines of code.
 The heart of every pluggable-namespace project is the creation of a hub, adding dynamic subsystems,
 and interacting with them through the hub's namespace.
 
+However, you can use the hub simply by adding it to your function's headers on a single python file:
+
 .. code-block:: python
 
-    import pns.shim
-    import asyncio
+
+    # my_file.py
+
+    async def func(Hub):
+        print("Hello World!")
+
+    async def main(hub):
+        # Call a function in your python file from the hub!
+        await hub._.func()
 
 
-    async def main():
-        hub = await pns.shim.loaded_hub()
-        await hub.my_sub.init.cli()
+Then you can run your script from the cli with the hub:
 
-    if __name__ == "__main__":
-        asyncio.run(main())
+.. code-block:: bash
+
+    hub -f my_file.py my_file.main
+
+
+This will execute the `main` function in `my_file.py`, and you will see "Hello World!" printed to the console.
+This is the simplest way to get started with pluggable namespaces.
+
 
 Configuration
 =============
@@ -76,9 +91,11 @@ When building a pluggable-namespace app, all configuration settings are stored i
       - toml
 
 
-From the example above, all arguments are loaded onto the namespace under hub.OPT.my_namespace.
+From the example above, all parsed arguments are loaded onto the namespace under hub.OPT.my_namespace.
 One ``config.yaml`` can add configuration options to multiple namespaces.
 They are merged in the order found in sys.path.
+
+If you have added files individually with ``hub -f`` then a ``config.yaml`` will be loaded from the directory of that file.
 
 Extending Namespaces
 ====================

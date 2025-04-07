@@ -15,6 +15,8 @@ These functions are typically used in systems where components are dynamically m
 enabling flexible and maintainable access patterns across a pluggably-structured application.
 """
 
+from collections.abc import Iterable
+
 
 def last(hub, ref) -> object:
     """
@@ -91,7 +93,7 @@ def find(hub, ref: str) -> object:
                 continue
             except TypeError:
                 # It might be an iterable, if the next part of the ref is a digit try to access the index
-                if p.isdigit() and isinstance(finder, hub.lib.typing.Iterable):
+                if p.isdigit() and isinstance(finder, Iterable):
                     finder = tuple(finder).__getitem__(int(p))
                     continue
             raise

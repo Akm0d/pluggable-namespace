@@ -30,7 +30,6 @@ and maintainability are paramount.
 import asyncio
 import pns.data
 import pns.loop
-import pns.verify
 import pkgutil
 
 # Constants for special attributes
@@ -114,7 +113,12 @@ class DynamicNamespace(pns.data.Namespace):
                         raise e
 
     async def _load_mod(
-        self, name: str, dirs: list[str] = None, *, merge: bool = False
+        self,
+        name: str,
+        dirs: list[str] = None,
+        *,
+        merge: bool = False,
+        ext: str = ".py",
     ):
         """
         Asynchronously loads a module by name from specified directories.
@@ -131,7 +135,7 @@ class DynamicNamespace(pns.data.Namespace):
             dirs = self._dir
 
         for path in dirs:
-            mod = pns.mod.load_from_path(name, path)
+            mod = pns.mod.load_from_path(name, path, ext=ext)
             if not mod:
                 raise AttributeError(f"Module '{name}' not found in {path}")
 

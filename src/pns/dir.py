@@ -62,7 +62,7 @@ def walk(locations: list[str]) -> list[pathlib.Path]:
     return sorted(ret)
 
 
-def dynamic():
+def dynamic(dirs: set[str] = ()) -> pns.data.NamespaceDict:
     """
     Dynamically discover and configure directories based on Python path entries and configuration files.
 
@@ -88,7 +88,7 @@ def dynamic():
         development or locally modified packages are included in the dynamic configuration. Regular directories
         within the Python path are also scanned for `config.yaml` files to load additional configurations.
     """
-    dirs = set()
+    dirs = {x for x in dirs}
     for dir_ in sys.path:
         if not dir_:
             continue

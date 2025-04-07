@@ -15,6 +15,12 @@ cli_config:
       help: The namespace to use as the authoritative CLI
       default: ""
       choices: _dynamic.config.cli_config
+    file:
+      help: A python file to load directly onto the hub
+      action: append
+      default: []
+      options:
+        - -f
     history_file:
       help: The location of the history file for the interactive console
       default: "~/.pns/.history"
@@ -52,8 +58,9 @@ import:
   - functools
   - pathlib
   - pdb
-  - pns.mod
+  - pns
   - pns.hub
+  - pns.mod
   - pns.ref
   - pickle
   - pprint

@@ -9,12 +9,27 @@ try:
 except ImportError:
     HAS_AIOMONITOR = False
 
+INITIAL_CLI = "cli"
+
 
 async def amain():
     loop = asyncio.get_running_loop()
 
-    hub = await pns.shim.loaded_hub(cli="cli")
+    hub = await pns.shim.loaded_hub(cli=INITIAL_CLI)
     await hub.log.debug("Initialized the hub")
+
+    # Add local python scripts to the hub
+    new_dirs = set()
+    for f in hub.OPT.cli.file:
+        path = hub.lib.pathlib.Path(f).absolute()
+        new_dirs.add(path.parent)
+        await hub._load_mod(path.stem, dirs=[path.parent], merge=True, ext=path.suffix)
+
+    if new_dirs:
+        # Reload the cli with the new directories
+        hub._dynamic = hub.lib.pns.dir.dynamic(new_dirs)
+        opt = await hub.config.init.load(cli=INITIAL_CLI, **hub._dynamic.config)
+        hub.OPT = opt
 
     for ref in hub.OPT.cli.init:
         coro = hub[ref]()

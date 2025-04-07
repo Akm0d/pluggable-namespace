@@ -22,8 +22,7 @@ import contextvars
 import sys
 
 import pns.dir
-import pns.data
-import pns.contract
+import pns.ref
 from ._debug import DEBUG_PNS_GETATTR
 
 CONTRACTS_DIR = "contract"
@@ -206,7 +205,7 @@ class Hub(Sub):
             return self
         # Remove the entry from the call stack
         last_mod = self._last_ref.rsplit(".", maxsplit=1)[0]
-        return self.lib.pns.ref.last(self, last_mod)
+        return pns.ref.last(self, last_mod)
 
     def __repr__(hub):
         """

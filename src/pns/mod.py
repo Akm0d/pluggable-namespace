@@ -218,7 +218,7 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
     return loaded
 
 
-def load_from_path(modname: str, path: pathlib.Path, ext: str = ".py") -> ModuleType:
+def load_from_path(modname: str, path: pathlib.Path, ext: str) -> ModuleType:
     """
     Load a Python module from a specified file path, ensuring that it is registered in `sys.modules`.
 
