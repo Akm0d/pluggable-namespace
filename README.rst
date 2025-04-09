@@ -152,7 +152,7 @@ Then you can run your script from the CLI with the hub:
 
 .. code-block:: bash
 
-    hub my_file.py
+    hub -f other_file.py my_file.py
 
 This will execute the `main` function, calling functions from other files, accessing Python modules, and using configuration options set in `config.yaml`.
 
