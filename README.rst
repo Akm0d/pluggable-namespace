@@ -23,14 +23,14 @@ Create a Python file called `my_file.py` with the following content:
 
 .. code-block:: python
 
-  def main(hub):
-      print("Hello World!")
+    def main(hub):
+        print("Hello World!")
 
 Then you can run your script from the CLI with the hub:
 
 .. code-block:: bash
 
-    hub -f my_file.py my_file.main
+    hub my_file.py
 
 That's it! This will execute the `main` function in `my_file.py`, and you will see "Hello World!" printed to the console.
 This is the simplest way to get started with Pluggable Namespaces.
@@ -62,7 +62,7 @@ Here’s an example of what a `config.yaml` might look like:
           os: MY_OPT_ENVIRONMENT_VARIABLE_NAME
           default: True
 
-    # Python imports that your app uses, to be added to hub.lib for your app
+    # Python imports that your app uses, to be added to the hub.lib namespace for your app
     import:
       - asyncio
       - os
@@ -74,7 +74,7 @@ It will be automatically loaded based on the location of your Python files when 
 Extending Namespaces
 ====================
 
-You can extend **Pluggable Namespace** locally or via PyPI.
+You can extend **Pluggable Namespace** with local files or via a packaged python module on PyPI.
 
 Locally
 -------
@@ -125,13 +125,13 @@ Here’s a more complex example showing how you can use the hub to access functi
     #!/usr/bin/env hub
 
     # This tells the hub which function to use as an entrypoint when running the script
-    __main__ = "main"
+    __main__ = "my_main"
 
     # my_file.py
     async def func(Hub):
         print("Hello World!")
 
-    async def main(hub):
+    async def my_main(hub):
         # Call a function in your python file from the hub
         await hub._.func()
 
@@ -152,17 +152,20 @@ Then you can run your script from the CLI with the hub:
 
 .. code-block:: bash
 
-    hub -f my_file.py my_file.main
+    hub my_file.py
 
 This will execute the `main` function, calling functions from other files, accessing Python modules, and using configuration options set in `config.yaml`.
 
 Summary
 =======
 
-**Pluggable Namespace** gives you the power to create modular, easily extendable applications without unnecessary complexity.
+**Pluggable Namespace** gives you the power to create modular, easily extendable applications without the bizarrely unnecessary complexity of other pluggable frameworks.
 
 1. **Start Simple**: Create one Python file with minimal boilerplate, add `hub` to your functions, and run it directly from the command line.
 2. **Add Flexibility**: Use `config.yaml` to scale your project with configuration settings, subcommands, and dynamic namespaces.
-3. **Extend Easily**: Whether you're extending locally or using PyPI, it's easy to integrate new modules and expand your app's functionality.
+3. **Extend Easily**: Whether you're extending locally or developing for PyPI release, it's easy to integrate new modules and expand your app's functionality.
 
-For published packages that extend the hub, check out the detailed documentation for more advanced configurations and features.
+There are further READMEs in the projects that give more details on how to use advanced features of `pluggable-namespace`.
+There are `contracts` which can be used to define an interface for dynamic namespaces (making it possible for others to easily extend your app's functionality).
+There's config merging -- which allows multiple projects to seamlessly extend the same CLI interface.
+And so much more!  If you have any questions, feel free to reach out or open an issue on GitHub.

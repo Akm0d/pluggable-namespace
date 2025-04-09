@@ -29,8 +29,8 @@ build:
     - apk add --no-cache python3 py3-virtualenv
     - python3 -m venv .venv
     - source .venv/bin/activate
-    - pip install cibuildwheel
-    - cibuildwheel --output-dir dist
+    - pip install --upgrade pip setuptools wheel
+    - pip wheel --no-deps --wheel-dir dist .
   needs:
     - pre-commit
     - test
