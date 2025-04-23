@@ -156,6 +156,56 @@ Then you can run your script from the CLI with the hub:
 
 This will execute the `main` function, calling functions from other files, accessing Python modules, and using configuration options set in `config.yaml`.
 
+Classes
+=======
+In general, you should use plugins and contracts in place of classes.
+Pluggable namespaces eliminate the need for objects, inheritence, and polymorphism.
+Instead, you define an interface with contracts and implement it with plugins.
+In pluggable-namespace, classes are for types -- plugin modules are for interfaces.
+
+However, if you need to use classes, you can still do so.
+
+When a python module is loaded onto the hub, it is scanned for functions, variables,and classes.
+When a class is added to the hub, it is given the `hub` attrbiute, which is a reference to the main hub instance.
+This allows you to access the hub from within your class methods, enabling you to call other functions, access configuration options, and use the hub's features seamlessly.
+
+I.e.
+
+.. code-block:: python
+
+    class MyClass:
+        def my_method(self):
+            print(self.hub.lib.os.name)
+
+Builtins
+========
+Once a hub is created, it adds itself to python's builtins, making it available globally as `__hub__`.
+This is helpful for top-level actions such as type hinting and decorators:
+
+.. code-block:: python
+
+    @__hub__.lib.contexxtlib.asynccontextmanager
+    async def my_async_context_manager(hub, var: __hub__.lib.typing.Any):
+        print("Entering context")
+        yield
+        print("Exiting context")
+
+Logging
+=======
+A logger is automatically created for each plugin module and is accessible via `hub.log`.
+Logs are passed through an internal asyncio Queue on `hub.log.QUEUE`, allowing for easy unit tests on log messages.
+Logging calls are non-blocking async tasks, but they can be awaited or ran synchronously without any problem.
+The only difference between awaiting a log call and not awaiting is that awaiting it will free up a cycle for the event loop to process the log message sooner.
+
+.. code-block:: python
+
+    __hub__.log.debug("Top-level debug message")
+
+    async def my_function(hub):
+        await hub.log.info("This is an info message")
+        hub.log.info("This is a synchronous message")
+
+
 Summary
 =======
 
