@@ -205,6 +205,9 @@ async def populate(loaded, mod: ModuleType, *, implicit_alias: bool = True):
             # It's a class
             if OMIT_CLASS:
                 continue
+            # Attach a hub to the class
+            obj.hub = loaded._
+            obj._ = loaded._
             loaded._class[name] = obj
         else:
             if OMIT_VARS:

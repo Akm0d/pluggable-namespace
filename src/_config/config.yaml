@@ -22,6 +22,7 @@ import:
   - argparse
   - asyncio
   - ast
+  - builtins
   - collections
   - pns.contract
   - pns.data

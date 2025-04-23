@@ -18,6 +18,7 @@ performance optimization, it includes conditional imports based on debug status 
 between development and production-ready code paths.
 """
 
+import builtins
 import contextvars
 import sys
 
@@ -162,6 +163,8 @@ class Hub(Sub):
         # NOTE This is how to add a dyne
         await hub.add_sub(name="log", locations=hub._dynamic.dyne.log.paths)
         await hub.log._load_mod("init")
+        if not hasattr(builtins, "__hub__"):
+            builtins.__hub__ = hub
         return hub
 
     @property

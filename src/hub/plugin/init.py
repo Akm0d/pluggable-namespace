@@ -19,7 +19,7 @@ async def run(hub):
 
     # If the ref was a file, then load it as a module and call its main function
     path = hub.lib.pathlib.Path(ref)
-    if path.exists():
+    if path.stem and path.exists():
         new_dirs = {path.parent.absolute()}
         await hub._load_mod(path.stem, dirs=new_dirs, merge=True, ext=path.suffix)
         hub._dynamic = hub.lib.pns.dir.dynamic(new_dirs)
