@@ -1,9 +1,17 @@
 async def cli(hub):
-    print(hub.OPT.{{name}})
+    await hub._.start(hub.OPT.pns.subparser)
 
 
-async def start(hub):
+async def start(hub, subparser:str):
     """
     Run the main program
     """
     print("Started {{name}}")
+    return
+
+    # If no subparser was specified, print the CLI help
+    if subparser not in hub.{{name}}:
+        print(hub.config.HELP)
+
+    # Call a separate entrypoint based on the subparser
+    await hub.{{name}}[subparser].run()

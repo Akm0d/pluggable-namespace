@@ -23,7 +23,7 @@ dependencies = [
     "argparse",
     "PyYaml",
 ]
-version = "2.1.0"
+version = "2.1.1"
 dynamic = ["optional-dependencies"]
 license= {"file" = "LICENSE.txt"}
 

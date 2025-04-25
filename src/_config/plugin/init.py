@@ -1,6 +1,11 @@
 DEFAULT_GLOBAL_CLIS = ("pns", "log")
 
 
+async def __init__(hub):
+    hub.config.HELP = ""
+    hub.config.PARSER = None
+
+
 async def load(
     hub,
     cli: str = None,
@@ -127,6 +132,9 @@ async def parse(
     main_parser: object,
     parser_args: tuple[dict[str, object]],
 ) -> dict[str, object]:
+    # Store the parser on the hub
+    hub.config.PARSER = main_parser
+    hub.config.HELP = main_parser.format_help()
     # Actually call the main parser
     parsed_args = main_parser.parse_args(args=parser_args)
     return hub.lib.pns.data.NamespaceDict(parsed_args.__dict__)
